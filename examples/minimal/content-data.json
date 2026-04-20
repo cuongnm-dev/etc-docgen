@@ -68,9 +68,7 @@
           "id": "F-001",
           "name": "Tạo yêu cầu xử lý",
           "description": "Tạo yêu cầu xử lý cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -166,9 +164,7 @@
           "id": "F-002",
           "name": "Xem danh sách yêu cầu",
           "description": "Xem danh sách yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -264,9 +260,7 @@
           "id": "F-003",
           "name": "Chi tiết yêu cầu",
           "description": "Chi tiết yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -362,9 +356,7 @@
           "id": "F-004",
           "name": "Cập nhật yêu cầu",
           "description": "Cập nhật yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -460,9 +452,7 @@
           "id": "F-005",
           "name": "Chuyển giao yêu cầu",
           "description": "Chuyển giao yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -558,9 +548,7 @@
           "id": "F-006",
           "name": "Phê duyệt yêu cầu",
           "description": "Phê duyệt yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -656,9 +644,7 @@
           "id": "F-007",
           "name": "Hủy yêu cầu",
           "description": "Hủy yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -754,9 +740,7 @@
           "id": "F-008",
           "name": "Báo cáo tổng hợp yêu cầu",
           "description": "Báo cáo tổng hợp yêu cầu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -852,9 +836,7 @@
           "id": "F-009",
           "name": "Xuất Excel danh sách",
           "description": "Xuất Excel danh sách cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -950,9 +932,7 @@
           "id": "F-010",
           "name": "Lọc yêu cầu theo trạng thái",
           "description": "Lọc yêu cầu theo trạng thái cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Tác nghiệp và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Cán bộ thụ lý"
-          ],
+          "actors": ["Cán bộ thụ lý"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1054,10 +1034,7 @@
           "id": "F-011",
           "name": "Tạo văn bản đến",
           "description": "Tạo văn bản đến cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1153,10 +1130,7 @@
           "id": "F-012",
           "name": "Danh sách văn bản đến",
           "description": "Danh sách văn bản đến cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1252,10 +1226,7 @@
           "id": "F-013",
           "name": "Xem chi tiết văn bản",
           "description": "Xem chi tiết văn bản cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1351,10 +1322,7 @@
           "id": "F-014",
           "name": "Phân phối văn bản",
           "description": "Phân phối văn bản cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1450,10 +1418,7 @@
           "id": "F-015",
           "name": "Tạo văn bản đi",
           "description": "Tạo văn bản đi cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1549,10 +1514,7 @@
           "id": "F-016",
           "name": "Ký số văn bản",
           "description": "Ký số văn bản cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1648,10 +1610,7 @@
           "id": "F-017",
           "name": "Gửi văn bản qua LGSP",
           "description": "Gửi văn bản qua LGSP cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1747,10 +1706,7 @@
           "id": "F-018",
           "name": "Tra cứu văn bản",
           "description": "Tra cứu văn bản cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1846,10 +1802,7 @@
           "id": "F-019",
           "name": "Báo cáo văn bản đi",
           "description": "Báo cáo văn bản đi cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -1945,10 +1898,7 @@
           "id": "F-020",
           "name": "Báo cáo văn bản đến",
           "description": "Báo cáo văn bản đến cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Văn thư và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Trưởng phòng",
-            "Phó phòng"
-          ],
+          "actors": ["Trưởng phòng", "Phó phòng"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2050,9 +2000,7 @@
           "id": "F-021",
           "name": "Quản lý người dùng",
           "description": "Quản lý người dùng cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2148,9 +2096,7 @@
           "id": "F-022",
           "name": "Thêm người dùng mới",
           "description": "Thêm người dùng mới cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2246,9 +2192,7 @@
           "id": "F-023",
           "name": "Cập nhật người dùng",
           "description": "Cập nhật người dùng cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2344,9 +2288,7 @@
           "id": "F-024",
           "name": "Khóa/mở khóa tài khoản",
           "description": "Khóa/mở khóa tài khoản cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2442,9 +2384,7 @@
           "id": "F-025",
           "name": "Phân quyền người dùng",
           "description": "Phân quyền người dùng cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2540,9 +2480,7 @@
           "id": "F-026",
           "name": "Quản lý vai trò",
           "description": "Quản lý vai trò cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2638,9 +2576,7 @@
           "id": "F-027",
           "name": "Cấu hình hệ thống",
           "description": "Cấu hình hệ thống cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2736,9 +2672,7 @@
           "id": "F-028",
           "name": "Nhật ký hệ thống",
           "description": "Nhật ký hệ thống cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2834,9 +2768,7 @@
           "id": "F-029",
           "name": "Sao lưu dữ liệu",
           "description": "Sao lưu dữ liệu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -2932,9 +2864,7 @@
           "id": "F-030",
           "name": "Khôi phục dữ liệu",
           "description": "Khôi phục dữ liệu cho phép người dùng thực hiện thao tác trực tiếp trên giao diện web. Chức năng này là một phần của Phân hệ Quản trị và được thiết kế để đáp ứng nhu cầu nghiệp vụ hàng ngày. Người dùng có thể truy cập qua menu chính hoặc đường dẫn trực tiếp.",
-          "actors": [
-            "Quản trị viên"
-          ],
+          "actors": ["Quản trị viên"],
           "preconditions": "Đã đăng nhập với quyền phù hợp",
           "ui_elements": [
             {
@@ -3251,27 +3181,19 @@
         "name": "api",
         "image": "qltn/api:1.0",
         "port": "3000",
-        "depends_on": [
-          "db",
-          "cache"
-        ]
+        "depends_on": ["db", "cache"]
       },
       {
         "name": "web",
         "image": "qltn/web:1.0",
         "port": "80",
-        "depends_on": [
-          "api"
-        ]
+        "depends_on": ["api"]
       },
       {
         "name": "worker",
         "image": "qltn/worker:1.0",
         "port": null,
-        "depends_on": [
-          "cache",
-          "db"
-        ]
+        "depends_on": ["cache", "db"]
       },
       {
         "name": "db",
@@ -3289,10 +3211,7 @@
         "name": "nginx",
         "image": "nginx:1.25-alpine",
         "port": "80/443",
-        "depends_on": [
-          "api",
-          "web"
-        ]
+        "depends_on": ["api", "web"]
       }
     ],
     "security_description": "Thiết kế bảo mật theo chiều sâu (defense in depth): TLS termination tại Nginx, JWT với short TTL + refresh rotation, RBAC chi tiết cho mỗi endpoint, audit log mọi hành động nghiệp vụ.",
@@ -3329,5 +3248,173 @@
   "tkcs": {
     "technology_rationale": "Hệ thống chọn stack Next.js + NestJS + PostgreSQL dựa trên: (1) Đội ngũ ETC có kinh nghiệm >3 năm với Node.js ecosystem; (2) Next.js hỗ trợ SSR + SEO tốt cho module công khai; (3) NestJS kiến trúc modular, dễ maintain cho hệ thống ≥30 chức năng; (4) PostgreSQL open-source, ACID, hỗ trợ tốt JSON + full-text search. So sánh với Java/Spring: Node.js cho developer productivity cao hơn. So sánh với .NET: chi phí license thấp hơn, đáp ứng tiêu chí OSS ưu tiên.",
     "detailed_design_summary": "Thiết kế chi tiết tham chiếu Tài liệu Thiết kế Kiến trúc (thiet-ke-kien-truc.docx) sinh cùng lần chạy này. Bao gồm: 3 phân hệ (Tác nghiệp, Văn thư, Quản trị) với tổng 30 chức năng, 6 API endpoints chính, 6 thành phần kiến trúc (auth, tacnghiep, vanthu, quantri, web-ui, worker)."
+  },
+  "tkct": {
+    "system_description": "Hệ thống Quản lý Tác nghiệp gồm 3 phân hệ: Tác nghiệp, Văn thư và Quản trị. Hệ thống sử dụng kiến trúc microservices với API Gateway, message queue và PostgreSQL.",
+    "architecture_reference": "Tham chiếu Tài liệu Thiết kế Kiến trúc (thiet-ke-kien-truc.docx) phiên bản 1.0 ngày 18/04/2026.",
+    "modules": [
+      {
+        "name": "Module Tác nghiệp",
+        "description": "Quản lý tiếp nhận, phân công, xử lý và theo dõi hồ sơ tác nghiệp.",
+        "flow_description": "Cán bộ văn thư tiếp nhận hồ sơ → Trưởng phòng phân công → Cán bộ xử lý thụ lý → Trình ký → Phát hành kết quả.",
+        "business_rules": "Hồ sơ quá hạn tự động cảnh báo qua email. Mỗi hồ sơ phải có ít nhất 1 cán bộ thụ lý. Trưởng phòng được ủy quyền cho phó phòng.",
+        "input_data": "Thông tin hồ sơ: mã hồ sơ, ngày tiếp nhận, loại hồ sơ, người nộp, tài liệu đính kèm.",
+        "output_data": "Kết quả xử lý: trạng thái, quyết định, văn bản phát hành, lịch sử xử lý.",
+        "feature_ids": ["TN-001", "TN-002", "TN-003"]
+      },
+      {
+        "name": "Module Quản trị",
+        "description": "Quản lý người dùng, phân quyền, cấu hình hệ thống và danh mục dùng chung.",
+        "flow_description": "Admin tạo tài khoản → Gán vai trò → Phân quyền chức năng → Người dùng đăng nhập theo quyền.",
+        "business_rules": "Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và số. Khóa tài khoản sau 5 lần đăng nhập sai.",
+        "input_data": "Thông tin người dùng: họ tên, email, đơn vị, vai trò.",
+        "output_data": "Tài khoản người dùng với quyền truy cập theo vai trò.",
+        "feature_ids": ["QT-001", "QT-002"]
+      }
+    ],
+    "db_description": "Hệ thống sử dụng PostgreSQL 15 với schema chính gồm các bảng quản lý hồ sơ, người dùng và phân quyền.",
+    "db_tables": [
+      {
+        "name": "ho_so",
+        "description": "Bảng lưu trữ thông tin hồ sơ tác nghiệp",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PK"
+          },
+          {
+            "name": "ma_ho_so",
+            "type": "VARCHAR(50)",
+            "nullable": false,
+            "description": "Mã hồ sơ duy nhất",
+            "constraints": "UNIQUE"
+          },
+          {
+            "name": "tieu_de",
+            "type": "TEXT",
+            "nullable": false,
+            "description": "Tiêu đề hồ sơ",
+            "constraints": ""
+          },
+          {
+            "name": "trang_thai",
+            "type": "VARCHAR(20)",
+            "nullable": false,
+            "description": "Trạng thái xử lý",
+            "constraints": "CHECK (trang_thai IN ('moi','dang_xu_ly','hoan_thanh'))"
+          },
+          {
+            "name": "ngay_tao",
+            "type": "TIMESTAMP",
+            "nullable": false,
+            "description": "Ngày tạo hồ sơ",
+            "constraints": "DEFAULT NOW()"
+          },
+          {
+            "name": "nguoi_tao_id",
+            "type": "UUID",
+            "nullable": false,
+            "description": "FK tới bảng nguoi_dung",
+            "constraints": "FK → nguoi_dung.id"
+          }
+        ]
+      },
+      {
+        "name": "nguoi_dung",
+        "description": "Bảng lưu trữ thông tin người dùng hệ thống",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PK"
+          },
+          {
+            "name": "ho_ten",
+            "type": "VARCHAR(100)",
+            "nullable": false,
+            "description": "Họ và tên",
+            "constraints": ""
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(255)",
+            "nullable": false,
+            "description": "Địa chỉ email",
+            "constraints": "UNIQUE"
+          },
+          {
+            "name": "mat_khau_hash",
+            "type": "TEXT",
+            "nullable": false,
+            "description": "Mật khẩu đã mã hóa",
+            "constraints": ""
+          },
+          {
+            "name": "vai_tro",
+            "type": "VARCHAR(20)",
+            "nullable": false,
+            "description": "Vai trò trong hệ thống",
+            "constraints": "CHECK (vai_tro IN ('admin','truong_phong','can_bo'))"
+          }
+        ]
+      }
+    ],
+    "api_description": "REST API sử dụng JSON, xác thực JWT Bearer, versioning qua URL prefix /api/v1.",
+    "api_details": [
+      {
+        "path": "/api/v1/ho-so",
+        "method": "POST",
+        "summary": "Tạo hồ sơ mới",
+        "description": "Tạo hồ sơ tác nghiệp mới với thông tin cơ bản và tài liệu đính kèm.",
+        "auth": "JWT Bearer",
+        "request_body": "{\"tieu_de\": \"string\", \"loai_ho_so\": \"string\", \"noi_dung\": \"string\"}",
+        "response_body": "{\"id\": \"uuid\", \"ma_ho_so\": \"string\", \"trang_thai\": \"moi\"}",
+        "parameters": [],
+        "error_codes": ["400", "401", "422"]
+      },
+      {
+        "path": "/api/v1/ho-so/{id}",
+        "method": "GET",
+        "summary": "Lấy chi tiết hồ sơ",
+        "description": "Trả về toàn bộ thông tin của một hồ sơ bao gồm lịch sử xử lý.",
+        "auth": "JWT Bearer",
+        "request_body": "",
+        "response_body": "{\"id\": \"uuid\", \"ma_ho_so\": \"string\", \"tieu_de\": \"string\", \"lich_su\": [...]}",
+        "parameters": [
+          {
+            "name": "id",
+            "location": "path",
+            "type": "UUID",
+            "required": true,
+            "description": "ID hồ sơ"
+          }
+        ],
+        "error_codes": ["401", "404"]
+      }
+    ],
+    "ui_guidelines": "Giao diện tuân theo Material Design 3, responsive từ 1024px trở lên. Font: Roboto 14px body, 16px heading. Màu chính: #1976D2 (Primary), #D32F2F (Error), #388E3C (Success).",
+    "ui_layout": "Layout 3 vùng: Header (logo + user menu), Sidebar (menu chức năng theo vai trò), Main content (breadcrumb + nội dung chính). Sidebar có thể thu gọn trên màn hình < 1280px.",
+    "screens": [
+      {
+        "name": "Danh sách hồ sơ",
+        "description": "Hiển thị bảng hồ sơ với bộ lọc trạng thái, phân trang, tìm kiếm theo mã/tiêu đề.",
+        "screenshot": "",
+        "feature_id": "TN-001"
+      },
+      {
+        "name": "Tạo hồ sơ mới",
+        "description": "Form nhập liệu hồ sơ với validation real-time, hỗ trợ upload tài liệu đính kèm.",
+        "screenshot": "",
+        "feature_id": "TN-002"
+      }
+    ],
+    "integration_design": "Tích hợp với LGSP qua API Gateway. Sử dụng message queue (RabbitMQ) cho xử lý bất đồng bộ: gửi email thông báo, đồng bộ dữ liệu với hệ thống một cửa điện tử. Retry policy: 3 lần, exponential backoff.",
+    "security_design": "Xác thực: JWT với access token (15 phút) + refresh token (7 ngày). Phân quyền: RBAC 3 cấp (admin, trưởng phòng, cán bộ). Mã hóa: TLS 1.3 truyền tải, AES-256 dữ liệu nhạy cảm. Audit log: ghi nhận mọi thao tác CRUD. Tuân thủ NĐ 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
+    "traceability_description": "Ma trận truy xuất liên kết: Yêu cầu nghiệp vụ → Module thiết kế → Bảng CSDL → API endpoint → Màn hình UI → Test case. Đảm bảo mỗi yêu cầu đều có thiết kế và kiểm thử tương ứng."
   }
 }

@@ -1,11 +1,10 @@
 """etc-docgen CLI — typer-based, rich-formatted."""
+
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -29,6 +28,7 @@ err_console = Console(stderr=True)
 
 # ─────────────────────────── Version ───────────────────────────
 
+
 def _version_callback(value: bool) -> None:
     if value:
         console.print(f"[bold]etc-docgen[/bold] v{__version__}")
@@ -38,15 +38,21 @@ def _version_callback(value: bool) -> None:
 @app.callback()
 def main_callback(
     version: Annotated[
-        Optional[bool],
-        typer.Option("--version", "-V", callback=_version_callback, is_eager=True,
-                     help="Show version and exit"),
+        bool | None,
+        typer.Option(
+            "--version",
+            "-V",
+            callback=_version_callback,
+            is_eager=True,
+            help="Show version and exit",
+        ),
     ] = None,
 ) -> None:
     """etc-docgen — turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents."""
 
 
 # ─────────────────────────── init ───────────────────────────
+
 
 @app.command()
 def init(
@@ -71,36 +77,41 @@ def init(
 
     # Also create .gitignore entry if repo is git-tracked
     gitignore = path / ".gitignore"
-    gitignore_lines = gitignore.read_text(encoding="utf-8").splitlines() if gitignore.exists() else []
+    gitignore_lines = (
+        gitignore.read_text(encoding="utf-8").splitlines() if gitignore.exists() else []
+    )
     if "auth.json" not in "".join(gitignore_lines):
         with gitignore.open("a", encoding="utf-8") as f:
             f.write("\n# etc-docgen\nauth.json\nstate.json\n.auth/\n")
-        console.print(f"[green]✓[/green] Added credentials to .gitignore")
+        console.print("[green]✓[/green] Added credentials to .gitignore")
 
-    console.print(Panel(
-        f"[green]✓[/green] Created [cyan]{config_file}[/cyan]\n\n"
-        f"Next steps:\n"
-        f"  1. Edit [cyan]etc-docgen.yaml[/cyan] with your project info\n"
-        f"  2. Set credentials: [yellow]export DOCGEN_USERNAME=...[/yellow]\n"
-        f"  3. Run: [cyan]etc-docgen generate[/cyan]",
-        title="Config created",
-    ))
+    console.print(
+        Panel(
+            f"[green]✓[/green] Created [cyan]{config_file}[/cyan]\n\n"
+            f"Next steps:\n"
+            f"  1. Edit [cyan]etc-docgen.yaml[/cyan] with your project info\n"
+            f"  2. Set credentials: [yellow]export DOCGEN_USERNAME=...[/yellow]\n"
+            f"  3. Run: [cyan]etc-docgen generate[/cyan]",
+            title="Config created",
+        )
+    )
 
 
 # ─────────────────────────── generate (full pipeline) ───────────────────────────
 
+
 @app.command()
 def generate(
     config_path: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option("--config", "-c", help="Config file path (default: ./etc-docgen.yaml)"),
     ] = None,
     skip: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option("--skip", help="Skip phases: research, capture, data, export"),
     ] = None,
     only: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option("--only", help="Run only these phases"),
     ] = None,
     incremental: Annotated[
@@ -114,17 +125,16 @@ def generate(
     phases_all = ["research", "capture", "data", "export"]
     skip_set = set(skip or [])
     only_set = set(only or [])
-    phases_to_run = [
-        p for p in phases_all
-        if p not in skip_set and (not only_set or p in only_set)
-    ]
+    phases_to_run = [p for p in phases_all if p not in skip_set and (not only_set or p in only_set)]
 
-    console.print(Panel(
-        f"[bold]Project:[/bold] {cfg.project.name}\n"
-        f"[bold]Phases:[/bold] {' → '.join(phases_to_run)}\n"
-        f"[bold]Output:[/bold] {cfg.output.path}",
-        title="etc-docgen pipeline",
-    ))
+    console.print(
+        Panel(
+            f"[bold]Project:[/bold] {cfg.project.name}\n"
+            f"[bold]Phases:[/bold] {' → '.join(phases_to_run)}\n"
+            f"[bold]Output:[/bold] {cfg.output.path}",
+            title="etc-docgen pipeline",
+        )
+    )
 
     for phase in phases_to_run:
         console.rule(f"[bold cyan]Phase: {phase}[/bold cyan]")
@@ -142,9 +152,10 @@ def generate(
 
 # ─────────────────────────── Individual phase commands ───────────────────────────
 
+
 @app.command()
 def research(
-    config_path: Annotated[Optional[Path], typer.Option("--config", "-c")] = None,
+    config_path: Annotated[Path | None, typer.Option("--config", "-c")] = None,
 ) -> None:
     """Phase 1: scan codebase, produce intel/*.json reports."""
     cfg = _load_cfg(config_path)
@@ -153,9 +164,9 @@ def research(
 
 @app.command()
 def capture(
-    config_path: Annotated[Optional[Path], typer.Option("--config", "-c")] = None,
+    config_path: Annotated[Path | None, typer.Option("--config", "-c")] = None,
     service: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--service", help="Only capture this service"),
     ] = None,
 ) -> None:
@@ -166,7 +177,7 @@ def capture(
 
 @app.command()
 def data(
-    config_path: Annotated[Optional[Path], typer.Option("--config", "-c")] = None,
+    config_path: Annotated[Path | None, typer.Option("--config", "-c")] = None,
 ) -> None:
     """Phase 3: build content-data.json from intel reports."""
     cfg = _load_cfg(config_path)
@@ -175,13 +186,15 @@ def data(
 
 @app.command()
 def export(
-    config_path: Annotated[Optional[Path], typer.Option("--config", "-c")] = None,
+    config_path: Annotated[Path | None, typer.Option("--config", "-c")] = None,
     data_file: Annotated[
-        Optional[Path],
-        typer.Option("--data", "-d", help="Path to content-data.json (default: {output}/content-data.json)"),
+        Path | None,
+        typer.Option(
+            "--data", "-d", help="Path to content-data.json (default: {output}/content-data.json)"
+        ),
     ] = None,
     only: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option("--only", help="Only these formats: xlsx, hdsd, tkkt, tkcs"),
     ] = None,
 ) -> None:
@@ -214,8 +227,7 @@ def template_fork(
     source: Annotated[Path, typer.Argument(help="Path to ETC template file to fork")],
     kind: Annotated[
         str,
-        typer.Option("--kind", "-k",
-                     help="Template kind: hdsd | tkkt | tkcs"),
+        typer.Option("--kind", "-k", help="Template kind: hdsd | tkkt | tkcs"),
     ] = "hdsd",
 ) -> None:
     """Fork an ETC template with Jinja2 tags for docxtpl rendering.
@@ -223,13 +235,16 @@ def template_fork(
     Example:
       etc-docgen template fork ~/Downloads/BM.QT.04.05-v2.docx --kind hdsd
     """
-    from etc_docgen.tools.jinjafy_templates import jinjafy_hdsd, jinjafy_tkkt, jinjafy_tkcs
+    from etc_docgen.tools.jinjafy_templates import jinjafy_hdsd, jinjafy_tkcs, jinjafy_tkkt
 
-    dest = templates_dir() / {
-        "hdsd": "huong-dan-su-dung.docx",
-        "tkkt": "thiet-ke-kien-truc.docx",
-        "tkcs": "thiet-ke-co-so.docx",
-    }[kind]
+    dest = (
+        templates_dir()
+        / {
+            "hdsd": "huong-dan-su-dung.docx",
+            "tkkt": "thiet-ke-kien-truc.docx",
+            "tkcs": "thiet-ke-co-so.docx",
+        }[kind]
+    )
 
     console.print(f"Forking [cyan]{kind.upper()}[/cyan]: {source} → {dest}")
     if kind == "hdsd":
@@ -247,69 +262,81 @@ def template_fork(
 
 # ─────────────────────────── validate ───────────────────────────
 
+
 @app.command()
 def validate(
     data_file: Annotated[Path, typer.Argument(help="Path to content-data.json")],
+    strict: Annotated[
+        bool,
+        typer.Option("--strict", help="Treat warnings as errors"),
+    ] = False,
 ) -> None:
-    """Validate content-data.json against schema."""
-    if not data_file.exists():
-        err_console.print(f"[red]File not found:[/red] {data_file}")
-        raise typer.Exit(1)
+    """Validate content-data.json against Pydantic schema + advisory checks."""
+    from etc_docgen.data.validation import validate_file
 
-    try:
-        data = json.loads(data_file.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        err_console.print(f"[red]Invalid JSON:[/red] {e}")
-        raise typer.Exit(1) from e
+    result = validate_file(data_file)
 
-    errors: list[str] = []
-
-    # Basic shape
-    if "project" not in data or "display_name" not in data.get("project", {}):
-        errors.append("Missing project.display_name")
-
-    services = data.get("services", [])
-    if not services:
-        errors.append("No services defined")
-
-    feat_count = 0
-    for svc in services:
-        for feat in svc.get("features", []):
-            feat_count += 1
-            if not feat.get("id", "").startswith("F-"):
-                errors.append(f"Bad feature id: {feat.get('id')!r}")
-            if not feat.get("steps"):
-                errors.append(f"Feature {feat.get('id')} has no steps")
-
-    allowed_priorities = {"Rất cao", "Cao", "Trung bình", "Thấp"}
-    tc_count = 0
-    for sheet in ("ui", "api"):
-        for tc in data.get("test_cases", {}).get(sheet, []):
-            tc_count += 1
-            pri = tc.get("priority")
-            if pri not in allowed_priorities:
-                errors.append(f"Bad priority in {sheet} TC: {pri!r}")
-
-    if errors:
-        err_console.print(f"[red]✗ Validation failed[/red] — {len(errors)} errors:")
-        for e in errors[:10]:
+    if not result.valid:
+        err_console.print(f"[red]✗ Validation failed[/red] — {len(result.errors)} errors:")
+        for e in result.errors[:20]:
             err_console.print(f"  [red]•[/red] {e}")
-        if len(errors) > 10:
-            err_console.print(f"  [dim]... and {len(errors) - 10} more[/dim]")
         raise typer.Exit(1)
 
-    console.print(Panel(
-        f"[green]✓ Valid[/green]\n\n"
-        f"Services: {len(services)}\n"
-        f"Features: {feat_count}\n"
-        f"Test cases: {tc_count}",
-        title="content-data.json",
-    ))
+    # Show warnings
+    if result.warnings:
+        console.print(f"\n[yellow]⚠ {len(result.warnings)} warnings:[/yellow]")
+        for w in result.warnings:
+            console.print(f"  [yellow]•[/yellow] {w}")
+
+    if strict and result.warnings:
+        err_console.print(
+            f"\n[red]✗ Strict mode:[/red] {len(result.warnings)} warnings treated as errors"
+        )
+        raise typer.Exit(1)
+
+    # Show stats
+    stats = result.stats
+    pri_dist = stats.get("priority_distribution", {})
+    pri_str = ", ".join(f"{k}: {v}" for k, v in sorted(pri_dist.items())) or "N/A"
+
+    console.print(
+        Panel(
+            f"[green]✓ Valid[/green]\n\n"
+            f"Services:        {stats.get('services', 0)}\n"
+            f"Features:        {stats.get('features', 0)}\n"
+            f"Test cases (UI): {stats.get('test_cases_ui', 0)}\n"
+            f"Test cases (API):{stats.get('test_cases_api', 0)}\n"
+            f"Total TCs:       {stats.get('test_cases_total', 0)}\n"
+            f"Priority dist:   {pri_str}",
+            title="content-data.json",
+        )
+    )
+
+
+@app.command(name="schema")
+def dump_schema(
+    output: Annotated[
+        Path | None,
+        typer.Option("--output", "-o", help="Write JSON Schema to file (default: stdout)"),
+    ] = None,
+) -> None:
+    """Print or export the JSON Schema for content-data.json."""
+    from etc_docgen.data.validation import generate_json_schema
+
+    schema = generate_json_schema()
+    schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
+
+    if output:
+        output.write_text(schema_json, encoding="utf-8")
+        console.print(f"[green]✓[/green] Schema written to [cyan]{output}[/cyan]")
+    else:
+        console.print(schema_json)
 
 
 # ─────────────────────────── Internal helpers ───────────────────────────
 
-def _load_cfg(path: Optional[Path]) -> Config:
+
+def _load_cfg(path: Path | None) -> Config:
     """Load config with user-friendly error."""
     try:
         return load_config(path)
@@ -325,10 +352,12 @@ def _load_cfg(path: Optional[Path]) -> Config:
 def _run_research(cfg: Config) -> None:
     """Phase 1 — stub in v0.1; will call research module in v0.2."""
     console.print("[yellow]⚠[/yellow] Research phase not yet implemented in v0.1.")
-    console.print("[dim]For now, produce intel/*.json manually or via AI (Cursor/Claude Code).[/dim]")
+    console.print(
+        "[dim]For now, produce intel/*.json manually or via AI (Cursor/Claude Code).[/dim]"
+    )
 
 
-def _run_capture(cfg: Config, service: Optional[str] = None) -> None:
+def _run_capture(cfg: Config, service: str | None = None) -> None:
     """Phase 2 — stub; requires [capture] extras. Wire in v0.2."""
     console.print("[yellow]⚠[/yellow] Capture phase not yet implemented in v0.1.")
     console.print("[dim]For now, use Playwright MCP in Cursor or Claude Code.[/dim]")
@@ -343,7 +372,7 @@ def _run_data(cfg: Config) -> None:
     )
 
 
-def _run_export(cfg: Config, data_file: Optional[Path] = None, only: Optional[list[str]] = None) -> None:
+def _run_export(cfg: Config, data_file: Path | None = None, only: list[str] | None = None) -> None:
     """Phase 4 — fully working in v0.1.
 
     Renders xlsx + 3 docx from content-data.json using bundled templates.
@@ -361,34 +390,54 @@ def _run_export(cfg: Config, data_file: Optional[Path] = None, only: Optional[li
         )
         raise typer.Exit(1)
 
-    only_set = set(only or []) or {"xlsx", "hdsd", "tkkt", "tkcs"}
+    only_set = set(only or []) or {"xlsx", "hdsd", "tkkt", "tkcs", "tkct"}
 
     from etc_docgen.engines import docx as docx_engine
     from etc_docgen.engines import xlsx as xlsx_engine
 
     jobs = [
-        ("xlsx", {
-            "template": template("test-case.xlsx"),
-            "schema": schema("test-case.xlsx.schema.yaml"),
-            "output": output_dir / "kich-ban-kiem-thu.xlsx",
-            "engine": "xlsx",
-        }),
-        ("hdsd", {
-            "template": template("huong-dan-su-dung.docx"),
-            "output": output_dir / "huong-dan-su-dung.docx",
-            "engine": "docx",
-            "screenshots_dir": Path("screenshots"),
-        }),
-        ("tkkt", {
-            "template": template("thiet-ke-kien-truc.docx"),
-            "output": output_dir / "thiet-ke-kien-truc.docx",
-            "engine": "docx",
-        }),
-        ("tkcs", {
-            "template": template("thiet-ke-co-so.docx"),
-            "output": output_dir / "thiet-ke-co-so.docx",
-            "engine": "docx",
-        }),
+        (
+            "xlsx",
+            {
+                "template": template("test-case.xlsx"),
+                "schema": schema("test-case.xlsx.schema.yaml"),
+                "output": output_dir / "kich-ban-kiem-thu.xlsx",
+                "engine": "xlsx",
+            },
+        ),
+        (
+            "hdsd",
+            {
+                "template": template("huong-dan-su-dung.docx"),
+                "output": output_dir / "huong-dan-su-dung.docx",
+                "engine": "docx",
+                "screenshots_dir": Path("screenshots"),
+            },
+        ),
+        (
+            "tkkt",
+            {
+                "template": template("thiet-ke-kien-truc.docx"),
+                "output": output_dir / "thiet-ke-kien-truc.docx",
+                "engine": "docx",
+            },
+        ),
+        (
+            "tkcs",
+            {
+                "template": template("thiet-ke-co-so.docx"),
+                "output": output_dir / "thiet-ke-co-so.docx",
+                "engine": "docx",
+            },
+        ),
+        (
+            "tkct",
+            {
+                "template": template("thiet-ke-chi-tiet.docx"),
+                "output": output_dir / "thiet-ke-chi-tiet.docx",
+                "engine": "docx",
+            },
+        ),
     ]
 
     failed = []
@@ -404,9 +453,15 @@ def _run_export(cfg: Config, data_file: Optional[Path] = None, only: Optional[li
                 if report.validator_failures:
                     failed.append((name, report.validator_failures))
             else:
-                screenshots = spec.get("screenshots_dir") if spec.get("screenshots_dir", Path()).exists() else None
+                screenshots = (
+                    spec.get("screenshots_dir")
+                    if spec.get("screenshots_dir", Path()).exists()
+                    else None
+                )
                 report = docx_engine.render(
-                    spec["template"], data_file, spec["output"],
+                    spec["template"],
+                    data_file,
+                    spec["output"],
                     screenshots_dir=screenshots,
                 )
                 if report.errors:
@@ -423,6 +478,57 @@ def _run_export(cfg: Config, data_file: Optional[Path] = None, only: Optional[li
         raise typer.Exit(1)
 
     console.print(f"\n[green]✓ All outputs written to {output_dir}[/green]")
+
+
+# ─────────────────────────── MCP server ───────────────────────────
+
+
+@app.command(
+    name="mcp", context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def mcp_serve(
+    ctx: typer.Context,
+    transport: Annotated[
+        str,
+        typer.Option("--transport", "-t", help="Transport: stdio, sse, streamable-http"),
+    ] = "stdio",
+    host: Annotated[
+        str,
+        typer.Option("--host", help="Host for sse/streamable-http (default: 127.0.0.1)"),
+    ] = "127.0.0.1",
+    port: Annotated[
+        int,
+        typer.Option("--port", "-p", help="Port for sse/streamable-http (default: 8000)"),
+    ] = 8000,
+) -> None:
+    """Start MCP server for IDE agent integration.
+
+    Transports:
+      stdio (default) — for local IDE (VS Code, Cursor, Claude Desktop)
+      sse             — for Docker / remote (HTTP + Server-Sent Events)
+      streamable-http — newer HTTP-based MCP transport
+
+    Examples:
+      etc-docgen mcp                              # stdio (local)
+      etc-docgen mcp -t sse -p 8000               # SSE on port 8000
+      etc-docgen mcp -t sse --host 0.0.0.0        # SSE, all interfaces (Docker)
+    """
+    import sys
+
+    # Build argv for mcp_server.main() argparse
+    sys.argv = [
+        "etc-docgen-mcp",
+        "--transport",
+        transport,
+        "--host",
+        host,
+        "--port",
+        str(port),
+    ]
+
+    from etc_docgen.mcp_server import main as mcp_main
+
+    mcp_main()
 
 
 if __name__ == "__main__":

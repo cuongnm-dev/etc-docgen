@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 jinjafy_templates.py — Fork ETC templates by adding Jinja2 (docxtpl) tags.
 
@@ -19,25 +18,24 @@ Usage:
   python jinjafy_templates.py tkkt  --source templates/huong-dan-su-dung.docx   # clones HDSD
   python jinjafy_templates.py tkcs  --source ../../../Downloads/Telegram\\ Desktop/TKCS_v1.2.docx
 """
+
 from __future__ import annotations
+
 import argparse
-import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Callable
 
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 WNS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 WNS_QN = f"{{{WNS}}}"
 
 
 # ─────────────────────────── Helpers ───────────────────────────
+
 
 def para_text(p_elem) -> str:
     return "".join(t.text or "" for t in p_elem.findall(f".//{WNS_QN}t"))
@@ -83,8 +81,14 @@ def walk_all_paragraphs(doc):
                         for ncell in nrow.cells:
                             yield from ncell.paragraphs
     for section in doc.sections:
-        for part in (section.header, section.first_page_header, section.even_page_header,
-                     section.footer, section.first_page_footer, section.even_page_footer):
+        for part in (
+            section.header,
+            section.first_page_header,
+            section.even_page_header,
+            section.footer,
+            section.first_page_footer,
+            section.even_page_footer,
+        ):
             if part is None:
                 continue
             yield from part.paragraphs
@@ -113,8 +117,9 @@ def replace_everywhere(doc, replacements: list[tuple[str, str]]) -> int:
     return count
 
 
-def add_paragraph_after(target_elem, text: str, style: str | None = None,
-                        bold: bool = False, italic: bool = False):
+def add_paragraph_after(
+    target_elem, text: str, style: str | None = None, bold: bool = False, italic: bool = False
+):
     """Insert new paragraph right after target_elem in XML tree."""
     new_p = OxmlElement("w:p")
     if style:
@@ -158,7 +163,7 @@ def clear_after_heading(doc, heading_text: str) -> int:
     if marker_idx is None:
         return 0
     removed = 0
-    for ch in children[marker_idx + 1:]:
+    for ch in children[marker_idx + 1 :]:
         tag = ch.tag.split("}")[-1] if "}" in ch.tag else ch.tag
         if tag == "sectPr":
             continue
@@ -168,6 +173,7 @@ def clear_after_heading(doc, heading_text: str) -> int:
 
 
 # ─────────────────────────── Template 1: HDSD ───────────────────────────
+
 
 def jinjafy_hdsd(source: Path, dest: Path, today: str = "{{ meta.today }}"):
     """Fork ETC huong-dan-su-dung.docx with Jinja2 tags."""
@@ -200,32 +206,28 @@ def jinjafy_hdsd(source: Path, dest: Path, today: str = "{{ meta.today }}"):
                 cells[2].text = "A"
                 cells[3].text = "Tạo mới tài liệu"
                 cells[4].text = "{{ meta.version or '1.0' }}"
-                print(f"  T[1] change history: row 1 Jinja-fied")
+                print("  T[1] change history: row 1 Jinja-fied")
 
     # 3. Abbreviations table T[4] — replace rows with Jinja loop
     if len(doc.tables) > 4:
-        jinjafy_loop_table(doc.tables[4], "overview.terms",
-                           ["short", "full", "explanation"])
-        print(f"  T[4] abbreviations: loop added")
+        jinjafy_loop_table(doc.tables[4], "overview.terms", ["short", "full", "explanation"])
+        print("  T[4] abbreviations: loop added")
 
     # 4. Related docs T[5] — same pattern
     if len(doc.tables) > 5:
-        jinjafy_loop_table(doc.tables[5], "overview.references",
-                           ["stt", "name", "ref"])
-        print(f"  T[5] related docs: loop added")
+        jinjafy_loop_table(doc.tables[5], "overview.references", ["stt", "name", "ref"])
+        print("  T[5] related docs: loop added")
 
     # 5. Section I fills (Mục đích tài liệu, Phạm vi tài liệu)
-    fill_section_i_after_heading(doc, "Mục đích tài liệu",
-                                 "{{ overview.purpose }}")
-    fill_section_i_after_heading(doc, "Phạm vi tài liệu",
-                                 "{{ overview.scope }}")
-    print(f"  Section I: purpose + scope replaced with Jinja expressions")
+    fill_section_i_after_heading(doc, "Mục đích tài liệu", "{{ overview.purpose }}")
+    fill_section_i_after_heading(doc, "Phạm vi tài liệu", "{{ overview.scope }}")
+    print("  Section I: purpose + scope replaced with Jinja expressions")
 
     # 6. Section II — clear after NỘI DUNG heading, append Jinja layout
     removed = clear_after_heading(doc, "NỘI DUNG")
     print(f"  Cleared {removed} elements after NỘI DUNG")
     append_hdsd_section_ii(doc)
-    print(f"  Appended Section II Jinja layout (~50 paragraphs)")
+    print("  Appended Section II Jinja layout (~50 paragraphs)")
 
     doc.save(dest)
     size_kb = dest.stat().st_size // 1024
@@ -299,14 +301,30 @@ def fill_section_i_after_heading(doc, heading_text: str, jinja_expr: str):
             end_idx = j
             break
 
-    # Delete everything between heading and next heading
-    for ch in children[heading_idx + 1:end_idx]:
+    # Collect content elements between heading and next heading
+    content_elems = []
+    for ch in children[heading_idx + 1 : end_idx]:
         tag = ch.tag.split("}")[-1] if "}" in ch.tag else ch.tag
         if tag in ("p", "tbl"):
-            body.remove(ch)
+            content_elems.append(ch)
 
-    # Insert single Jinja paragraph with ETC_Content style
-    add_paragraph_after(children[heading_idx], jinja_expr, style="ETC_Content")
+    if content_elems:
+        # Keep the first paragraph, replace its text (preserves original style)
+        first = content_elems[0]
+        first_tag = first.tag.split("}")[-1] if "}" in first.tag else first.tag
+        if first_tag == "p":
+            set_para_text(first, jinja_expr)
+            # Remove the rest
+            for ch in content_elems[1:]:
+                body.remove(ch)
+        else:
+            # First element is a table — remove all and add new paragraph
+            for ch in content_elems:
+                body.remove(ch)
+            add_paragraph_after(children[heading_idx], jinja_expr, style="ETC_Content")
+    else:
+        # No content paragraphs — insert one
+        add_paragraph_after(children[heading_idx], jinja_expr, style="ETC_Content")
     return True
 
 
@@ -319,6 +337,7 @@ def append_hdsd_section_ii(doc):
 
     Requires render_docx.py to pre-compute `all_features` from services[].
     """
+
     def H(text, level):
         style = f"A_Heading {level}" if level > 1 else "A_HEADING 1"
         return doc.add_paragraph(text, style=style)
@@ -394,6 +413,17 @@ def append_hdsd_section_ii(doc):
     P("{%p endif %}")
     P("{%p endfor %}")
 
+    # Dialogs (bulleted paragraphs — avoid table in nest)
+    P("{%p if feat.dialogs %}")
+    P("Hộp thoại:", bold=True)
+    P("{%p for dlg in feat.dialogs %}")
+    P("• {{ dlg.title }}:", bold=True)
+    P("{%p for comp in dlg.components %}")
+    P("  – {{ comp.name }}: {{ comp.description }}")
+    P("{%p endfor %}")
+    P("{%p endfor %}")
+    P("{%p endif %}")
+
     # Error cases (bulleted paragraphs — avoid table in nest)
     P("{%p if feat.error_cases %}")
     P("Các trường hợp lỗi:", bold=True)
@@ -427,6 +457,7 @@ def append_hdsd_section_ii(doc):
 
 
 # ─────────────────────────── Template 2: TKKT ───────────────────────────
+
 
 def jinjafy_tkkt(source: Path, dest: Path):
     """TKKT uses HDSD cover + signing pages, but different Section II content."""
@@ -463,17 +494,13 @@ def jinjafy_tkkt(source: Path, dest: Path):
 
     # 3. Abbreviations + Related docs (same as HDSD)
     if len(doc.tables) > 4:
-        jinjafy_loop_table(doc.tables[4], "overview.terms",
-                           ["short", "full", "explanation"])
+        jinjafy_loop_table(doc.tables[4], "overview.terms", ["short", "full", "explanation"])
     if len(doc.tables) > 5:
-        jinjafy_loop_table(doc.tables[5], "overview.references",
-                           ["stt", "name", "ref"])
+        jinjafy_loop_table(doc.tables[5], "overview.references", ["stt", "name", "ref"])
 
     # 4. Section I
-    fill_section_i_after_heading(doc, "Mục đích tài liệu",
-                                 "{{ architecture.purpose }}")
-    fill_section_i_after_heading(doc, "Phạm vi tài liệu",
-                                 "{{ architecture.scope }}")
+    fill_section_i_after_heading(doc, "Mục đích tài liệu", "{{ architecture.purpose }}")
+    fill_section_i_after_heading(doc, "Phạm vi tài liệu", "{{ architecture.scope }}")
 
     # 5. Section II — architecture-specific layout
     clear_after_heading(doc, "NỘI DUNG")
@@ -485,12 +512,19 @@ def jinjafy_tkkt(source: Path, dest: Path):
 
 def append_tkkt_section_ii(doc):
     """7 sections: overview / logic / data / integration / deployment / security / NFR."""
+
     def H(text, level):
         style = f"A_Heading {level}" if level > 1 else "A_HEADING 1"
         return doc.add_paragraph(text, style=style)
 
-    def P(text, style="ETC_Content"):
-        return doc.add_paragraph(text, style=style)
+    def P(text, style="ETC_Content", bold=False, italic=False):
+        p = doc.add_paragraph(style=style)
+        run = p.add_run(text)
+        if bold:
+            run.bold = True
+        if italic:
+            run.italic = True
+        return p
 
     def simple_table(hdr_labels, rows_jinja, loop_var, col_exprs):
         """Build table with header + 3-row Jinja loop pattern."""
@@ -522,64 +556,125 @@ def append_tkkt_section_ii(doc):
     # 2.1 Tổng quan hệ thống
     H("Tổng quan hệ thống", 2)
     P("{{ architecture.system_overview }}")
+    P("{%p if architecture.architecture_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc tổng thể", italic=True)
+    P("{{ architecture.architecture_diagram_image }}")
+    P("{%p endif %}")
     H("Phạm vi và đối tượng", 3)
     P("{{ architecture.scope_description }}")
     H("Công nghệ sử dụng", 3)
-    simple_table(["Lớp", "Công nghệ", "Phiên bản", "Vai trò"],
-                 None, "architecture.tech_stack",
-                 ["{{ item.layer }}", "{{ item.technology }}",
-                  "{{ item.version or '-' }}", "{{ item.role }}"])
+    simple_table(
+        ["Lớp", "Công nghệ", "Phiên bản", "Vai trò"],
+        None,
+        "architecture.tech_stack",
+        [
+            "{{ item.layer }}",
+            "{{ item.technology }}",
+            "{{ item.version or '-' }}",
+            "{{ item.role }}",
+        ],
+    )
 
     # 2.2 Kiến trúc logic
     H("Kiến trúc logic", 2)
     P("{{ architecture.logical_description }}")
+    P("{%p if architecture.logical_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc logic", italic=True)
+    P("{{ architecture.logical_diagram_image }}")
+    P("{%p endif %}")
     H("Danh sách thành phần", 3)
-    simple_table(["STT", "Thành phần", "Loại", "Mô tả"],
-                 None, "architecture.components",
-                 ["{{ loop.index }}", "{{ item.name }}",
-                  "{{ item.type }}", "{{ item.description }}"])
+    simple_table(
+        ["STT", "Thành phần", "Loại", "Mô tả"],
+        None,
+        "architecture.components",
+        ["{{ loop.index }}", "{{ item.name }}", "{{ item.type }}", "{{ item.description }}"],
+    )
     H("Tương tác giữa các thành phần", 3)
     P("{{ architecture.interaction_description }}")
 
     # 2.3 Kiến trúc dữ liệu
     H("Kiến trúc dữ liệu", 2)
     P("{{ architecture.data_description }}")
+    P("{%p if architecture.data_diagram_image %}")
+    P("Hình: Sơ đồ mô hình dữ liệu", italic=True)
+    P("{{ architecture.data_diagram_image }}")
+    P("{%p endif %}")
     H("Mô hình dữ liệu", 3)
-    simple_table(["STT", "Bảng/Collection", "Mục đích", "Loại lưu trữ"],
-                 None, "architecture.data_entities",
-                 ["{{ loop.index }}", "{{ item.name }}",
-                  "{{ item.purpose }}", "{{ item.storage_type or 'PostgreSQL' }}"])
+    simple_table(
+        ["STT", "Bảng/Collection", "Mục đích", "Loại lưu trữ"],
+        None,
+        "architecture.data_entities",
+        [
+            "{{ loop.index }}",
+            "{{ item.name }}",
+            "{{ item.purpose }}",
+            "{{ item.storage_type or 'PostgreSQL' }}",
+        ],
+    )
 
     # 2.4 Kiến trúc tích hợp
     H("Kiến trúc tích hợp", 2)
     P("{{ architecture.integration_description }}")
+    P("{%p if architecture.integration_diagram_image %}")
+    P("Hình: Sơ đồ tích hợp hệ thống", italic=True)
+    P("{{ architecture.integration_diagram_image }}")
+    P("{%p endif %}")
     H("Danh sách API/Interface", 3)
-    simple_table(["STT", "Endpoint", "Phương thức", "Mô tả", "Xác thực"],
-                 None, "architecture.apis",
-                 ["{{ loop.index }}", "{{ item.path }}", "{{ item.method }}",
-                  "{{ item.description }}", "{{ item.auth or 'JWT Bearer' }}"])
+    simple_table(
+        ["STT", "Endpoint", "Phương thức", "Mô tả", "Xác thực"],
+        None,
+        "architecture.apis",
+        [
+            "{{ loop.index }}",
+            "{{ item.path }}",
+            "{{ item.method }}",
+            "{{ item.description }}",
+            "{{ item.auth or 'JWT Bearer' }}",
+        ],
+    )
     H("Tích hợp hệ thống ngoài", 3)
-    simple_table(["STT", "Hệ thống ngoài", "Giao thức", "Mục đích"],
-                 None, "architecture.external_integrations",
-                 ["{{ loop.index }}", "{{ item.system }}",
-                  "{{ item.protocol }}", "{{ item.purpose }}"])
+    simple_table(
+        ["STT", "Hệ thống ngoài", "Giao thức", "Mục đích"],
+        None,
+        "architecture.external_integrations",
+        ["{{ loop.index }}", "{{ item.system }}", "{{ item.protocol }}", "{{ item.purpose }}"],
+    )
 
     # 2.5 Kiến trúc triển khai
     H("Kiến trúc triển khai", 2)
     P("{{ architecture.deployment_description }}")
+    P("{%p if architecture.deployment_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc triển khai", italic=True)
+    P("{{ architecture.deployment_diagram_image }}")
+    P("{%p endif %}")
     H("Môi trường triển khai", 3)
-    simple_table(["Môi trường", "Hạ tầng", "Mục đích"],
-                 None, "architecture.environments",
-                 ["{{ item.name }}", "{{ item.infrastructure }}", "{{ item.purpose }}"])
+    simple_table(
+        ["Môi trường", "Hạ tầng", "Mục đích"],
+        None,
+        "architecture.environments",
+        ["{{ item.name }}", "{{ item.infrastructure }}", "{{ item.purpose }}"],
+    )
     H("Các container/service", 3)
-    simple_table(["STT", "Container", "Image", "Port", "Phụ thuộc"],
-                 None, "architecture.containers",
-                 ["{{ loop.index }}", "{{ item.name }}", "{{ item.image }}",
-                  "{{ item.port or '-' }}", "{{ item.depends_on|join(', ') if item.depends_on else '-' }}"])
+    simple_table(
+        ["STT", "Container", "Image", "Port", "Phụ thuộc"],
+        None,
+        "architecture.containers",
+        [
+            "{{ loop.index }}",
+            "{{ item.name }}",
+            "{{ item.image }}",
+            "{{ item.port or '-' }}",
+            "{{ item.depends_on|join(', ') if item.depends_on else '-' }}",
+        ],
+    )
 
     # 2.6 Kiến trúc bảo mật
     H("Kiến trúc bảo mật", 2)
     P("{{ architecture.security_description }}")
+    P("{%p if architecture.security_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc bảo mật", italic=True)
+    P("{{ architecture.security_diagram_image }}")
+    P("{%p endif %}")
     H("Xác thực và phân quyền", 3)
     P("{{ architecture.auth_description }}")
     H("Bảo vệ dữ liệu", 3)
@@ -587,72 +682,582 @@ def append_tkkt_section_ii(doc):
 
     # 2.7 Yêu cầu phi chức năng
     H("Yêu cầu phi chức năng", 2)
-    simple_table(["Tiêu chí", "Yêu cầu", "Phương án đáp ứng"],
-                 None, "architecture.nfr",
-                 ["{{ item.criterion }}", "{{ item.requirement }}", "{{ item.solution }}"])
+    simple_table(
+        ["Tiêu chí", "Yêu cầu", "Phương án đáp ứng"],
+        None,
+        "architecture.nfr",
+        ["{{ item.criterion }}", "{{ item.requirement }}", "{{ item.solution }}"],
+    )
 
 
 # ─────────────────────────── Template 3: TKCS ───────────────────────────
 
-def jinjafy_tkcs(source: Path, dest: Path):
-    """TKCS (based on stripped TKCS_v1.2) — minimal fills only.
 
-    Strategy: fill Section 1 (Giới thiệu chung) with project info from Jinja,
-    and prepend [CẦN BỔ SUNG] hints under each top-level heading for BA.
+def jinjafy_tkcs(source: Path, dest: Path):
+    """TKCS cloned from HDSD base — same cover/signing pages, TKCS-specific Section II.
+
+    Outline follows NĐ 73/2019 Điều 13 (thay thế bởi NĐ 45/2026 Điều 13):
+    Section I: Giới thiệu chung (purpose, scope, terms, refs)
+    Section II:
+      2.1 Giới thiệu chung dự án
+      2.2 Sự cần thiết đầu tư
+      2.3 Đánh giá sự phù hợp với quy hoạch
+      2.4 Phân tích, lựa chọn phương án công nghệ
+      2.5 Thiết kế cơ sở phương án chọn
+      2.6 Phương án đảm bảo ATTT
+      2.7 Phương án tổ chức quản lý, khai thác
+      2.8 Dự kiến tiến độ thực hiện
+      2.9 Xác định tổng mức đầu tư
+      2.10 Xác định chi phí vận hành
+      2.11 Tổ chức quản lý dự án
     """
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, dest)
     doc = Document(dest)
 
-    # Cover replacements
+    # 1. Cover + header/footer — replace HDSD title → TKCS
     replacements = [
         ("<Tên dự án>", "{{ project.display_name }}"),
+        ("HỆ THỐNG QUẢN LÝ", "{{ project.display_name|upper }}"),
+        ("TÀI LIỆU HƯỚNG DẪN SỬ DỤNG", "TÀI LIỆU THIẾT KẾ CƠ SỞ"),
+        ("Tài liệu hướng dẫn sử dụng", "Tài liệu thiết kế cơ sở"),
         ("CÔNG TY CỔ PHẦN HỆ THỐNG CÔNG NGHỆ ETC", "{{ dev_unit|upper }}"),
         ("<Họ tên>", "[CẦN BỔ SUNG: Tên người ký]"),
         ("<Chức danh>", "[CẦN BỔ SUNG: Chức danh]"),
+        ("<Màn hình 1>", ""),
+        ("Ban hành: dd/mm/yyyy", "Ban hành: {{ meta.today }}"),
     ]
     replace_everywhere(doc, replacements)
 
-    # Section 1 fills — find H2 headings under Giới thiệu chung
-    fills_section1 = [
-        ("Tên dự án", "{{ project.display_name }}"),
-        ("Chủ đầu tư", "{{ project.client }}"),
-        ("Tổ chức tư vấn lập dự án", "{{ dev_unit }}"),
-        ("Hình thức đầu tư", "[CẦN BỔ SUNG: Đầu tư mới / Nâng cấp / Thuê dịch vụ]"),
-        ("Thời gian thực hiện dự án", "[CẦN BỔ SUNG: Thời gian dự kiến]"),
-        ("Nguồn vốn", "[CẦN BỔ SUNG: Ngân sách nhà nước / Vốn tự có]"),
-    ]
-    for heading, content in fills_section1:
-        replace_content_after_h2(doc, heading, content)
+    # 2. Change history
+    if len(doc.tables) > 1:
+        t = doc.tables[1]
+        if len(t.rows) >= 2:
+            row = t.rows[1]
+            cells = row.cells
+            if len(cells) >= 5:
+                cells[0].text = "{{ meta.today }}"
+                cells[1].text = "Toàn bộ tài liệu"
+                cells[2].text = "A"
+                cells[3].text = "Tạo mới tài liệu thiết kế cơ sở"
+                cells[4].text = "{{ meta.version or '1.0' }}"
 
-    # Section-level hints — inserted after each H1
-    hints = [
-        ("SỰ CẦN THIẾT ĐẦU TƯ",
-         "[CẦN BỔ SUNG: BA viết cơ sở pháp lý, hiện trạng, sự cần thiết đầu tư]"),
-        ("ĐÁNH GIÁ SỰ PHÙ HỢP VỚI QUY HOẠCH",
-         "[CẦN BỔ SUNG: Thuyết minh phù hợp Khung Kiến trúc CPĐT 4.0, Kế hoạch CNTT]"),
-        ("PHÂN TÍCH, LỰA CHỌN PHƯƠNG ÁN CÔNG NGHỆ",
-         "{{ tkcs.technology_rationale or '[CẦN BỔ SUNG: Phân tích lựa chọn công nghệ]' }}"),
-        ("THIẾT KẾ CƠ SỞ PHƯƠNG ÁN CHỌN",
-         "{{ tkcs.detailed_design_summary or '[CẦN BỔ SUNG: Tham chiếu Tài liệu Thiết kế Kiến trúc]' }}"),
-        ("PHƯƠNG ÁN ĐẢM BẢO AN TOÀN THÔNG TIN",
-         "[CẦN BỔ SUNG: Đánh giá cấp độ ATTT theo TT 03/2017/TT-BTTTT]"),
-        ("PHƯƠNG ÁN TỔ CHỨC QUẢN LÝ, KHAI THÁC",
-         "[CẦN BỔ SUNG: Mô hình tổ chức vận hành, SLA]"),
-        ("DỰ KIẾN TIẾN ĐỘ THỰC HIỆN",
-         "[CẦN BỔ SUNG: Mốc thời gian triển khai]"),
-        ("XÁC ĐỊNH TỔNG MỨC ĐẦU TƯ",
-         "[CẦN BỔ SUNG: Bóc khối lượng theo TT 04/2020/TT-BTTTT]"),
-        ("XÁC ĐỊNH CHI PHÍ VẬN HÀNH",
-         "[CẦN BỔ SUNG: Chi phí O&M hàng năm]"),
-        ("TỔ CHỨC QUẢN LÝ DỰ ÁN",
-         "[CẦN BỔ SUNG: Mô hình QLDA — BQL chuyên trách / kiêm nhiệm]"),
-    ]
-    for heading, content in hints:
-        insert_after_h1(doc, heading, content, italic=True)
+    # 3. Abbreviations + Related docs (same as HDSD)
+    if len(doc.tables) > 4:
+        jinjafy_loop_table(doc.tables[4], "overview.terms", ["short", "full", "explanation"])
+    if len(doc.tables) > 5:
+        jinjafy_loop_table(doc.tables[5], "overview.references", ["stt", "name", "ref"])
+
+    # 4. Section I
+    fill_section_i_after_heading(doc, "Mục đích tài liệu", "{{ overview.purpose }}")
+    fill_section_i_after_heading(doc, "Phạm vi tài liệu", "{{ overview.scope }}")
+
+    # 5. Section II — TKCS-specific layout
+    clear_after_heading(doc, "NỘI DUNG")
+    append_tkcs_section_ii(doc)
 
     doc.save(dest)
     print(f"  Saved {dest} ({dest.stat().st_size // 1024} KB)")
+
+
+def append_tkcs_section_ii(doc):
+    """TKCS Section II: 11 sections per NĐ 73/2019 Điều 13."""
+
+    def H(text, level):
+        style = f"A_Heading {level}" if level > 1 else "A_HEADING 1"
+        return doc.add_paragraph(text, style=style)
+
+    def P(text, style="ETC_Content", bold=False, italic=False):
+        p = doc.add_paragraph(style=style)
+        run = p.add_run(text)
+        if bold:
+            run.bold = True
+        if italic:
+            run.italic = True
+        return p
+
+    def simple_table(hdr_labels, loop_var, col_exprs):
+        tbl = doc.add_table(rows=4, cols=len(hdr_labels))
+        try:
+            tbl.style = "Table Grid"
+        except KeyError:
+            pass
+        h = tbl.rows[0].cells
+        for i, label in enumerate(hdr_labels):
+            h[i].text = label
+            for r in h[i].paragraphs[0].runs:
+                r.bold = True
+        singular = loop_var.split(".")[-1].rstrip("s")
+        tbl.rows[1].cells[0].text = f"{{%tr for {singular} in {loop_var} %}}"
+        data = tbl.rows[2].cells
+        for i, expr in enumerate(col_exprs):
+            rewritten = expr.replace("{{ item.", f"{{{{ {singular}.")
+            rewritten = rewritten.replace("item.", f"{singular}.")
+            data[i].text = rewritten
+        tbl.rows[3].cells[0].text = "{%tr endfor %}"
+
+    # ─ 2.1 Giới thiệu chung dự án ─
+    H("Giới thiệu chung dự án", 2)
+    H("Tên dự án", 3)
+    P("{{ project.display_name }}")
+    H("Chủ đầu tư", 3)
+    P("{{ project.client }}")
+    H("Đơn vị tư vấn", 3)
+    P("{{ dev_unit }}")
+    H("Hình thức đầu tư", 3)
+    P("{{ tkcs.investment_type or '[CẦN BỔ SUNG: Đầu tư mới / Nâng cấp / Thuê dịch vụ CNTT]' }}")
+    H("Thời gian thực hiện", 3)
+    P("{{ tkcs.project_duration or '[CẦN BỔ SUNG: Thời gian dự kiến]' }}")
+    H("Nguồn vốn", 3)
+    P("{{ tkcs.funding_source or '[CẦN BỔ SUNG: Ngân sách nhà nước / Vốn tự có]' }}")
+
+    # ─ 2.2 Sự cần thiết đầu tư ─
+    H("Sự cần thiết đầu tư", 2)
+    H("Cơ sở pháp lý", 3)
+    P("{{ tkcs.legal_basis or '[CẦN BỔ SUNG: Viện dẫn QĐ, NĐ, CT làm cơ sở pháp lý]' }}")
+    H("Hiện trạng", 3)
+    P("{{ tkcs.current_state or '[CẦN BỔ SUNG: Hiện trạng hệ thống/quy trình hiện tại]' }}")
+    H("Sự cần thiết", 3)
+    P("{{ tkcs.necessity or '[CẦN BỔ SUNG: Lý do cần thiết phải đầu tư]' }}")
+
+    # ─ 2.3 Đánh giá sự phù hợp với quy hoạch ─
+    H("Đánh giá sự phù hợp với quy hoạch", 2)
+    P(
+        "{{ tkcs.architecture_compliance or '[CẦN BỔ SUNG: Phù hợp Khung Kiến trúc CPĐT 4.0, Kế hoạch ứng dụng CNTT của đơn vị]' }}"
+    )
+
+    # ─ 2.4 Phân tích, lựa chọn phương án công nghệ ─
+    H("Phân tích, lựa chọn phương án công nghệ", 2)
+    P("{{ tkcs.technology_rationale or '[CẦN BỔ SUNG: Phân tích lựa chọn phương án công nghệ]' }}")
+    H("Công nghệ sử dụng", 3)
+    simple_table(
+        ["Lớp", "Công nghệ", "Phiên bản", "Vai trò"],
+        "architecture.tech_stack",
+        [
+            "{{ item.layer }}",
+            "{{ item.technology }}",
+            "{{ item.version or '-' }}",
+            "{{ item.role }}",
+        ],
+    )
+
+    # ─ 2.5 Thiết kế cơ sở phương án chọn ─
+    H("Thiết kế cơ sở phương án chọn", 2)
+    P("{{ tkcs.detailed_design_summary or '[CẦN BỔ SUNG: Tổng quan thiết kế cơ sở]' }}")
+
+    H("Kiến trúc hệ thống", 3)
+    P("{{ architecture.system_overview }}")
+    P("{%p if tkcs.architecture_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc phương án chọn", italic=True)
+    P("{{ tkcs.architecture_diagram_image }}")
+    P("{%p endif %}")
+    P("{%p if not tkcs.architecture_diagram_image and architecture.architecture_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc tổng thể", italic=True)
+    P("{{ architecture.architecture_diagram_image }}")
+    P("{%p endif %}")
+    simple_table(
+        ["STT", "Thành phần", "Loại", "Mô tả"],
+        "architecture.components",
+        ["{{ loop.index }}", "{{ item.name }}", "{{ item.type }}", "{{ item.description }}"],
+    )
+
+    H("Thiết kế chức năng", 3)
+    P("{{ tkcs.functional_design or '[CẦN BỔ SUNG: Mô tả thiết kế chức năng tổng quan]' }}")
+    # Feature catalog table
+    simple_table(
+        ["STT", "Phân hệ", "Chức năng", "Mô tả"],
+        "all_features",
+        [
+            "{{ loop.index }}",
+            "{{ item.service_name }}",
+            "{{ item.name }}",
+            "{{ item.description }}",
+        ],
+    )
+
+    H("Thiết kế cơ sở dữ liệu", 3)
+    P(
+        "{{ tkcs.db_design_summary or architecture.data_description or '[CẦN BỔ SUNG: Thiết kế CSDL tổng quan]' }}"
+    )
+    P("{%p if tkcs.data_model_diagram_image %}")
+    P("Hình: Sơ đồ mô hình dữ liệu tổng quan", italic=True)
+    P("{{ tkcs.data_model_diagram_image }}")
+    P("{%p endif %}")
+    P("{%p if not tkcs.data_model_diagram_image and architecture.data_diagram_image %}")
+    P("Hình: Sơ đồ mô hình dữ liệu", italic=True)
+    P("{{ architecture.data_diagram_image }}")
+    P("{%p endif %}")
+    simple_table(
+        ["STT", "Bảng/Collection", "Mục đích", "Loại lưu trữ"],
+        "architecture.data_entities",
+        [
+            "{{ loop.index }}",
+            "{{ item.name }}",
+            "{{ item.purpose }}",
+            "{{ item.storage_type or 'PostgreSQL' }}",
+        ],
+    )
+
+    H("Thiết kế tích hợp", 3)
+    P(
+        "{{ tkcs.integration_design_summary or architecture.integration_description or '[CẦN BỔ SUNG: Thiết kế tích hợp]' }}"
+    )
+    simple_table(
+        ["STT", "Hệ thống ngoài", "Giao thức", "Mục đích"],
+        "architecture.external_integrations",
+        ["{{ loop.index }}", "{{ item.system }}", "{{ item.protocol }}", "{{ item.purpose }}"],
+    )
+
+    # ─ 2.6 Phương án đảm bảo ATTT ─
+    H("Phương án đảm bảo an toàn thông tin", 2)
+    P(
+        "{{ tkcs.security_plan or '[CẦN BỔ SUNG: Đánh giá cấp độ ATTT theo TT 03/2017/TT-BTTTT, phương án bảo đảm]' }}"
+    )
+    P("{{ architecture.security_description }}")
+
+    # ─ 2.7 Phương án tổ chức quản lý, khai thác ─
+    H("Phương án tổ chức quản lý, khai thác", 2)
+    P("{{ tkcs.operations_plan or '[CẦN BỔ SUNG: Mô hình tổ chức vận hành, SLA, nhân lực]' }}")
+
+    # ─ 2.8 Dự kiến tiến độ thực hiện ─
+    H("Dự kiến tiến độ thực hiện", 2)
+    P("{{ tkcs.timeline or '[CẦN BỔ SUNG: Mốc thời gian triển khai theo giai đoạn]' }}")
+
+    # ─ 2.9 Xác định tổng mức đầu tư ─
+    H("Xác định tổng mức đầu tư", 2)
+    P("{{ tkcs.total_investment or '[CẦN BỔ SUNG: Bóc khối lượng theo TT 04/2020/TT-BTTTT]' }}")
+
+    # ─ 2.10 Xác định chi phí vận hành ─
+    H("Xác định chi phí vận hành", 2)
+    P("{{ tkcs.operating_cost or '[CẦN BỔ SUNG: Chi phí O&M hàng năm]' }}")
+
+    # ─ 2.11 Tổ chức quản lý dự án ─
+    H("Tổ chức quản lý dự án", 2)
+    P(
+        "{{ tkcs.project_management or '[CẦN BỔ SUNG: Mô hình QLDA — BQL chuyên trách / kiêm nhiệm]' }}"
+    )
+
+
+# ─────────────────────────── Template 4: TKCT ───────────────────────────
+
+
+def jinjafy_tkct(source: Path, dest: Path):
+    """TKCT (Thiết kế chi tiết) cloned from HDSD base.
+
+    Outline:
+    Section I: Giới thiệu chung (purpose, scope, terms, refs)
+    Section II:
+      2.1 Tổng quan thiết kế
+      2.2 Thiết kế chi tiết chức năng (per module)
+      2.3 Thiết kế cơ sở dữ liệu
+      2.4 Thiết kế API
+      2.5 Thiết kế giao diện
+      2.6 Thiết kế tích hợp
+      2.7 Thiết kế bảo mật
+      2.8 Ma trận truy xuất nguồn gốc
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, dest)
+    doc = Document(dest)
+
+    # 1. Cover + header/footer — replace HDSD title → TKCT
+    replacements = [
+        ("<Tên dự án>", "{{ project.display_name }}"),
+        ("HỆ THỐNG QUẢN LÝ", "{{ project.display_name|upper }}"),
+        ("TÀI LIỆU HƯỚNG DẪN SỬ DỤNG", "TÀI LIỆU THIẾT KẾ CHI TIẾT"),
+        ("Tài liệu hướng dẫn sử dụng", "Tài liệu thiết kế chi tiết"),
+        ("CÔNG TY CỔ PHẦN HỆ THỐNG CÔNG NGHỆ ETC", "{{ dev_unit|upper }}"),
+        ("<Họ tên>", "[CẦN BỔ SUNG: Tên người ký]"),
+        ("<Chức danh>", "[CẦN BỔ SUNG: Chức danh]"),
+        ("<Màn hình 1>", ""),
+        ("Ban hành: dd/mm/yyyy", "Ban hành: {{ meta.today }}"),
+    ]
+    replace_everywhere(doc, replacements)
+
+    # 2. Change history
+    if len(doc.tables) > 1:
+        t = doc.tables[1]
+        if len(t.rows) >= 2:
+            row = t.rows[1]
+            cells = row.cells
+            if len(cells) >= 5:
+                cells[0].text = "{{ meta.today }}"
+                cells[1].text = "Toàn bộ tài liệu"
+                cells[2].text = "A"
+                cells[3].text = "Tạo mới tài liệu thiết kế chi tiết"
+                cells[4].text = "{{ meta.version or '1.0' }}"
+
+    # 3. Abbreviations + Related docs
+    if len(doc.tables) > 4:
+        jinjafy_loop_table(doc.tables[4], "overview.terms", ["short", "full", "explanation"])
+    if len(doc.tables) > 5:
+        jinjafy_loop_table(doc.tables[5], "overview.references", ["stt", "name", "ref"])
+
+    # 4. Section I
+    fill_section_i_after_heading(doc, "Mục đích tài liệu", "{{ overview.purpose }}")
+    fill_section_i_after_heading(doc, "Phạm vi tài liệu", "{{ overview.scope }}")
+
+    # 5. Section II — TKCT-specific layout
+    clear_after_heading(doc, "NỘI DUNG")
+    append_tkct_section_ii(doc)
+
+    doc.save(dest)
+    print(f"  Saved {dest} ({dest.stat().st_size // 1024} KB)")
+
+
+def append_tkct_section_ii(doc):
+    """TKCT Section II: 8 sections for detailed design."""
+
+    def H(text, level):
+        style = f"A_Heading {level}" if level > 1 else "A_HEADING 1"
+        return doc.add_paragraph(text, style=style)
+
+    def P(text, style="ETC_Content", bold=False, italic=False):
+        p = doc.add_paragraph(style=style)
+        run = p.add_run(text)
+        if bold:
+            run.bold = True
+        if italic:
+            run.italic = True
+        return p
+
+    def simple_table(hdr_labels, loop_var, col_exprs):
+        tbl = doc.add_table(rows=4, cols=len(hdr_labels))
+        try:
+            tbl.style = "Table Grid"
+        except KeyError:
+            pass
+        h = tbl.rows[0].cells
+        for i, label in enumerate(hdr_labels):
+            h[i].text = label
+            for r in h[i].paragraphs[0].runs:
+                r.bold = True
+        singular = loop_var.split(".")[-1].rstrip("s")
+        tbl.rows[1].cells[0].text = f"{{%tr for {singular} in {loop_var} %}}"
+        data = tbl.rows[2].cells
+        for i, expr in enumerate(col_exprs):
+            rewritten = expr.replace("{{ item.", f"{{{{ {singular}.")
+            rewritten = rewritten.replace("item.", f"{singular}.")
+            data[i].text = rewritten
+        tbl.rows[3].cells[0].text = "{%tr endfor %}"
+
+    # ─ 2.1 Tổng quan thiết kế ─
+    H("Tổng quan thiết kế", 2)
+    H("Mô tả hệ thống", 3)
+    P("{{ tkct.system_description or architecture.system_overview }}")
+    P("{%p if tkct.architecture_overview_diagram_image %}")
+    P("Hình: Sơ đồ kiến trúc tổng quan", italic=True)
+    P("{{ tkct.architecture_overview_diagram_image }}")
+    P("{%p endif %}")
+    P(
+        "{%p if not tkct.architecture_overview_diagram_image and architecture.architecture_diagram_image %}"
+    )
+    P("Hình: Sơ đồ kiến trúc tổng thể", italic=True)
+    P("{{ architecture.architecture_diagram_image }}")
+    P("{%p endif %}")
+    H("Tham chiếu kiến trúc", 3)
+    P(
+        "{{ tkct.architecture_reference or '[CẦN BỔ SUNG: Tham chiếu Tài liệu Thiết kế Kiến trúc]' }}"
+    )
+    H("Công nghệ sử dụng", 3)
+    simple_table(
+        ["Lớp", "Công nghệ", "Phiên bản", "Vai trò"],
+        "architecture.tech_stack",
+        [
+            "{{ item.layer }}",
+            "{{ item.technology }}",
+            "{{ item.version or '-' }}",
+            "{{ item.role }}",
+        ],
+    )
+
+    # ─ 2.2 Thiết kế chi tiết chức năng ─
+    H("Thiết kế chi tiết chức năng", 2)
+    P("{%p for module in tkct.modules %}")
+    H("{{ module.name }}", 3)
+    P("{{ module.description }}")
+    P("{%p if module.flow_description %}")
+    P("Luồng xử lý:", bold=True)
+    P("{{ module.flow_description }}")
+    P("{%p endif %}")
+    P("{%p if module.flow_diagram_image %}")
+    P("Hình: Sơ đồ luồng xử lý {{ module.name }}", italic=True)
+    P("{{ module.flow_diagram_image }}")
+    P("{%p endif %}")
+    P("{%p if module.business_rules %}")
+    P("Quy tắc nghiệp vụ:", bold=True)
+    P("{{ module.business_rules }}")
+    P("{%p endif %}")
+    P("{%p if module.input_data %}")
+    P("Dữ liệu đầu vào: {{ module.input_data }}")
+    P("{%p endif %}")
+    P("{%p if module.output_data %}")
+    P("Dữ liệu đầu ra: {{ module.output_data }}")
+    P("{%p endif %}")
+    P("{%p endfor %}")
+
+    # ─ 2.3 Thiết kế cơ sở dữ liệu ─
+    H("Thiết kế cơ sở dữ liệu", 2)
+    P(
+        "{{ tkct.db_description or architecture.data_description or '[CẦN BỔ SUNG: Mô tả thiết kế CSDL]' }}"
+    )
+    P("{%p if tkct.db_erd_diagram_image %}")
+    P("Hình: Sơ đồ ERD chi tiết", italic=True)
+    P("{{ tkct.db_erd_diagram_image }}")
+    P("{%p endif %}")
+    P("{%p if not tkct.db_erd_diagram_image and architecture.data_diagram_image %}")
+    P("Hình: Sơ đồ mô hình dữ liệu", italic=True)
+    P("{{ architecture.data_diagram_image }}")
+    P("{%p endif %}")
+
+    H("Danh sách bảng dữ liệu", 3)
+    simple_table(
+        ["STT", "Bảng/Collection", "Mục đích"],
+        "architecture.data_entities",
+        ["{{ loop.index }}", "{{ item.name }}", "{{ item.purpose }}"],
+    )
+
+    # Per-table column specifications (nested loops)
+    H("Đặc tả chi tiết bảng dữ liệu", 3)
+    P("{%p for table in tkct.db_tables %}")
+    P("Bảng: {{ table.name }}", bold=True)
+    P("{{ table.description }}")
+    # Column spec table with for loop
+    P("{%p if table.columns %}")
+
+    tbl_cols = doc.add_table(rows=4, cols=5)
+    try:
+        tbl_cols.style = "Table Grid"
+    except KeyError:
+        pass
+    hdr = tbl_cols.rows[0].cells
+    for i, label in enumerate(["Tên cột", "Kiểu dữ liệu", "Nullable", "Ràng buộc", "Mô tả"]):
+        hdr[i].text = label
+        for r in hdr[i].paragraphs[0].runs:
+            r.bold = True
+    tbl_cols.rows[1].cells[0].text = "{%tr for col in table.columns %}"
+    d = tbl_cols.rows[2].cells
+    d[0].text = "{{ col.name }}"
+    d[1].text = "{{ col.type }}"
+    d[2].text = "{{ 'Yes' if col.nullable else 'No' }}"
+    d[3].text = "{{ col.constraints }}"
+    d[4].text = "{{ col.description }}"
+    tbl_cols.rows[3].cells[0].text = "{%tr endfor %}"
+
+    P("{%p endif %}")
+    P("{%p endfor %}")
+
+    # ─ 2.4 Thiết kế API ─
+    H("Thiết kế API", 2)
+    P("{{ tkct.api_description or '[CẦN BỔ SUNG: Mô tả thiết kế API tổng quan]' }}")
+
+    H("Danh sách API", 3)
+    simple_table(
+        ["STT", "Endpoint", "Phương thức", "Mô tả", "Xác thực"],
+        "architecture.apis",
+        [
+            "{{ loop.index }}",
+            "{{ item.path }}",
+            "{{ item.method }}",
+            "{{ item.description }}",
+            "{{ item.auth or 'JWT Bearer' }}",
+        ],
+    )
+
+    H("Đặc tả chi tiết API", 3)
+    P("{%p for api in tkct.api_details %}")
+    P("{{ api.method }} {{ api.path }}", bold=True)
+    P("{{ api.summary }}")
+    P("{%p if api.description %}")
+    P("{{ api.description }}")
+    P("{%p endif %}")
+    P("{%p if api.request_body %}")
+    P("Request body:", bold=True)
+    P("{{ api.request_body }}")
+    P("{%p endif %}")
+    P("{%p if api.response_body %}")
+    P("Response body:", bold=True)
+    P("{{ api.response_body }}")
+    P("{%p endif %}")
+    P("{%p if api.error_codes %}")
+    P("Mã lỗi: {{ api.error_codes|join(', ') }}")
+    P("{%p endif %}")
+    P("{%p endfor %}")
+
+    # ─ 2.5 Thiết kế giao diện ─
+    H("Thiết kế giao diện", 2)
+    H("Quy tắc thiết kế chung", 3)
+    P(
+        "{{ tkct.ui_guidelines or '[CẦN BỔ SUNG: Quy tắc thiết kế giao diện chung — font, màu, spacing]' }}"
+    )
+    H("Bố cục giao diện", 3)
+    P(
+        "{{ tkct.ui_layout or '[CẦN BỔ SUNG: Bố cục giao diện chung — header, sidebar, content, footer]' }}"
+    )
+    P("{%p if tkct.ui_layout_diagram_image %}")
+    P("Hình: Sơ đồ bố cục giao diện", italic=True)
+    P("{{ tkct.ui_layout_diagram_image }}")
+    P("{%p endif %}")
+    H("Danh mục màn hình", 3)
+    simple_table(
+        ["STT", "Màn hình", "Mô tả", "Chức năng liên quan"],
+        "tkct.screens",
+        [
+            "{{ loop.index }}",
+            "{{ item.name }}",
+            "{{ item.description }}",
+            "{{ item.feature_id }}",
+        ],
+    )
+
+    # ─ 2.6 Thiết kế tích hợp ─
+    H("Thiết kế tích hợp", 2)
+    P(
+        "{{ tkct.integration_design or architecture.integration_description or '[CẦN BỔ SUNG: Thiết kế tích hợp chi tiết]' }}"
+    )
+    P("{%p if tkct.integration_diagram_image %}")
+    P("Hình: Sơ đồ tích hợp chi tiết", italic=True)
+    P("{{ tkct.integration_diagram_image }}")
+    P("{%p endif %}")
+    P("{%p if not tkct.integration_diagram_image and architecture.integration_diagram_image %}")
+    P("Hình: Sơ đồ tích hợp hệ thống", italic=True)
+    P("{{ architecture.integration_diagram_image }}")
+    P("{%p endif %}")
+    simple_table(
+        ["STT", "Hệ thống ngoài", "Giao thức", "Mục đích"],
+        "architecture.external_integrations",
+        ["{{ loop.index }}", "{{ item.system }}", "{{ item.protocol }}", "{{ item.purpose }}"],
+    )
+
+    # ─ 2.7 Thiết kế bảo mật ─
+    H("Thiết kế bảo mật", 2)
+    P(
+        "{{ tkct.security_design or architecture.security_description or '[CẦN BỔ SUNG: Thiết kế bảo mật chi tiết]' }}"
+    )
+    H("Xác thực và phân quyền", 3)
+    P("{{ architecture.auth_description }}")
+    H("Bảo vệ dữ liệu", 3)
+    P(
+        "{{ architecture.data_protection or '[CẦN BỔ SUNG: Mã hóa, TLS, masking dữ liệu nhạy cảm]' }}"
+    )
+
+    # ─ 2.8 Ma trận truy xuất nguồn gốc ─
+    H("Ma trận truy xuất nguồn gốc", 2)
+    P(
+        "{{ tkct.traceability_description or '[CẦN BỔ SUNG: Ma trận truy xuất features ↔ modules ↔ test cases]' }}"
+    )
+    # Feature ↔ module traceability table using all_features
+    simple_table(
+        ["STT", "Chức năng", "Mã chức năng", "Phân hệ", "Mô tả"],
+        "all_features",
+        [
+            "{{ loop.index }}",
+            "{{ item.name }}",
+            "{{ item.id }}",
+            "{{ item.service_name }}",
+            "{{ item.description }}",
+        ],
+    )
 
 
 def replace_content_after_h2(doc, heading_text: str, new_content: str):
@@ -697,9 +1302,10 @@ def insert_after_h1(doc, heading_text: str, content: str, italic: bool = False):
 
 # ─────────────────────────── CLI ───────────────────────────
 
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("kind", choices=["hdsd", "tkkt", "tkcs"])
+    ap.add_argument("kind", choices=["hdsd", "tkkt", "tkcs", "tkct"])
     ap.add_argument("--source", required=True, help="Source template (original ETC or cloned)")
     ap.add_argument("--dest", default=None, help="Output path; defaults to templates/<name>.docx")
     args = ap.parse_args()
@@ -713,9 +1319,12 @@ def main():
         "hdsd": "huong-dan-su-dung.docx",
         "tkkt": "thiet-ke-kien-truc.docx",
         "tkcs": "thiet-ke-co-so.docx",
+        "tkct": "thiet-ke-chi-tiet.docx",
     }
-    dest = Path(args.dest) if args.dest else (
-        Path(__file__).parent.parent / "templates" / default_names[args.kind]
+    dest = (
+        Path(args.dest)
+        if args.dest
+        else (Path(__file__).parent.parent / "templates" / default_names[args.kind])
     )
 
     print(f"Jinjafying {args.kind.upper()}: {source} → {dest}")
@@ -725,6 +1334,8 @@ def main():
         jinjafy_tkkt(source, dest)
     elif args.kind == "tkcs":
         jinjafy_tkcs(source, dest)
+    elif args.kind == "tkct":
+        jinjafy_tkct(source, dest)
 
 
 if __name__ == "__main__":

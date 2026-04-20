@@ -1,0 +1,1464 @@
+{
+  "$defs": {
+    "ApiDetail": {
+      "description": "Detailed API specification — richer than Architecture.ApiEndpoint.",
+      "properties": {
+        "path": {
+          "default": "",
+          "title": "Path",
+          "type": "string"
+        },
+        "method": {
+          "default": "",
+          "title": "Method",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "auth": {
+          "default": "JWT Bearer",
+          "title": "Auth",
+          "type": "string"
+        },
+        "request_body": {
+          "default": "",
+          "description": "JSON schema hoặc mô tả cấu trúc request",
+          "title": "Request Body",
+          "type": "string"
+        },
+        "response_body": {
+          "default": "",
+          "description": "JSON schema hoặc mô tả cấu trúc response",
+          "title": "Response Body",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ApiParameter"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "error_codes": {
+          "description": "Mã lỗi: 400, 401, 404, 500",
+          "items": {
+            "type": "string"
+          },
+          "title": "Error Codes",
+          "type": "array"
+        }
+      },
+      "title": "ApiDetail",
+      "type": "object"
+    },
+    "ApiEndpoint": {
+      "properties": {
+        "path": {
+          "default": "",
+          "title": "Path",
+          "type": "string"
+        },
+        "method": {
+          "default": "",
+          "title": "Method",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "auth": {
+          "default": "JWT Bearer",
+          "title": "Auth",
+          "type": "string"
+        }
+      },
+      "title": "ApiEndpoint",
+      "type": "object"
+    },
+    "ApiParameter": {
+      "description": "API parameter specification.",
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "location": {
+          "default": "body",
+          "description": "body | query | path | header",
+          "title": "Location",
+          "type": "string"
+        },
+        "type": {
+          "default": "string",
+          "title": "Type",
+          "type": "string"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "title": "ApiParameter",
+      "type": "object"
+    },
+    "ArchComponent": {
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "",
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "title": "ArchComponent",
+      "type": "object"
+    },
+    "Architecture": {
+      "description": "Architecture data — consumed by TKKT (docx) and HDSD system_overview fallback.",
+      "properties": {
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "scope": {
+          "default": "",
+          "title": "Scope",
+          "type": "string"
+        },
+        "system_overview": {
+          "default": "",
+          "title": "System Overview",
+          "type": "string"
+        },
+        "scope_description": {
+          "default": "",
+          "title": "Scope Description",
+          "type": "string"
+        },
+        "tech_stack": {
+          "items": {
+            "$ref": "#/$defs/TechStackItem"
+          },
+          "title": "Tech Stack",
+          "type": "array"
+        },
+        "logical_description": {
+          "default": "",
+          "title": "Logical Description",
+          "type": "string"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/$defs/ArchComponent"
+          },
+          "title": "Components",
+          "type": "array"
+        },
+        "interaction_description": {
+          "default": "",
+          "title": "Interaction Description",
+          "type": "string"
+        },
+        "data_description": {
+          "default": "",
+          "title": "Data Description",
+          "type": "string"
+        },
+        "data_entities": {
+          "items": {
+            "$ref": "#/$defs/DataEntity"
+          },
+          "title": "Data Entities",
+          "type": "array"
+        },
+        "integration_description": {
+          "default": "",
+          "title": "Integration Description",
+          "type": "string"
+        },
+        "apis": {
+          "items": {
+            "$ref": "#/$defs/ApiEndpoint"
+          },
+          "title": "Apis",
+          "type": "array"
+        },
+        "external_integrations": {
+          "items": {
+            "$ref": "#/$defs/ExternalIntegration"
+          },
+          "title": "External Integrations",
+          "type": "array"
+        },
+        "deployment_description": {
+          "default": "",
+          "title": "Deployment Description",
+          "type": "string"
+        },
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/DeployEnvironment"
+          },
+          "title": "Environments",
+          "type": "array"
+        },
+        "containers": {
+          "items": {
+            "$ref": "#/$defs/ContainerInfo"
+          },
+          "title": "Containers",
+          "type": "array"
+        },
+        "security_description": {
+          "default": "",
+          "title": "Security Description",
+          "type": "string"
+        },
+        "auth_description": {
+          "default": "",
+          "title": "Auth Description",
+          "type": "string"
+        },
+        "data_protection": {
+          "default": "",
+          "title": "Data Protection",
+          "type": "string"
+        },
+        "nfr": {
+          "items": {
+            "$ref": "#/$defs/NfrItem"
+          },
+          "title": "Nfr",
+          "type": "array"
+        }
+      },
+      "title": "Architecture",
+      "type": "object"
+    },
+    "ContainerInfo": {
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "image": {
+          "default": "",
+          "title": "Image",
+          "type": "string"
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "",
+          "title": "Port"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        }
+      },
+      "title": "ContainerInfo",
+      "type": "object"
+    },
+    "DataEntity": {
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "storage_type": {
+          "default": "PostgreSQL",
+          "title": "Storage Type",
+          "type": "string"
+        }
+      },
+      "title": "DataEntity",
+      "type": "object"
+    },
+    "DbColumn": {
+      "description": "Column specification for detailed database design.",
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "",
+          "title": "Type",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "constraints": {
+          "default": "",
+          "description": "PK, FK, UNIQUE, CHECK, etc.",
+          "title": "Constraints",
+          "type": "string"
+        }
+      },
+      "title": "DbColumn",
+      "type": "object"
+    },
+    "DbTable": {
+      "description": "Table specification for detailed database design.",
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/DbColumn"
+          },
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "title": "DbTable",
+      "type": "object"
+    },
+    "DeployEnvironment": {
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "infrastructure": {
+          "default": "",
+          "title": "Infrastructure",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "title": "DeployEnvironment",
+      "type": "object"
+    },
+    "Dialog": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/$defs/DialogComponent"
+          },
+          "title": "Components",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "Dialog",
+      "type": "object"
+    },
+    "DialogComponent": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "DialogComponent",
+      "type": "object"
+    },
+    "ErrorCase": {
+      "properties": {
+        "trigger_step": {
+          "default": 0,
+          "title": "Trigger Step",
+          "type": "integer"
+        },
+        "condition": {
+          "default": "",
+          "title": "Condition",
+          "type": "string"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "ErrorCase",
+      "type": "object"
+    },
+    "ExpectedResult": {
+      "description": "Expected result — separate model for backward compat with split steps/expected.",
+      "properties": {
+        "no": {
+          "minimum": 1,
+          "title": "No",
+          "type": "integer"
+        },
+        "expected": {
+          "minLength": 1,
+          "title": "Expected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "expected"
+      ],
+      "title": "ExpectedResult",
+      "type": "object"
+    },
+    "ExternalIntegration": {
+      "properties": {
+        "system": {
+          "default": "",
+          "title": "System",
+          "type": "string"
+        },
+        "protocol": {
+          "default": "",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "title": "ExternalIntegration",
+      "type": "object"
+    },
+    "Feature": {
+      "description": "A single feature — used by HDSD (docx) and cross-referenced by test cases.",
+      "properties": {
+        "id": {
+          "description": "Feature ID: F-001, F-0012",
+          "pattern": "^F-\\d{3,4}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "actors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actors",
+          "type": "array"
+        },
+        "preconditions": {
+          "default": "",
+          "title": "Preconditions",
+          "type": "string"
+        },
+        "ui_elements": {
+          "items": {
+            "$ref": "#/$defs/UIElement"
+          },
+          "title": "Ui Elements",
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/FeatureStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "dialogs": {
+          "items": {
+            "$ref": "#/$defs/Dialog"
+          },
+          "title": "Dialogs",
+          "type": "array"
+        },
+        "error_cases": {
+          "items": {
+            "$ref": "#/$defs/ErrorCase"
+          },
+          "title": "Error Cases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Feature",
+      "type": "object"
+    },
+    "FeatureGroupRow": {
+      "description": "Feature group header — rendered as merged colored row in Excel.",
+      "properties": {
+        "title": {
+          "description": "Feature group display name",
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "feature_id": {
+          "default": "",
+          "description": "Links to services[].features[].id for cross-validation",
+          "title": "Feature Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "FeatureGroupRow",
+      "type": "object"
+    },
+    "FeatureStep": {
+      "description": "HDSD feature step — different from TestStep (has screenshot, no expected).",
+      "properties": {
+        "no": {
+          "minimum": 1,
+          "title": "No",
+          "type": "integer"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "screenshot": {
+          "default": "",
+          "title": "Screenshot",
+          "type": "string"
+        },
+        "expected": {
+          "default": "",
+          "title": "Expected",
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "action"
+      ],
+      "title": "FeatureStep",
+      "type": "object"
+    },
+    "Meta": {
+      "properties": {
+        "today": {
+          "description": "dd/mm/yyyy format",
+          "title": "Today",
+          "type": "string"
+        },
+        "version": {
+          "default": "1.0",
+          "title": "Version",
+          "type": "string"
+        },
+        "test_period": {
+          "default": "",
+          "title": "Test Period",
+          "type": "string"
+        }
+      },
+      "required": [
+        "today"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "ModuleDesign": {
+      "description": "Detailed design for a module/service.",
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "flow_description": {
+          "default": "",
+          "description": "Mô tả luồng xử lý",
+          "title": "Flow Description",
+          "type": "string"
+        },
+        "business_rules": {
+          "default": "",
+          "description": "Quy tắc nghiệp vụ",
+          "title": "Business Rules",
+          "type": "string"
+        },
+        "input_data": {
+          "default": "",
+          "description": "Dữ liệu đầu vào",
+          "title": "Input Data",
+          "type": "string"
+        },
+        "output_data": {
+          "default": "",
+          "description": "Dữ liệu đầu ra",
+          "title": "Output Data",
+          "type": "string"
+        },
+        "feature_ids": {
+          "description": "Feature IDs liên quan",
+          "items": {
+            "type": "string"
+          },
+          "title": "Feature Ids",
+          "type": "array"
+        }
+      },
+      "title": "ModuleDesign",
+      "type": "object"
+    },
+    "NfrItem": {
+      "properties": {
+        "criterion": {
+          "default": "",
+          "title": "Criterion",
+          "type": "string"
+        },
+        "requirement": {
+          "default": "",
+          "title": "Requirement",
+          "type": "string"
+        },
+        "solution": {
+          "default": "",
+          "title": "Solution",
+          "type": "string"
+        }
+      },
+      "title": "NfrItem",
+      "type": "object"
+    },
+    "Overview": {
+      "properties": {
+        "purpose": {
+          "default": "",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "scope": {
+          "default": "",
+          "title": "Scope",
+          "type": "string"
+        },
+        "system_description": {
+          "default": "",
+          "title": "System Description",
+          "type": "string"
+        },
+        "conventions": {
+          "default": "",
+          "title": "Conventions",
+          "type": "string"
+        },
+        "terms": {
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Terms",
+          "type": "array"
+        },
+        "references": {
+          "items": {
+            "$ref": "#/$defs/Reference"
+          },
+          "title": "References",
+          "type": "array"
+        }
+      },
+      "title": "Overview",
+      "type": "object"
+    },
+    "Priority": {
+      "description": "Test case priority — accepts Vietnamese or English input.",
+      "enum": [
+        "Critical",
+        "Major",
+        "Normal",
+        "Minor"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "ProjectInfo": {
+      "properties": {
+        "display_name": {
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "code": {
+          "default": "",
+          "title": "Code",
+          "type": "string"
+        },
+        "client": {
+          "default": "",
+          "title": "Client",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "tech_stack": {
+          "default": "",
+          "title": "Tech Stack",
+          "type": "string"
+        }
+      },
+      "required": [
+        "display_name"
+      ],
+      "title": "ProjectInfo",
+      "type": "object"
+    },
+    "Reference": {
+      "properties": {
+        "stt": {
+          "default": "",
+          "title": "Stt",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "ref": {
+          "default": "",
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "ScreenDesign": {
+      "description": "UI screen specification.",
+      "properties": {
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "screenshot": {
+          "default": "",
+          "description": "Screenshot filename",
+          "title": "Screenshot",
+          "type": "string"
+        },
+        "feature_id": {
+          "default": "",
+          "description": "Links to Feature.id",
+          "title": "Feature Id",
+          "type": "string"
+        }
+      },
+      "title": "ScreenDesign",
+      "type": "object"
+    },
+    "SectionHeaderRow": {
+      "description": "Section header — rendered as merged light-colored row in Excel.",
+      "properties": {
+        "title": {
+          "description": "Section header text (supports \\n)",
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "SectionHeaderRow",
+      "type": "object"
+    },
+    "Service": {
+      "description": "A service/module grouping features.",
+      "properties": {
+        "slug": {
+          "minLength": 1,
+          "title": "Slug",
+          "type": "string"
+        },
+        "display_name": {
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "features": {
+          "items": {
+            "$ref": "#/$defs/Feature"
+          },
+          "title": "Features",
+          "type": "array"
+        }
+      },
+      "required": [
+        "slug",
+        "display_name"
+      ],
+      "title": "Service",
+      "type": "object"
+    },
+    "TechStackItem": {
+      "properties": {
+        "layer": {
+          "default": "",
+          "title": "Layer",
+          "type": "string"
+        },
+        "technology": {
+          "default": "",
+          "title": "Technology",
+          "type": "string"
+        },
+        "version": {
+          "default": "",
+          "title": "Version",
+          "type": "string"
+        },
+        "role": {
+          "default": "",
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "title": "TechStackItem",
+      "type": "object"
+    },
+    "Term": {
+      "properties": {
+        "short": {
+          "title": "Short",
+          "type": "string"
+        },
+        "full": {
+          "title": "Full",
+          "type": "string"
+        },
+        "explanation": {
+          "default": "",
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "short",
+        "full"
+      ],
+      "title": "Term",
+      "type": "object"
+    },
+    "TestCaseRow": {
+      "description": "A single test case row — the primary data unit.\n\nSupports two step formats:\n  1. Unified: steps[] with action + expected in each step (Playwright/Xray style)\n  2. Split:   steps[] (actions only) + expected[] (results only) — legacy/Excel-native\n\nThe engine normalizes to the split format for Excel column C/D mapping.",
+      "properties": {
+        "name": {
+          "description": "Test case name → Excel col B",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "steps": {
+          "description": "Test steps with action (+ optional expected per step)",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/TestStep"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "expected": {
+          "description": "Expected results (if not embedded in steps)",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ExpectedResult"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            ]
+          },
+          "title": "Expected",
+          "type": "array"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "Normal",
+          "description": "Severity: Rất cao|Cao|Trung bình|Thấp or Critical|Major|Normal|Minor"
+        },
+        "preconditions": {
+          "default": "",
+          "description": "Preconditions for this TC",
+          "title": "Preconditions",
+          "type": "string"
+        },
+        "checklog": {
+          "default": "",
+          "description": "Check log reference → Excel col E",
+          "title": "Checklog",
+          "type": "string"
+        },
+        "redirect": {
+          "default": "",
+          "description": "Redirect/navigation target → Excel col F",
+          "title": "Redirect",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "description": "Additional notes → Excel col M",
+          "title": "Notes",
+          "type": "string"
+        },
+        "feature_id": {
+          "default": "",
+          "description": "Links to services[].features[].id (e.g. F-001)",
+          "title": "Feature Id",
+          "type": "string"
+        },
+        "tc_id": {
+          "default": "",
+          "description": "Unique test case ID (auto-generated if empty)",
+          "title": "Tc Id",
+          "type": "string"
+        },
+        "labels": {
+          "description": "Tags/labels: ['smoke', 'regression', 'ui']",
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "TestCaseRow",
+      "type": "object"
+    },
+    "TestCases": {
+      "description": "Test cases grouped by sheet — the primary input for xlsx engine.",
+      "properties": {
+        "ui": {
+          "description": "UI test cases → 'Tên chức năng' sheet",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FeatureGroupRow"
+              },
+              {
+                "$ref": "#/$defs/SectionHeaderRow"
+              },
+              {
+                "$ref": "#/$defs/TestCaseRow"
+              }
+            ]
+          },
+          "title": "Ui",
+          "type": "array"
+        },
+        "api": {
+          "description": "API test cases → 'Tên API' sheet",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FeatureGroupRow"
+              },
+              {
+                "$ref": "#/$defs/SectionHeaderRow"
+              },
+              {
+                "$ref": "#/$defs/TestCaseRow"
+              }
+            ]
+          },
+          "title": "Api",
+          "type": "array"
+        }
+      },
+      "title": "TestCases",
+      "type": "object"
+    },
+    "TestSheetConfig": {
+      "description": "Optional labels for test result sheet.",
+      "properties": {
+        "ui_label": {
+          "default": "Chức năng hệ thống",
+          "title": "Ui Label",
+          "type": "string"
+        },
+        "api_label": {
+          "default": "API hệ thống",
+          "title": "Api Label",
+          "type": "string"
+        },
+        "ui_requirement": {
+          "default": "Kiểm tra các chức năng hệ thống",
+          "title": "Ui Requirement",
+          "type": "string"
+        },
+        "api_requirement": {
+          "default": "Kiểm tra các API hệ thống",
+          "title": "Api Requirement",
+          "type": "string"
+        }
+      },
+      "title": "TestSheetConfig",
+      "type": "object"
+    },
+    "TestStep": {
+      "description": "A single test step — compatible with Xray/TestRail/Playwright output.",
+      "properties": {
+        "no": {
+          "description": "Step sequence number (1-based)",
+          "minimum": 1,
+          "title": "No",
+          "type": "integer"
+        },
+        "action": {
+          "description": "Action to perform",
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "data": {
+          "default": "",
+          "description": "Test data for this step",
+          "title": "Data",
+          "type": "string"
+        },
+        "expected": {
+          "default": "",
+          "description": "Expected result",
+          "title": "Expected",
+          "type": "string"
+        },
+        "screenshot": {
+          "default": "",
+          "description": "Screenshot filename (F-XXX-step-NN-state.png)",
+          "title": "Screenshot",
+          "type": "string"
+        }
+      },
+      "required": [
+        "no",
+        "action"
+      ],
+      "title": "TestStep",
+      "type": "object"
+    },
+    "TkcsData": {
+      "description": "TKCS-specific data — consumed by thiet-ke-co-so.docx template.\n\nOutline follows NĐ 73/2019 Điều 13 (thay thế bởi NĐ 45/2026 Điều 13):\nSection 1: Giới thiệu chung (filled from project/overview)\nSection 2-11: TKCS-specific content below",
+      "properties": {
+        "legal_basis": {
+          "default": "",
+          "description": "Cơ sở pháp lý (viện dẫn QĐ, NĐ, CT)",
+          "title": "Legal Basis",
+          "type": "string"
+        },
+        "current_state": {
+          "default": "",
+          "description": "Hiện trạng hệ thống/quy trình hiện tại",
+          "title": "Current State",
+          "type": "string"
+        },
+        "necessity": {
+          "default": "",
+          "description": "Sự cần thiết đầu tư",
+          "title": "Necessity",
+          "type": "string"
+        },
+        "architecture_compliance": {
+          "default": "",
+          "description": "Phù hợp Khung KTCPĐT, Kế hoạch ứng dụng CNTT",
+          "title": "Architecture Compliance",
+          "type": "string"
+        },
+        "technology_rationale": {
+          "default": "",
+          "description": "Phân tích lựa chọn phương án CN",
+          "title": "Technology Rationale",
+          "type": "string"
+        },
+        "detailed_design_summary": {
+          "default": "",
+          "description": "Tổng quan thiết kế cơ sở",
+          "title": "Detailed Design Summary",
+          "type": "string"
+        },
+        "functional_design": {
+          "default": "",
+          "description": "Thiết kế chức năng tổng quan",
+          "title": "Functional Design",
+          "type": "string"
+        },
+        "db_design_summary": {
+          "default": "",
+          "description": "Thiết kế CSDL tổng quan",
+          "title": "Db Design Summary",
+          "type": "string"
+        },
+        "integration_design_summary": {
+          "default": "",
+          "description": "Thiết kế tích hợp tổng quan",
+          "title": "Integration Design Summary",
+          "type": "string"
+        },
+        "security_plan": {
+          "default": "",
+          "description": "Phương án bảo đảm ATTT",
+          "title": "Security Plan",
+          "type": "string"
+        },
+        "operations_plan": {
+          "default": "",
+          "description": "Phương án tổ chức quản lý, khai thác",
+          "title": "Operations Plan",
+          "type": "string"
+        },
+        "timeline": {
+          "default": "",
+          "description": "Dự kiến tiến độ thực hiện",
+          "title": "Timeline",
+          "type": "string"
+        },
+        "total_investment": {
+          "default": "",
+          "description": "Xác định tổng mức đầu tư",
+          "title": "Total Investment",
+          "type": "string"
+        },
+        "operating_cost": {
+          "default": "",
+          "description": "Chi phí vận hành hàng năm",
+          "title": "Operating Cost",
+          "type": "string"
+        },
+        "project_management": {
+          "default": "",
+          "description": "Mô hình tổ chức quản lý dự án",
+          "title": "Project Management",
+          "type": "string"
+        },
+        "investment_type": {
+          "default": "",
+          "description": "Đầu tư mới / Nâng cấp / Thuê dịch vụ CNTT",
+          "title": "Investment Type",
+          "type": "string"
+        },
+        "funding_source": {
+          "default": "",
+          "description": "Ngân sách nhà nước / Vốn tự có",
+          "title": "Funding Source",
+          "type": "string"
+        },
+        "project_duration": {
+          "default": "",
+          "description": "Thời gian thực hiện dự kiến",
+          "title": "Project Duration",
+          "type": "string"
+        }
+      },
+      "title": "TkcsData",
+      "type": "object"
+    },
+    "TkctData": {
+      "description": "TKCT (Thiết kế chi tiết) data — consumed by thiet-ke-chi-tiet.docx template.\n\nStandard outline for Vietnamese IT detailed design document:\n1. Tổng quan thiết kế\n2. Thiết kế chi tiết chức năng (per module)\n3. Thiết kế cơ sở dữ liệu\n4. Thiết kế API\n5. Thiết kế giao diện\n6. Thiết kế tích hợp\n7. Thiết kế bảo mật\n8. Ma trận truy xuất nguồn gốc",
+      "properties": {
+        "system_description": {
+          "default": "",
+          "description": "Mô tả tổng quan hệ thống",
+          "title": "System Description",
+          "type": "string"
+        },
+        "architecture_reference": {
+          "default": "",
+          "description": "Tham chiếu tài liệu TKKT",
+          "title": "Architecture Reference",
+          "type": "string"
+        },
+        "modules": {
+          "items": {
+            "$ref": "#/$defs/ModuleDesign"
+          },
+          "title": "Modules",
+          "type": "array"
+        },
+        "db_description": {
+          "default": "",
+          "description": "Mô tả thiết kế CSDL tổng quan",
+          "title": "Db Description",
+          "type": "string"
+        },
+        "db_tables": {
+          "items": {
+            "$ref": "#/$defs/DbTable"
+          },
+          "title": "Db Tables",
+          "type": "array"
+        },
+        "api_description": {
+          "default": "",
+          "description": "Mô tả thiết kế API tổng quan",
+          "title": "Api Description",
+          "type": "string"
+        },
+        "api_details": {
+          "items": {
+            "$ref": "#/$defs/ApiDetail"
+          },
+          "title": "Api Details",
+          "type": "array"
+        },
+        "ui_guidelines": {
+          "default": "",
+          "description": "Quy tắc thiết kế giao diện chung",
+          "title": "Ui Guidelines",
+          "type": "string"
+        },
+        "ui_layout": {
+          "default": "",
+          "description": "Bố cục giao diện chung",
+          "title": "Ui Layout",
+          "type": "string"
+        },
+        "screens": {
+          "items": {
+            "$ref": "#/$defs/ScreenDesign"
+          },
+          "title": "Screens",
+          "type": "array"
+        },
+        "integration_design": {
+          "default": "",
+          "description": "Thiết kế tích hợp chi tiết",
+          "title": "Integration Design",
+          "type": "string"
+        },
+        "security_design": {
+          "default": "",
+          "description": "Thiết kế bảo mật chi tiết",
+          "title": "Security Design",
+          "type": "string"
+        },
+        "traceability_description": {
+          "default": "",
+          "description": "Mô tả ma trận truy xuất features ↔ modules ↔ test cases",
+          "title": "Traceability Description",
+          "type": "string"
+        }
+      },
+      "title": "TkctData",
+      "type": "object"
+    },
+    "TroubleshootingItem": {
+      "description": "FAQ/troubleshooting entry — rendered in HDSD Section 2.4.",
+      "properties": {
+        "situation": {
+          "description": "Problem description",
+          "minLength": 1,
+          "title": "Situation",
+          "type": "string"
+        },
+        "cause": {
+          "default": "",
+          "description": "Root cause",
+          "title": "Cause",
+          "type": "string"
+        },
+        "resolution": {
+          "default": "",
+          "description": "How to fix",
+          "title": "Resolution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "situation"
+      ],
+      "title": "TroubleshootingItem",
+      "type": "object"
+    },
+    "UIElement": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "default": "",
+          "title": "Type",
+          "type": "string"
+        },
+        "rules": {
+          "default": "",
+          "title": "Rules",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "UIElement",
+      "type": "object"
+    }
+  },
+  "description": "Root model for content-data.json — the contract between all pipeline phases.\n\nProducers:\n  - Phase 1 (tdoc-researcher): populates services[], overview\n  - Phase 2 (tdoc-test-runner): populates services[].features[].steps[].screenshot\n  - Phase 3 (tdoc-data-writer): populates test_cases, meta, project\n  - Manual: user edits directly\n\nConsumers:\n  - xlsx engine: reads project, meta, dev_unit, test_cases, test_sheets\n  - docx engine: reads project, meta, dev_unit, overview, services",
+  "properties": {
+    "project": {
+      "$ref": "#/$defs/ProjectInfo"
+    },
+    "dev_unit": {
+      "default": "Công ty CP Hệ thống Công nghệ ETC",
+      "description": "Development company name",
+      "title": "Dev Unit",
+      "type": "string"
+    },
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "overview": {
+      "$ref": "#/$defs/Overview"
+    },
+    "test_sheets": {
+      "$ref": "#/$defs/TestSheetConfig"
+    },
+    "services": {
+      "items": {
+        "$ref": "#/$defs/Service"
+      },
+      "title": "Services",
+      "type": "array"
+    },
+    "test_cases": {
+      "$ref": "#/$defs/TestCases"
+    },
+    "troubleshooting": {
+      "description": "FAQ items for HDSD Section 2.4",
+      "items": {
+        "$ref": "#/$defs/TroubleshootingItem"
+      },
+      "title": "Troubleshooting",
+      "type": "array"
+    },
+    "architecture": {
+      "$ref": "#/$defs/Architecture",
+      "description": "Architecture data for TKKT template"
+    },
+    "tkcs": {
+      "$ref": "#/$defs/TkcsData",
+      "description": "TKCS-specific data"
+    },
+    "tkct": {
+      "$ref": "#/$defs/TkctData",
+      "description": "TKCT (detailed design) data"
+    }
+  },
+  "required": [
+    "project",
+    "meta"
+  ],
+  "title": "ContentData",
+  "type": "object"
+}

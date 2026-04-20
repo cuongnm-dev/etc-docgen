@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "etc-docgen"
-version = "0.1.0"
+version = "0.2.0"
 description = "Template-first documentation generator for ETC projects — turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -33,12 +33,16 @@ dependencies = [
     "Pillow>=10.0.0",
     "rich>=13.0.0",                # Pretty CLI output
     "jinja2>=3.1.0",
+    "mcp>=1.0.0",                  # MCP server SDK
 ]
 
 [project.optional-dependencies]
 capture = [
     "playwright>=1.40.0",
     "requests>=2.31.0",
+]
+serve = [
+    "uvicorn>=0.27.0",             # SSE / streamable-http transport
 ]
 web = [
     "mkdocs>=1.5.0",
@@ -56,10 +60,11 @@ dev = [
     "types-PyYAML",
     "types-Pillow",
 ]
-all = ["etc-docgen[capture,web,xray,dev]"]
+all = ["etc-docgen[capture,serve,web,xray,dev]"]
 
 [project.scripts]
 etc-docgen = "etc_docgen.cli:app"
+etc-docgen-mcp = "etc_docgen.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/etc-vn/etc-docgen"

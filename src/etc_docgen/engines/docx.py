@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 render_docx.py — Jinja2-based .docx rendering via docxtpl.
 
@@ -27,6 +26,7 @@ Usage:
     [--screenshots-dir path/]   # optional, enables InlineImage for screenshots
     [--report        out/render-report.json]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,11 +34,10 @@ import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 try:
-    from docxtpl import DocxTemplate, InlineImage
     from docx.shared import Inches, Mm
+    from docxtpl import DocxTemplate, InlineImage
 except ImportError:
     print("ERROR: docxtpl required. Run: pip install docxtpl python-docx", file=sys.stderr)
     sys.exit(2)
@@ -57,13 +56,14 @@ WNS_QN = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 
 # ─────────────────────────── Report ───────────────────────────
 
+
 @dataclass
 class RenderReport:
     template: str = ""
     output: str = ""
     screenshots_embedded: int = 0
     screenshots_missing: int = 0
-    tokens_substituted: int = 0    # approximation — count {{ }} tokens
+    tokens_substituted: int = 0  # approximation — count {{ }} tokens
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -75,8 +75,10 @@ class RenderReport:
 
 # ─────────────────────────── Image context pre-processor ───────────────────────────
 
-def build_image_context(tpl: DocxTemplate, data: dict, screenshots_dir: Path | None,
-                         report: RenderReport) -> dict:
+
+def build_image_context(
+    tpl: DocxTemplate, data: dict, screenshots_dir: Path | None, report: RenderReport
+) -> dict:
     """Walk services[].features[].steps[] — replace screenshot filenames
     with InlineImage objects (so Jinja renders them as embedded images).
 
@@ -108,9 +110,7 @@ def build_image_context(tpl: DocxTemplate, data: dict, screenshots_dir: Path | N
                     candidates.append(screenshots_dir / (stem + ext))
                 resolved = next((c for c in candidates if c.exists()), None)
                 if resolved:
-                    step["screenshot_image"] = InlineImage(
-                        tpl, str(resolved), width=Inches(5.5)
-                    )
+                    step["screenshot_image"] = InlineImage(tpl, str(resolved), width=Inches(5.5))
                     report.screenshots_embedded += 1
                 else:
                     step["screenshot_image"] = None
@@ -118,7 +118,74 @@ def build_image_context(tpl: DocxTemplate, data: dict, screenshots_dir: Path | N
     return data
 
 
+def _resolve_diagram(
+    tpl: DocxTemplate,
+    filename: str,
+    diagrams_dir: Path | None,
+    report: RenderReport,
+    width: Inches = Inches(5.5),
+) -> InlineImage | None:
+    """Resolve a diagram filename to InlineImage, or None if missing."""
+    if not filename or not diagrams_dir or not diagrams_dir.exists():
+        return None
+    candidates = [diagrams_dir / filename]
+    stem = Path(filename).stem
+    for ext in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
+        candidates.append(diagrams_dir / (stem + ext))
+    resolved = next((c for c in candidates if c.exists()), None)
+    if resolved:
+        return InlineImage(tpl, str(resolved), width=width)
+    return None
+
+
+def build_diagram_context(
+    tpl: DocxTemplate, data: dict, diagrams_dir: Path | None, report: RenderReport
+) -> dict:
+    """Walk architecture/tkcs/tkct diagram fields — replace filenames with InlineImage.
+
+    Convention: for each field named `*_diagram`, creates a `*_diagram_image` key.
+    Templates use {%p if arch.architecture_diagram_image %} guards.
+    """
+    # Architecture diagrams
+    arch = data.get("architecture", {})
+    for field in (
+        "architecture_diagram",
+        "logical_diagram",
+        "data_diagram",
+        "deployment_diagram",
+        "integration_diagram",
+        "security_diagram",
+    ):
+        img = _resolve_diagram(tpl, arch.get(field, ""), diagrams_dir, report)
+        arch[f"{field}_image"] = img
+
+    # TKCS diagrams
+    tkcs = data.get("tkcs", {})
+    for field in ("architecture_diagram", "data_model_diagram"):
+        img = _resolve_diagram(tpl, tkcs.get(field, ""), diagrams_dir, report)
+        tkcs[f"{field}_image"] = img
+
+    # TKCT diagrams
+    tkct = data.get("tkct", {})
+    for field in (
+        "architecture_overview_diagram",
+        "db_erd_diagram",
+        "ui_layout_diagram",
+        "integration_diagram",
+    ):
+        img = _resolve_diagram(tpl, tkct.get(field, ""), diagrams_dir, report)
+        tkct[f"{field}_image"] = img
+
+    # Module-level flow diagrams
+    for module in tkct.get("modules", []):
+        img = _resolve_diagram(tpl, module.get("flow_diagram", ""), diagrams_dir, report)
+        module["flow_diagram_image"] = img
+
+    return data
+
+
 # ─────────────────────────── Post-process ───────────────────────────
+
 
 def mark_toc_dirty(docx_path: Path):
     """Set updateFields=true + mark TOC fields as dirty so Word auto-refreshes."""
@@ -142,9 +209,9 @@ def strip_orphan_media(docx_path: Path) -> int:
     inherited from v1.2) — after DocxTpl render clears original body,
     those media become orphan and can be safely stripped.
     """
-    import zipfile
     import re
     import shutil
+    import zipfile
 
     REL_FILE = "word/_rels/document.xml.rels"
     DOC_FILE = "word/document.xml"
@@ -173,7 +240,8 @@ def strip_orphan_media(docx_path: Path) -> int:
     for rid in orphan_rels:
         new_rels = re.sub(
             rf'<Relationship\s+[^/]*Id="{re.escape(rid)}"[^/]*/>',
-            "", new_rels,
+            "",
+            new_rels,
         )
     orphan_targets = {f"word/{t}" for t in orphan_rels.values()}
 
@@ -195,8 +263,12 @@ def strip_orphan_media(docx_path: Path) -> int:
 
 # ─────────────────────────── Main render ───────────────────────────
 
-def render(template_path: Path, data_path: Path, output_path: Path,
-           screenshots_dir: Path | None = None) -> RenderReport:
+
+def render(
+    template_path: Path, data_path: Path, output_path: Path,
+    screenshots_dir: Path | None = None,
+    diagrams_dir: Path | None = None,
+) -> RenderReport:
     report = RenderReport(template=str(template_path), output=str(output_path))
 
     if not template_path.exists():
@@ -212,6 +284,15 @@ def render(template_path: Path, data_path: Path, output_path: Path,
 
     # Add `meta.today` fallback if missing
     data.setdefault("meta", {}).setdefault("today", "")
+
+    # Ensure all top-level sections have defaults so templates don't fail on
+    # missing keys (backward compat: older content-data.json may lack new sections)
+    data.setdefault("overview", {})
+    data.setdefault("architecture", {})
+    data.setdefault("tkcs", {})
+    data.setdefault("tkct", {})
+    data.setdefault("services", [])
+    data.setdefault("troubleshooting", [])
 
     # Pre-compute `all_features` flat list (features with service_name embedded)
     # — simplifies templates by avoiding nested {%p for service %} + {%tr for feat %}
@@ -234,6 +315,9 @@ def render(template_path: Path, data_path: Path, output_path: Path,
 
     # Pre-process screenshots into InlineImage objects
     data = build_image_context(tpl, data, screenshots_dir, report)
+
+    # Pre-process diagram images into InlineImage objects
+    data = build_diagram_context(tpl, data, diagrams_dir, report)
 
     # Render
     try:
@@ -306,8 +390,9 @@ def main():
 
     print(f"Template: {report.template}")
     print(f"Output:   {report.output}")
-    print(f"Screenshots: {report.screenshots_embedded} embedded, "
-          f"{report.screenshots_missing} missing")
+    print(
+        f"Screenshots: {report.screenshots_embedded} embedded, {report.screenshots_missing} missing"
+    )
     if report.warnings:
         print(f"Warnings: {len(report.warnings)}")
         for w in report.warnings:

@@ -1,0 +1,3367 @@
+{
+  "meta": {
+    "schema_version": "1.0",
+    "generated_at": "2026-04-20T10:00:00+07:00",
+    "project_slug": "seal-management-system",
+    "export_targets": [
+      "hdsd",
+      "tkkt",
+      "tkcs",
+      "tkct",
+      "xlsx"
+    ]
+  },
+  "project": {
+    "display_name": "Phần mềm quản lý định vị Seal điện tử",
+    "code": "SEAL-GPS-2026",
+    "client": "[CẦN BỔ SUNG: Tên đơn vị chủ đầu tư]",
+    "client_short": "[CẦN BỔ SUNG: Tên viết tắt đơn vị chủ đầu tư]",
+    "version": "1.0",
+    "today": "20/04/2026"
+  },
+  "dev_unit": "Công ty Cổ phần Hệ thống Công nghệ ETC",
+  "dev_unit_detail": {
+    "name": "Công ty Cổ phần Hệ thống Công nghệ ETC",
+    "short": "ETC",
+    "address": "[CẦN BỔ SUNG: Địa chỉ ETC]",
+    "phone": "[CẦN BỔ SUNG: Số điện thoại ETC]",
+    "email": "cuongnm1@etc.vn"
+  },
+  "overview": {
+    "purpose": "Phần mềm quản lý giám sát container bằng seal GPS điện tử phục vụ ngành Hải quan Việt Nam, giải quyết bài toán giám sát hàng hóa xuất nhập khẩu vận chuyển quá cảnh: theo dõi vị trí container theo thời gian thực, phát hiện vi phạm lộ trình và mở khóa trái phép, cảnh báo tự động cho cán bộ Hải quan.",
+    "scope": "Hệ thống bao gồm 6 phân hệ chức năng: Quản trị hệ thống, Quản lý danh mục, Quản lý Seal GPS, Báo cáo thống kê, Giám sát và Lộ trình, Quản lý thông tin theo dõi. Phạm vi người dùng: cán bộ Hải quan các cấp (Tổng Cục, Đội) trên toàn quốc.",
+    "system_description": "Kiến trúc microservices triển khai trên nền tảng Docker: ứng dụng web quản trị (Next.js 15), dịch vụ API nghiệp vụ (NestJS 10), cổng IoT (NestJS 10), dịch vụ thông báo (NestJS 10). Cơ sở dữ liệu PostgreSQL 16, cache Redis 7. Xác thực JWT tùy chỉnh, phân quyền RBAC theo đơn vị và ứng dụng.",
+    "terms": [
+      {
+        "short": "Seal GPS",
+        "full": "Thiết bị seal định vị GPS",
+        "explanation": "Thiết bị khóa điện tử tích hợp GPS gắn vào container/phương tiện vận tải, gửi tín hiệu vị trí về hệ thống"
+      },
+      {
+        "short": "BES",
+        "full": "Back End Service",
+        "explanation": "Dịch vụ trung gian nhận lệnh từ hệ thống và giao tiếp với thiết bị seal GPS vật lý"
+      },
+      {
+        "short": "RFID",
+        "full": "Radio Frequency Identification",
+        "explanation": "Thẻ nhận dạng tần số vô tuyến dùng để mở khóa thiết bị seal"
+      },
+      {
+        "short": "XNK",
+        "full": "Xuất nhập khẩu",
+        "explanation": "Hoạt động xuất khẩu và nhập khẩu hàng hóa"
+      },
+      {
+        "short": "PTVT",
+        "full": "Phương thức vận tải",
+        "explanation": "Phân loại phương tiện vận chuyển: đường sông, biển, sắt, không, bộ"
+      },
+      {
+        "short": "ICD",
+        "full": "Inland Container Depot",
+        "explanation": "Cảng cạn nội địa — địa điểm xếp/dỡ hàng hóa"
+      },
+      {
+        "short": "JWT",
+        "full": "JSON Web Token",
+        "explanation": "Chuẩn xác thực người dùng dạng token, hiệu lực 8 giờ"
+      },
+      {
+        "short": "RBAC",
+        "full": "Role-Based Access Control",
+        "explanation": "Kiểm soát truy cập theo vai trò, phân quyền theo đơn vị và ứng dụng"
+      },
+      {
+        "short": "SSE",
+        "full": "Server-Sent Events",
+        "explanation": "Cơ chế máy chủ đẩy dữ liệu thời gian thực về phía client"
+      },
+      {
+        "short": "SIM",
+        "full": "Subscriber Identity Module",
+        "explanation": "Thẻ SIM điện thoại gắn trong thiết bị seal để truyền dữ liệu qua mạng di động"
+      }
+    ],
+    "references": [
+      {
+        "stt": "1",
+        "name": "Tài liệu mô tả phần mềm Seal định vị",
+        "ref": "docs/source/04. Phan mem mo ta seal dinh vi.docx"
+      },
+      {
+        "stt": "2",
+        "name": "Bản mẫu giao diện ứng dụng",
+        "ref": "docs/source/app.jsx"
+      },
+      {
+        "stt": "3",
+        "name": "NĐ 13/2023/NĐ-CP",
+        "ref": "Nghị định số 13/2023/NĐ-CP ngày 17 tháng 4 năm 2023 của Chính phủ về bảo vệ dữ liệu cá nhân"
+      }
+    ],
+    "conventions": ""
+  },
+  "services": [
+    {
+      "id": "quan-tri-he-thong",
+      "name": "Quản trị hệ thống",
+      "module_id": "M1",
+      "description": "Phân hệ quản lý người dùng, nhóm người dùng và phân quyền truy cập hệ thống. Là nền tảng bảo mật cho toàn bộ hệ thống.",
+      "actors": [
+        "Quản trị viên hệ thống"
+      ],
+      "features": [
+        {
+          "id": "M1-F001",
+          "name": "Quản lý người dùng",
+          "description": "Cho phép quản trị viên thực hiện đầy đủ thao tác CRUD đối với tài khoản người dùng: tìm kiếm, thêm mới, xem chi tiết, sửa thông tin, xóa mềm (thay đổi trạng thái). Hỗ trợ điều chuyển công tác.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/users",
+          "preconditions": "Người dùng đã đăng nhập với quyền quản trị viên.",
+          "ui_elements": [
+            {
+              "label": "Bảng danh sách người dùng với bộ lọc tìm kiếm",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Nút Thêm mới người dùng",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Context menu: Sửa, Xem chi tiết, Đặt lại mật khẩu, Xóa, Điều chuyển công tác",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Modal form Thêm/Sửa người dùng",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Màn hình Chi tiết người dùng",
+              "type": "component",
+              "rules": ""
+            }
+          ],
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập menu Quản trị hệ thống > Quản lý người dùng",
+              "expected": "Hiển thị danh sách người dùng",
+              "no": 1,
+              "screenshot": "M1-F001-step-01-list.png"
+            },
+            {
+              "step": 2,
+              "action": "Nhập điều kiện tìm kiếm (Mã đơn vị chính xác, Tên đăng nhập/Họ tên một phần)",
+              "expected": "Danh sách lọc theo điều kiện",
+              "no": 2,
+              "screenshot": "M1-F001-step-02-create-modal.png"
+            },
+            {
+              "step": 3,
+              "action": "Nhấn nút Thêm mới",
+              "expected": "Hiển thị modal form tạo người dùng",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhập thông tin bắt buộc: Mã đơn vị, Tên đăng nhập (≤25 ký tự), Họ và tên, Email (≤254), Trạng thái",
+              "expected": "Form hợp lệ, nút Lưu kích hoạt",
+              "no": 4,
+              "screenshot": null
+            },
+            {
+              "step": 5,
+              "action": "Nhấn Lưu",
+              "expected": "Người dùng mới xuất hiện trong danh sách",
+              "no": 5,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M1-F001-step-01-list.png",
+              "caption": "Danh sách người dùng"
+            },
+            {
+              "filename": "M1-F001-step-02-create-modal.png",
+              "caption": "Form thêm mới người dùng"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Tên đăng nhập đã tồn tại",
+              "message": "hiển thị thông báo lỗi trùng"
+            },
+            {
+              "trigger_step": 2,
+              "condition": "Email không đúng định dạng",
+              "message": "validate client-side"
+            },
+            {
+              "trigger_step": 3,
+              "condition": "Mã đơn vị không tồn tại",
+              "message": "hiển thị lỗi"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-001",
+            "BR-INTEL-002",
+            "BR-INTEL-003",
+            "BR-INTEL-004"
+          ]
+        },
+        {
+          "id": "M1-F002",
+          "name": "Phân quyền người dùng",
+          "description": "Cho phép quản trị viên phân quyền truy cập chức năng cho người dùng dựa trên Mã ứng dụng và cây chức năng (function tree). Phân quyền scoped theo cấp đơn vị.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/users/{id}/permissions",
+          "preconditions": "Người dùng đã được tạo trong hệ thống.",
+          "ui_elements": [
+            {
+              "label": "Dropdown chọn Mã ứng dụng",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Multi-select Cấp đơn vị được sử dụng",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Cây chức năng dạng checkbox tree",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Nút Lưu",
+              "type": "component",
+              "rules": ""
+            }
+          ],
+          "steps": [
+            {
+              "step": 1,
+              "action": "Mở dialog phân quyền từ context menu của người dùng",
+              "expected": "Dialog phân quyền hiển thị",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Chọn Mã ứng dụng",
+              "expected": "Cây chức năng cập nhật theo ứng dụng",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Check/uncheck các chức năng cần phân quyền",
+              "expected": "Trạng thái checkbox thay đổi",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhấn Lưu",
+              "expected": "Quyền truy cập được cập nhật",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": [
+            "BR-INTEL-005"
+          ]
+        },
+        {
+          "id": "M1-F003",
+          "name": "Đặt lại mật khẩu",
+          "description": "Quản trị viên đặt lại mật khẩu cho người dùng. Hệ thống kiểm tra chính sách mật khẩu và gửi email thông báo đến người dùng sau khi thay đổi thành công.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/users/{id}/reset-password",
+          "preconditions": "Người dùng tồn tại và đang hoạt động.",
+          "ui_elements": [
+            {
+              "label": "Modal form Đặt lại mật khẩu",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Trường Mật khẩu mới (ẩn)",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Trường Xác nhận mật khẩu (ẩn)",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Hiển thị yêu cầu chính sách mật khẩu",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Nút Lưu",
+              "type": "component",
+              "rules": ""
+            }
+          ],
+          "steps": [
+            {
+              "step": 1,
+              "action": "Chọn Đặt lại mật khẩu từ context menu của người dùng",
+              "expected": "Modal đặt lại mật khẩu hiển thị với danh sách yêu cầu",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Nhập mật khẩu mới (≥8 ký tự, ≥3/4 loại ký tự)",
+              "expected": "Kiểm tra độ mạnh mật khẩu",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Nhập lại xác nhận mật khẩu",
+              "expected": "Kiểm tra khớp",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhấn Lưu",
+              "expected": "Mật khẩu cập nhật, email thông báo gửi đến người dùng",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": [
+            "BR-INTEL-006",
+            "BR-INTEL-007"
+          ]
+        },
+        {
+          "id": "M1-F004",
+          "name": "Quản lý nhóm người dùng",
+          "description": "CRUD nhóm người dùng. Nhóm được scope theo Mã ứng dụng và Mã đơn vị. Hỗ trợ phân quyền nhóm truy cập chức năng.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/groups",
+          "preconditions": "Đã có ứng dụng và đơn vị trong hệ thống.",
+          "ui_elements": [
+            {
+              "label": "Bảng danh sách nhóm với bộ lọc",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Nút Thêm mới nhóm",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Context menu: Sửa, Phân quyền nhóm, Thêm người dùng, Xóa",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Modal form Thêm/Sửa nhóm",
+              "type": "component",
+              "rules": ""
+            }
+          ],
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản trị hệ thống > Nhóm người dùng",
+              "expected": "Danh sách nhóm hiển thị",
+              "no": 1,
+              "screenshot": "M1-F004-step-01-groups-list.png"
+            },
+            {
+              "step": 2,
+              "action": "Nhấn Thêm mới, nhập Mã nhóm (≤50), Tên nhóm (≤255), chọn Ứng dụng và Đơn vị",
+              "expected": "Form hợp lệ",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Nhấn Lưu",
+              "expected": "Nhóm mới thêm vào danh sách",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M1-F004-step-01-groups-list.png",
+              "caption": "Danh sách nhóm người dùng"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-008"
+          ]
+        },
+        {
+          "id": "M1-F005",
+          "name": "Thêm người dùng vào nhóm",
+          "description": "Gán hoặc gỡ người dùng vào/ra nhóm thông qua giao diện two-panel transfer. Người dùng được lọc theo đơn vị.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/groups/{id}/members",
+          "preconditions": "Nhóm đã được tạo.",
+          "ui_elements": [
+            {
+              "label": "Dialog two-panel transfer",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Panel trái: danh sách người dùng chưa gán",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Panel phải: danh sách người dùng đã gán",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Nút chuyển (→, ←, →→, ←←)",
+              "type": "component",
+              "rules": ""
+            },
+            {
+              "label": "Dropdown Mã đơn vị để lọc",
+              "type": "component",
+              "rules": ""
+            }
+          ],
+          "steps": [
+            {
+              "step": 1,
+              "action": "Chọn Thêm người dùng từ context menu nhóm",
+              "expected": "Dialog transfer hiển thị",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Chọn đơn vị để lọc danh sách",
+              "expected": "Panel trái cập nhật",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Chọn người dùng bên trái, nhấn → để chuyển sang phải",
+              "expected": "Người dùng chuyển sang panel phải",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhấn Lưu",
+              "expected": "Người dùng được thêm vào nhóm",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": [
+            "BR-INTEL-009"
+          ]
+        }
+      ],
+      "display_name": "Quản trị hệ thống"
+    },
+    {
+      "id": "quan-ly-danh-muc",
+      "name": "Quản lý danh mục",
+      "module_id": "M2",
+      "description": "Phân hệ quản lý 11 loại danh mục dùng chung: đơn vị, phương thức vận tải, loại hình XNK, địa điểm lưu kho, địa điểm xếp/dỡ, doanh nghiệp XNK, doanh nghiệp vận tải, đầu mối, cảnh báo, thông số cảnh báo, cách thức thông báo.",
+      "actors": [
+        "Quản trị viên",
+        "Cán bộ Hải quan"
+      ],
+      "features": [
+        {
+          "id": "M2-F001",
+          "name": "Danh mục đơn vị",
+          "description": "Quản lý danh sách đơn vị Hải quan có phân cấp (Cấp Tổng Cục, Cấp Đội). Hiện có 422 đơn vị trong hệ thống.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/don-vi",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Đơn vị",
+              "expected": "Danh sách đơn vị với phân cấp",
+              "no": 1,
+              "screenshot": "M2-F001-step-01-don-vi.png"
+            },
+            {
+              "step": 2,
+              "action": "Thêm/Sửa/Xóa đơn vị",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M2-F001-step-01-don-vi.png",
+              "caption": "Danh mục đơn vị"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-010"
+          ]
+        },
+        {
+          "id": "M2-F002",
+          "name": "Danh mục phương thức vận tải",
+          "description": "Quản lý danh sách 35 phương thức vận tải: đường sông, biển, sắt, không, bộ và các loại container tương ứng.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/phuong-thuc-van-tai",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Phương thức vận tải",
+              "expected": "Danh sách PTVT",
+              "no": 1,
+              "screenshot": "M2-F002-step-01-ptvt.png"
+            },
+            {
+              "step": 2,
+              "action": "CRUD phương thức vận tải",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M2-F002-step-01-ptvt.png",
+              "caption": "Danh mục phương thức vận tải"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F003",
+          "name": "Danh mục loại hình XNK",
+          "description": "Quản lý 275 loại hình xuất nhập khẩu phân theo nhóm: Vận chuyển, XCX, Chung.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/loai-hinh-xnk",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Loại hình XNK",
+              "expected": "Danh sách loại hình XNK",
+              "no": 1,
+              "screenshot": "M2-F003-step-01-loai-hinh-xnk.png"
+            },
+            {
+              "step": 2,
+              "action": "CRUD loại hình XNK",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M2-F003-step-01-loai-hinh-xnk.png",
+              "caption": "Danh mục loại hình XNK"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F004",
+          "name": "Danh mục địa điểm lưu kho",
+          "description": "Quản lý danh sách kho hàng với thông tin mã kho, tên kho, tên viết tắt và đơn vị quản lý.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/dia-diem-luu-kho",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Địa điểm lưu kho",
+              "expected": "Danh sách kho hàng",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD địa điểm lưu kho",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F005",
+          "name": "Danh mục địa điểm xếp/dỡ hàng hóa",
+          "description": "Quản lý 5 loại địa điểm xếp/dỡ: Cảng ICD, Cảng nước ngoài, Cửa khẩu đường bộ, Sân bay trong nước, Sân bay nước ngoài.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/dia-diem-xep-do",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Địa điểm xếp/dỡ",
+              "expected": "Tab menu 5 loại địa điểm",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Chọn tab loại địa điểm và CRUD",
+              "expected": "Cập nhật danh sách tương ứng",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F006",
+          "name": "Danh mục doanh nghiệp XNK",
+          "description": "Quản lý danh sách doanh nghiệp xuất nhập khẩu với mã doanh nghiệp, tên, số điện thoại, địa chỉ.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/doanh-nghiep-xnk",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập danh mục doanh nghiệp XNK",
+              "expected": "Danh sách hiển thị",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD doanh nghiệp",
+              "expected": "Cập nhật thành công",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F007",
+          "name": "Danh mục doanh nghiệp vận tải",
+          "description": "Quản lý danh sách doanh nghiệp vận tải với mã số thuế, tên, số điện thoại, địa chỉ.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/doanh-nghiep-van-tai",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập danh mục doanh nghiệp vận tải",
+              "expected": "Danh sách hiển thị",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD doanh nghiệp vận tải",
+              "expected": "Cập nhật thành công",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F008",
+          "name": "Danh mục đầu mối",
+          "description": "Quản lý danh sách đầu mối liên hệ gồm tên, tài khoản người dùng, chức danh, số điện thoại, email và đơn vị.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/dau-moi",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập danh mục đầu mối",
+              "expected": "Danh sách hiển thị",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD đầu mối",
+              "expected": "Cập nhật thành công",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M2-F009",
+          "name": "Danh mục cảnh báo",
+          "description": "Cấu hình mức độ, màu sắc và âm thanh cho các loại cảnh báo cố định: pin yếu, xe sai lộ trình, mất GPS, quẹt thẻ khác, cắt dây. Không cho phép thêm/xóa loại cảnh báo.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/canh-bao",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Cảnh báo",
+              "expected": "Danh sách cảnh báo cố định",
+              "no": 1,
+              "screenshot": "M2-F009-step-01-canh-bao.png"
+            },
+            {
+              "step": 2,
+              "action": "Nhấn Sửa trên loại cảnh báo",
+              "expected": "Modal sửa hiển thị",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Điều chỉnh mức độ (1-5), màu sắc, âm thanh",
+              "expected": "Cập nhật thành công",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M2-F009-step-01-canh-bao.png",
+              "caption": "Danh mục cảnh báo"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-011"
+          ]
+        },
+        {
+          "id": "M2-F010",
+          "name": "Thiết lập thông số cảnh báo",
+          "description": "Cấu hình giá trị ngưỡng cho các thông số cảnh báo: AlertCountLowBattery, AlertPercentBattery, CloseSealCount, ExpiredMinuteSMSCode, FilterCount, LockSealCount, UnlockSealCount.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/thong-so-canh-bao",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý danh mục > Thông số cảnh báo",
+              "expected": "Danh sách thông số",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Nhấn Sửa, điều chỉnh Giá trị và Diễn giải",
+              "expected": "Cập nhật thành công",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": [
+            "BR-INTEL-012"
+          ]
+        },
+        {
+          "id": "M2-F011",
+          "name": "Thiết lập cách thức thông báo",
+          "description": "Cấu hình kênh thông báo (SMS/Email/Web/App) cho từng người dùng theo từng loại cảnh báo và đơn vị Hải quan quản lý.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/catalog/cach-thuc-thong-bao",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập danh mục cách thức thông báo",
+              "expected": "Bảng cấu hình kênh thông báo",
+              "no": 1,
+              "screenshot": "M2-F011-step-01-cach-thuc-thong-bao.png"
+            },
+            {
+              "step": 2,
+              "action": "Bật/tắt kênh SMS/Email/Web/App cho từng dòng người dùng - cảnh báo",
+              "expected": "Cập nhật cấu hình thông báo",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M2-F011-step-01-cach-thuc-thong-bao.png",
+              "caption": "Cách thức thông báo"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-013"
+          ]
+        }
+      ],
+      "display_name": "Quản lý danh mục"
+    },
+    {
+      "id": "quan-ly-seal-gps",
+      "name": "Quản lý Seal GPS",
+      "module_id": "M3",
+      "description": "Phân hệ quản lý thiết bị seal GPS: CRUD thiết bị, gán khóa vùng cảnh báo, thiết lập khóa điện tử, phân công cán bộ, quản lý SIM card, thẻ RFID và tuyến điểm.",
+      "actors": [
+        "Quản trị viên",
+        "Cán bộ Hải quan",
+        "Cán bộ quản lý seal"
+      ],
+      "features": [
+        {
+          "id": "M3-F001",
+          "name": "Quản lý danh mục thiết bị seal",
+          "description": "Tìm kiếm, thêm mới, chỉnh sửa, xóa mềm và khôi phục thiết bị seal GPS. Hỗ trợ đánh dấu thiết bị triển khai nhanh.",
+          "actors": [
+            "Quản trị viên",
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/seal/thiet-bi",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Thiết bị seal",
+              "expected": "Danh sách thiết bị với trạng thái Online/Offline",
+              "no": 1,
+              "screenshot": "M3-F001-step-01-thiet-bi-seal.png"
+            },
+            {
+              "step": 2,
+              "action": "Thêm thiết bị mới: Số seal, IMEI, Mã quản lý, SIM 1/2",
+              "expected": "Thiết bị được thêm vào danh sách",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Xóa thiết bị (soft delete)",
+              "expected": "Thiết bị ẩn khỏi danh sách hoạt động",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhấn Khôi phục seal đã xóa để phục hồi",
+              "expected": "Thiết bị xuất hiện lại",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F001-step-01-thiet-bi-seal.png",
+              "caption": "Danh sách thiết bị seal"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-014",
+            "BR-INTEL-015"
+          ]
+        },
+        {
+          "id": "M3-F002",
+          "name": "Gán khóa cho vùng cảnh báo",
+          "description": "Gán thiết bị seal vào vùng cảnh báo địa lý. Khi seal ra khỏi vùng hoặc vào khu vực quy định, hệ thống phát cảnh báo tự động. Gỡ seal để ngừng nhận cảnh báo.",
+          "actors": [
+            "Cán bộ quản lý seal"
+          ],
+          "entry_ui": "/seal/gan-khoa-vung",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Gán khóa vùng cảnh báo",
+              "expected": "Danh sách gán khóa hiện tại",
+              "no": 1,
+              "screenshot": "M3-F002-step-01-gan-khoa-vung.png"
+            },
+            {
+              "step": 2,
+              "action": "Thêm mới: chọn Khóa (seal), Vùng cảnh báo, Ngày bắt đầu",
+              "expected": "Cấu hình gán được tạo, nạp xuống thiết bị",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Gỡ seal khỏi vùng",
+              "expected": "Seal không còn nhận cảnh báo cho vùng đó",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F002-step-01-gan-khoa-vung.png",
+              "caption": "Gán khóa vùng cảnh báo"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-016",
+            "BR-INTEL-017"
+          ]
+        },
+        {
+          "id": "M3-F003",
+          "name": "Thiết lập khóa điện tử",
+          "description": "Gửi lệnh thiết lập khóa điện tử đến thiết bị seal qua Back End Service. Hỗ trợ 6 loại: Mở khóa bằng mật khẩu, Đổi mật khẩu, Nạp SĐT, Xóa SĐT, Gán thẻ mở khóa, Thiết lập tần suất gửi tin. Trạng thái cập nhật async khi nhận phản hồi.",
+          "actors": [
+            "Cán bộ quản lý seal"
+          ],
+          "entry_ui": "/seal/thiet-lap-khoa",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Thiết lập khóa điện tử",
+              "expected": "Danh sách lịch sử thiết lập",
+              "no": 1,
+              "screenshot": "M3-F003-step-01-thiet-lap-khoa.png"
+            },
+            {
+              "step": 2,
+              "action": "Chọn loại Thiết lập, chọn Khóa (seal), nhập thông tin tương ứng",
+              "expected": "Form hợp lệ",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Nhấn Gửi lệnh",
+              "expected": "Trạng thái chuyển sang Chờ phản hồi",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Back End Service phản hồi",
+              "expected": "Trạng thái cập nhật thành Thiết lập thành công hoặc Lỗi",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F003-step-01-thiet-lap-khoa.png",
+              "caption": "Thiết lập khóa điện tử"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-018",
+            "BR-INTEL-019",
+            "BR-INTEL-020"
+          ]
+        },
+        {
+          "id": "M3-F004",
+          "name": "Phân công quản lý seal",
+          "description": "Phân công cán bộ Hải quan chịu trách nhiệm quản lý thiết bị seal cụ thể. Hỗ trợ hủy phân công.",
+          "actors": [
+            "Quản trị viên",
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/seal/phan-cong",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Phân công quản lý seal",
+              "expected": "Danh sách phân công hiện tại",
+              "no": 1,
+              "screenshot": "M3-F004-step-01-phan-cong.png"
+            },
+            {
+              "step": 2,
+              "action": "Thêm phân công: chọn seal, đơn vị, cán bộ",
+              "expected": "Two-panel transfer hiển thị",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Transfer cán bộ từ danh sách chưa phân công sang đã phân công",
+              "expected": "Cán bộ được gán",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Nhấn Lưu",
+              "expected": "Phân công được ghi nhận với ngày phân công",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F004-step-01-phan-cong.png",
+              "caption": "Phân công quản lý seal"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-021"
+          ]
+        },
+        {
+          "id": "M3-F005",
+          "name": "Theo dõi trạng thái seal",
+          "description": "Xem trạng thái kết nối (Online/Offline), phiên bản firmware và thời gian online của thiết bị seal. Hỗ trợ làm mới thời gian thực.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/seal/trang-thai",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Theo dõi trạng thái",
+              "expected": "Danh sách trạng thái seal",
+              "no": 1,
+              "screenshot": "M3-F005-step-01-giam-sat-trang-thai.png"
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo đơn vị quản lý",
+              "expected": "Lọc danh sách theo đơn vị",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Nhấn Làm mới",
+              "expected": "Dữ liệu trạng thái cập nhật",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F005-step-01-giam-sat-trang-thai.png",
+              "caption": "Theo dõi trạng thái seal"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M3-F006",
+          "name": "Quản lý tình trạng thiết bị",
+          "description": "Theo dõi vòng đời thiết bị seal: gán -> sử dụng -> hoàn trả -> xác nhận hoàn trả. Lưu lịch sử tình trạng và phương thức hoàn trả.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/seal/tinh-trang",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Tình trạng thiết bị",
+              "expected": "Danh sách tình trạng thiết bị",
+              "no": 1,
+              "screenshot": "M3-F006-step-01-lifecycle.png"
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian hiệu lực, đơn vị, đối tượng",
+              "expected": "Danh sách lọc theo điều kiện",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Xem chi tiết tình trạng",
+              "expected": "Lịch sử vòng đời thiết bị",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F006-step-01-lifecycle.png",
+              "caption": "Tình trạng thiết bị"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-022"
+          ]
+        },
+        {
+          "id": "M3-F007",
+          "name": "Danh mục SIM Card",
+          "description": "Xem thông tin SIM card của thiết bị seal (SIM 1, SIM 2, số dư, đơn vị quản lý). Hỗ trợ nhập nhanh thông tin SIM.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/sim",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > SIM Card",
+              "expected": "Danh sách SIM card",
+              "no": 1,
+              "screenshot": "M3-F007-step-01-sim.png"
+            },
+            {
+              "step": 2,
+              "action": "Chọn SIM để xem chi tiết",
+              "expected": "Chi tiết SIM: số dư, ngày cập nhật, ghi chú",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F007-step-01-sim.png",
+              "caption": "Danh mục SIM Card"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M3-F008",
+          "name": "Danh mục thẻ RFID",
+          "description": "Quản lý thẻ RFID dùng để mở khóa thiết bị seal. Hỗ trợ thêm đơn lẻ và nhập nhanh hàng loạt (batch import). Mỗi mã số thẻ 10 chữ số, tối đa 60 thẻ/seal.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/rfid",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Thẻ RFID",
+              "expected": "Danh sách thẻ RFID",
+              "no": 1,
+              "screenshot": "M3-F008-step-01-rfid.png"
+            },
+            {
+              "step": 2,
+              "action": "Thêm đơn lẻ hoặc Nhập nhanh (batch) thẻ RFID",
+              "expected": "Thẻ được thêm vào danh sách",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Xem Danh sách lỗi sau khi nhập nhanh",
+              "expected": "Danh sách thẻ nhập lỗi với lý do",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M3-F008-step-01-rfid.png",
+              "caption": "Danh mục thẻ RFID"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-023"
+          ]
+        },
+        {
+          "id": "M3-F009",
+          "name": "Danh mục tuyến điểm checkpoint",
+          "description": "Quản lý danh sách tuyến điểm checkpoint phục vụ giám sát lộ trình container.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/tuyen-diem",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Tuyến điểm checkpoint",
+              "expected": "Danh sách tuyến điểm",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD tuyến điểm",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M3-F010",
+          "name": "Danh mục khu vực - tuyến đường - lộ trình",
+          "description": "Quản lý khu vực địa lý, tuyến đường và lộ trình được phép di chuyển cho phương tiện vận tải.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/khu-vuc-lo-trinh",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Khu vực - Tuyến đường - Lộ trình",
+              "expected": "Danh sách khu vực/tuyến đường/lộ trình",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD khu vực/tuyến đường/lộ trình",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M3-F011",
+          "name": "Danh mục tuyến đường GPS/GSM",
+          "description": "Quản lý tuyến đường dựa trên tín hiệu GPS/GSM của thiết bị seal.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/tuyen-duong-gps",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Tuyến đường GPS/GSM",
+              "expected": "Danh sách tuyến đường GPS/GSM",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD tuyến đường GPS/GSM",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M3-F012",
+          "name": "Danh mục điểm cơ quan chuyên môn",
+          "description": "Quản lý danh sách điểm cơ quan chuyên môn phục vụ định nghĩa vùng cảnh báo và checkpoint.",
+          "actors": [
+            "Quản trị viên"
+          ],
+          "entry_ui": "/seal/diem-co-quan",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý Seal > Điểm cơ quan chuyên môn",
+              "expected": "Danh sách điểm cơ quan",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "CRUD điểm cơ quan",
+              "expected": "Cập nhật danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        }
+      ],
+      "display_name": "Quản lý Seal GPS"
+    },
+    {
+      "id": "bao-cao-thong-ke",
+      "name": "Báo cáo thống kê",
+      "module_id": "M4",
+      "description": "Phân hệ cung cấp 7 loại báo cáo thống kê và 1 biểu đồ tổng hợp về hoạt động giám sát container. Hỗ trợ xuất Excel, PDF và in.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ],
+      "features": [
+        {
+          "id": "M4-F001",
+          "name": "BC tổng hợp DN vận tải theo khu vực",
+          "description": "Báo cáo tổng hợp doanh nghiệp vận tải hoạt động theo khu vực trong khoảng thời gian xác định.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/dn-van-tai-khu-vuc",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > DN vận tải theo khu vực",
+              "expected": "Màn hình báo cáo với bộ lọc",
+              "no": 1,
+              "screenshot": "M4-F001-step-01-bao-cao-dn-van-tai.png"
+            },
+            {
+              "step": 2,
+              "action": "Chọn thời gian hiệu lực, khu vực theo dõi, đơn vị vận tải",
+              "expected": "Báo cáo hiển thị kết quả",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4-F001-step-01-bao-cao-dn-van-tai.png",
+              "caption": "BC DN vận tải theo khu vực"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F002",
+          "name": "BC thống kê số lần mở khóa container",
+          "description": "Thống kê số lần mở khóa container theo nơi đi hoặc nơi đến trong khoảng thời gian. Xuất Excel, PDF, In.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/mo-khoa-container",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Mở khóa container",
+              "expected": "Màn hình báo cáo",
+              "no": 1,
+              "screenshot": "M4-F002-step-01-bao-cao-mo-khoa.png"
+            },
+            {
+              "step": 2,
+              "action": "Chọn Tìm kiếm theo (nơi đi/nơi đến), ngày, nơi đi/đến",
+              "expected": "Kết quả thống kê số lần mở khóa",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Nhấn Xuất Excel/PDF hoặc In",
+              "expected": "File tải về hoặc in",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4-F002-step-01-bao-cao-mo-khoa.png",
+              "caption": "BC mở khóa container"
+            }
+          ],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F003",
+          "name": "BC thống kê thời gian vào khu vực quy định",
+          "description": "Thống kê thời gian các seal/phương tiện vào khu vực quy định theo loại cảnh báo.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/thoi-gian-vao-khu-vuc",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Thời gian vào khu vực",
+              "expected": "Màn hình báo cáo",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian, mã quản lý, đối tượng, loại cảnh báo, số seal",
+              "expected": "Kết quả thống kê",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F004",
+          "name": "BC thống kê liên quan đến lộ trình",
+          "description": "Thống kê các sự kiện liên quan đến lộ trình di chuyển của phương tiện.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/lo-trinh",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Lộ trình",
+              "expected": "Màn hình báo cáo",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian, mã quản lý, số seal, biển kiểm soát",
+              "expected": "Kết quả thống kê lộ trình",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F005",
+          "name": "BC tổng hợp số lần vi phạm",
+          "description": "Báo cáo tổng hợp số lần vi phạm theo seal và container trong khoảng thời gian.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/vi-pham",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Tổng hợp vi phạm",
+              "expected": "Màn hình báo cáo",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian, mã quản lý, số seal, mã container",
+              "expected": "Kết quả số lần vi phạm",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F006",
+          "name": "BC thống kê thời gian ra khỏi vùng quy định",
+          "description": "Thống kê thời gian các seal/phương tiện ra khỏi vùng quy định.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/ra-khoi-vung",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Thời gian ra khỏi vùng",
+              "expected": "Màn hình báo cáo",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Lọc và xem kết quả",
+              "expected": "Thống kê hiển thị",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M4-F007",
+          "name": "Biểu đồ tổng hợp vi phạm",
+          "description": "Biểu đồ tròn (pie chart) thống kê 9 loại vi phạm: ra khỏi khu vực, mất GSM, mở nắp lưng, vượt thời gian, sai mật khẩu quá 5 lần, vào khu vực, mất GPS, đỗ vượt thời gian, rung động.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/bieu-do-vi-pham",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Biểu đồ vi phạm",
+              "expected": "Biểu đồ tròn 9 loại vi phạm",
+              "no": 1,
+              "screenshot": "M4-F007-step-01-bieu-do-vi-pham.png"
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian, mã quản lý, số seal, mã container",
+              "expected": "Biểu đồ cập nhật",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4-F007-step-01-bieu-do-vi-pham.png",
+              "caption": "Biểu đồ tổng hợp vi phạm"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-024"
+          ]
+        },
+        {
+          "id": "M4-F008",
+          "name": "Xem lịch sử báo cáo thống kê",
+          "description": "Xem lịch sử các báo cáo đã được tạo và trạng thái xử lý.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/reports/lich-su",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Báo cáo > Lịch sử báo cáo",
+              "expected": "Danh sách lịch sử báo cáo",
+              "no": 1,
+              "screenshot": "M4-F008-step-01-lich-su-bao-cao.png"
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo thời gian, mã, thiết lập, số seal",
+              "expected": "Lọc danh sách",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4-F008-step-01-lich-su-bao-cao.png",
+              "caption": "Lịch sử báo cáo"
+            }
+          ],
+          "business_rules": []
+        }
+      ],
+      "display_name": "Báo cáo thống kê"
+    },
+    {
+      "id": "giam-sat-lo-trinh",
+      "name": "Giám sát & Lộ trình",
+      "module_id": "M4b",
+      "description": "Phân hệ giám sát real-time thiết bị seal trên bản đồ GPS, xử lý cảnh báo vi phạm và xem lịch sử lộ trình.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ],
+      "features": [
+        {
+          "id": "M4b-F001",
+          "name": "Giám sát thiết bị seal",
+          "description": "Giám sát real-time thiết bị seal trên bản đồ GPS. Hiển thị cảnh báo vi phạm tự động. Cán bộ xử lý cảnh báo và cập nhật kết quả/thông tin bổ sung.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/monitor/ban-do",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Giám sát > Bản đồ giám sát",
+              "expected": "Bản đồ GPS với marker vị trí seal",
+              "no": 1,
+              "screenshot": "M4b-F001-step-01-ban-do-giam-sat.png"
+            },
+            {
+              "step": 2,
+              "action": "Lọc theo đơn vị và trạng thái",
+              "expected": "Danh sách seal được lọc trên bản đồ",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Khi có cảnh báo vi phạm, cảnh báo overlay xuất hiện",
+              "expected": "Thông báo vi phạm hiển thị (màu sắc theo mức độ)",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Xử lý cảnh báo: cập nhật kết quả, ghi nhận thông tin bổ sung",
+              "expected": "Cảnh báo được ghi nhận và cập nhật trạng thái",
+              "no": 4,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4b-F001-step-01-ban-do-giam-sat.png",
+              "caption": "Bản đồ giám sát seal real-time"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-024",
+            "BR-INTEL-025",
+            "BR-INTEL-026"
+          ]
+        },
+        {
+          "id": "M4b-F002",
+          "name": "Lộ trình",
+          "description": "Xem lịch sử di chuyển của seal, so sánh tuyến đường thực tế với tuyến đường thiết lập để phát hiện sai lệch.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/monitor/lo-trinh",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Giám sát > Lộ trình",
+              "expected": "Bản đồ lộ trình",
+              "no": 1,
+              "screenshot": "M4b-F002-step-01-lo-trinh.png"
+            },
+            {
+              "step": 2,
+              "action": "Chọn seal và khoảng thời gian",
+              "expected": "Hiển thị tuyến đường thực tế (màu đỏ) và tuyến thiết lập (màu xanh)",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Xem điểm sai lệch",
+              "expected": "Đánh dấu các đoạn vi phạm lộ trình",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [
+            {
+              "filename": "M4b-F002-step-01-lo-trinh.png",
+              "caption": "Lịch sử lộ trình"
+            }
+          ],
+          "business_rules": [
+            "BR-INTEL-027"
+          ]
+        }
+      ],
+      "display_name": "Giám sát & Lộ trình"
+    },
+    {
+      "id": "quan-ly-theo-doi",
+      "name": "Quản lý thông tin theo dõi",
+      "module_id": "M5",
+      "description": "Phân hệ nhập và quản lý thông tin container, hàng hóa, tờ khai phục vụ giám sát. Hỗ trợ import batch từ file Excel.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ],
+      "features": [
+        {
+          "id": "M5-F001",
+          "name": "Danh sách container/PTVT",
+          "description": "Tìm kiếm và quản lý danh sách container và phương tiện vận tải trong hệ thống.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/tracking/container",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý thông tin > Container/PTVT",
+              "expected": "Danh sách container/PTVT",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Tìm kiếm theo điều kiện",
+              "expected": "Kết quả tìm kiếm",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M5-F002",
+          "name": "Thông tin hàng hóa",
+          "description": "Import batch và tìm kiếm thông tin hàng hóa. Quy trình: tải file mẫu → chọn file → import. Hỗ trợ xem và xuất danh sách lỗi import.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/tracking/hang-hoa",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý thông tin > Hàng hóa",
+              "expected": "Màn hình import hàng hóa",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Tải file mẫu Excel",
+              "expected": "File mẫu được tải về",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Điền thông tin vào file mẫu: số định danh, biển kiểm soát, số container, số tờ khai, ngày hiệu lực, ngày hết hạn, mã kho/bãi/cảng",
+              "expected": "File Excel hợp lệ",
+              "no": 3,
+              "screenshot": null
+            },
+            {
+              "step": 4,
+              "action": "Chọn file và Import",
+              "expected": "Tiến trình import hiển thị, kết quả thành công/lỗi",
+              "no": 4,
+              "screenshot": null
+            },
+            {
+              "step": 5,
+              "action": "Xem tab Danh sách lỗi nếu có lỗi",
+              "expected": "Chi tiết bản ghi lỗi",
+              "no": 5,
+              "screenshot": null
+            },
+            {
+              "step": 6,
+              "action": "Xuất file lỗi để xử lý",
+              "expected": "File Excel lỗi tải về",
+              "no": 6,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M5-F003",
+          "name": "Thông tin tờ khai",
+          "description": "Import batch và tìm kiếm thông tin tờ khai hải quan. Cấu trúc tương tự import hàng hóa.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/tracking/to-khai",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý thông tin > Tờ khai",
+              "expected": "Màn hình import tờ khai",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Tải file mẫu, điền thông tin tờ khai và Import",
+              "expected": "Import thành công",
+              "no": 2,
+              "screenshot": null
+            },
+            {
+              "step": 3,
+              "action": "Xem tab lỗi nếu có",
+              "expected": "Chi tiết lỗi import",
+              "no": 3,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        },
+        {
+          "id": "M5-F004",
+          "name": "Thông tin ưu tiên giám sát",
+          "description": "Cấu hình thứ tự ưu tiên giám sát cho các container/phương tiện đặc biệt.",
+          "actors": [
+            "Cán bộ Hải quan"
+          ],
+          "entry_ui": "/tracking/uu-tien",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Truy cập Quản lý thông tin > Ưu tiên giám sát",
+              "expected": "Danh sách ưu tiên giám sát",
+              "no": 1,
+              "screenshot": null
+            },
+            {
+              "step": 2,
+              "action": "Cấu hình ưu tiên",
+              "expected": "Cập nhật thành công",
+              "no": 2,
+              "screenshot": null
+            }
+          ],
+          "screenshots": [],
+          "business_rules": []
+        }
+      ],
+      "display_name": "Quản lý thông tin theo dõi"
+    }
+  ],
+  "architecture": {
+    "business_overview": "Hệ thống phục vụ ngành Hải quan Việt Nam trong việc giám sát hàng hóa xuất nhập khẩu vận chuyển quá cảnh. Container được gắn thiết bị seal GPS điện tử; thiết bị gửi vị trí GPS về hệ thống qua mạng di động (SIM). Cán bộ Hải quan theo dõi real-time trên bản đồ, nhận cảnh báo tự động khi phát hiện vi phạm (sai lộ trình, mở khóa trái phép, ra khỏi vùng quy định). Hệ thống quản lý toàn bộ vòng đời: từ đăng ký thiết bị, phân công cán bộ, thiết lập khóa điện tử, giám sát vận chuyển đến báo cáo thống kê vi phạm.",
+    "design_principles": "Kiến trúc microservices với 4 dịch vụ độc lập triển khai qua Docker Compose. Tách biệt nghiệp vụ (api), giao tiếp IoT (iot-gateway), thông báo (notification) và giao diện người dùng (web-admin). Xác thực JWT tập trung tại api, các dịch vụ nội bộ dùng Internal API Key. Sử dụng Redis làm message queue cho thông báo async và pub/sub cho cập nhật trạng thái real-time.",
+    "tech_stack": [
+      {
+        "layer": "Frontend",
+        "technology": "Next.js",
+        "version": "^15",
+        "note": "React ^19, App Router, TypeScript"
+      },
+      {
+        "layer": "Backend API",
+        "technology": "NestJS",
+        "version": "^10",
+        "note": "TypeScript, Modular architecture, APP_GUARD JwtAuthGuard"
+      },
+      {
+        "layer": "IoT Gateway",
+        "technology": "NestJS",
+        "version": "^10",
+        "note": "HTTP/REST polling + webhook, BES_MOCK=true (UAT)"
+      },
+      {
+        "layer": "Notification",
+        "technology": "NestJS",
+        "version": "^10",
+        "note": "BullMQ queue, 4 kênh: SMS/Email/Web/App"
+      },
+      {
+        "layer": "ORM",
+        "technology": "TypeORM",
+        "version": "^0.3",
+        "note": "autoLoadEntities, synchronize (non-prod)"
+      },
+      {
+        "layer": "Database",
+        "technology": "PostgreSQL",
+        "version": "16-alpine",
+        "note": "Port 5432, database: sealdb"
+      },
+      {
+        "layer": "Cache/Queue",
+        "technology": "Redis",
+        "version": "7-alpine",
+        "note": "Port 6379, pub/sub + BullMQ"
+      },
+      {
+        "layer": "Build tool",
+        "technology": "Turborepo",
+        "version": "latest",
+        "note": "Monorepo build orchestration"
+      },
+      {
+        "layer": "Package manager",
+        "technology": "pnpm",
+        "version": "10.33.0",
+        "note": "Workspace support"
+      },
+      {
+        "layer": "Code quality",
+        "technology": "Biome",
+        "version": "latest",
+        "note": "Lint + format (thay ESLint/Prettier)"
+      },
+      {
+        "layer": "Containerization",
+        "technology": "Docker Compose",
+        "version": "v2",
+        "note": "6 services: db, cache, api, iot-gateway, notification, web-admin"
+      },
+      {
+        "layer": "Maps",
+        "technology": "Google Maps API / Leaflet.js",
+        "version": "[CẦN BỔ SUNG: xác nhận vendor]",
+        "note": "Dùng cho M4b bản đồ GPS real-time"
+      }
+    ],
+    "components": [
+      {
+        "name": "web-admin",
+        "type": "Frontend App",
+        "port": 3000,
+        "path": "src/apps/web-admin",
+        "description": "Ứng dụng web quản trị (Next.js 15). Giao diện CRUD 6 phân hệ, bản đồ giám sát GPS, báo cáo thống kê."
+      },
+      {
+        "name": "api",
+        "type": "Backend Service",
+        "port": 3001,
+        "path": "src/services/api",
+        "description": "Dịch vụ API nghiệp vụ (NestJS 10). Xử lý M1, M2, M4, M5. JWT auth global guard, RBAC phân quyền."
+      },
+      {
+        "name": "iot-gateway",
+        "type": "IoT Service",
+        "port": 3002,
+        "path": "src/services/iot-gateway",
+        "description": "Cổng IoT (NestJS 10). Nhận/gửi lệnh thiết bị seal GPS qua HTTP/REST. BES_MOCK=true trong UAT."
+      },
+      {
+        "name": "notification",
+        "type": "Notification Service",
+        "port": 3003,
+        "path": "src/services/notification",
+        "description": "Dịch vụ thông báo (NestJS 10). Fan-out 4 kênh: SMS, Email, Web, App dùng BullMQ."
+      },
+      {
+        "name": "PostgreSQL",
+        "type": "Database",
+        "port": 5432,
+        "description": "Cơ sở dữ liệu quan hệ. 20+ bảng entity. 422 đơn vị, 275 loại hình XNK."
+      },
+      {
+        "name": "Redis",
+        "type": "Cache & Queue",
+        "port": 6379,
+        "description": "Cache dữ liệu danh mục, pub/sub cập nhật trạng thái seal real-time, BullMQ cho notification queue."
+      }
+    ],
+    "data_entities": [
+      {
+        "name": "NguoiDung",
+        "purpose": "Tài khoản người dùng hệ thống",
+        "key_fields": "ten_dang_nhap VARCHAR(25) UNIQUE, ho_va_ten VARCHAR(500), email VARCHAR(254), trang_thai ENUM, ma_don_vi FK"
+      },
+      {
+        "name": "DonVi",
+        "purpose": "Đơn vị Hải quan (422 đơn vị)",
+        "key_fields": "ma_don_vi VARCHAR(20) UNIQUE, ten_don_vi VARCHAR(255), cap_don_vi ENUM"
+      },
+      {
+        "name": "NhomNguoiDung",
+        "purpose": "Nhóm người dùng phân quyền",
+        "key_fields": "ma_nhom VARCHAR(50) UNIQUE, ma_ung_dung FK, ma_don_vi FK, trang_thai ENUM"
+      },
+      {
+        "name": "ThietBiSeal",
+        "purpose": "Thiết bị seal GPS",
+        "key_fields": "so_seal VARCHAR(20) UNIQUE, so_imei VARCHAR(20), trang_thai ENUM(Online/Offline), thiet_bi_trien_khai_nhanh BOOLEAN"
+      },
+      {
+        "name": "CanhBao",
+        "purpose": "Loại cảnh báo (cố định)",
+        "key_fields": "ten_canh_bao VARCHAR(255), muc_do INT(1-5), mau_sac VARCHAR(7), am_thanh BOOLEAN"
+      },
+      {
+        "name": "GanKhoaVung",
+        "purpose": "Gán seal vào vùng cảnh báo",
+        "key_fields": "khoa FK(ThietBiSeal), vung_canh_bao FK, ngay_bat_dau TIMESTAMP, ket_thuc BOOLEAN"
+      },
+      {
+        "name": "ThietLapKhoa",
+        "purpose": "Lịch sử thiết lập khóa điện tử",
+        "key_fields": "khoa FK(ThietBiSeal), thiet_lap ENUM(6 loại), trang_thai ENUM(Thành công/Chờ/Lỗi)"
+      },
+      {
+        "name": "PhanCongSeal",
+        "purpose": "Phân công cán bộ quản lý seal",
+        "key_fields": "so_seal FK, can_bo_phan_cong FK(NguoiDung), trang_thai_phan_cong ENUM, ngay_phan_cong DATE"
+      },
+      {
+        "name": "TheRFID",
+        "purpose": "Thẻ RFID mở khóa seal",
+        "key_fields": "ma_so_the VARCHAR(20), loai_the ENUM(RFID), trang_thai ENUM"
+      },
+      {
+        "name": "SimCard",
+        "purpose": "SIM card trong thiết bị seal",
+        "key_fields": "so_seal FK, sim_1 VARCHAR(15), sim_2 VARCHAR(15), so_du DECIMAL"
+      },
+      {
+        "name": "ToKhai",
+        "purpose": "Tờ khai hải quan",
+        "key_fields": "so_to_khai VARCHAR(20), ma_dn FK(DoanhNghiepXNK), tong_tien_thue DECIMAL(18,2)"
+      },
+      {
+        "name": "HangHoa",
+        "purpose": "Thông tin hàng hóa",
+        "key_fields": "so_dinh_danh VARCHAR(50), bien_kiem_soat VARCHAR(20), so_container VARCHAR(20), so_to_khai FK"
+      },
+      {
+        "name": "CachThucThongBao",
+        "purpose": "Cấu hình kênh thông báo per user per cảnh báo",
+        "key_fields": "nguoi_dung FK, canh_bao FK, sms BOOLEAN, email BOOLEAN, web BOOLEAN, app BOOLEAN"
+      }
+    ],
+    "apis": [
+      {
+        "path": "/health",
+        "method": "GET",
+        "service": "api",
+        "description": "Health check endpoint",
+        "auth": false
+      },
+      {
+        "path": "/health",
+        "method": "GET",
+        "service": "iot-gateway",
+        "description": "Health check endpoint",
+        "auth": false
+      },
+      {
+        "path": "/api/v1/auth/login",
+        "method": "POST",
+        "service": "api",
+        "description": "Đăng nhập, trả về JWT token (8h)",
+        "auth": false
+      },
+      {
+        "path": "/api/v1/users",
+        "method": "GET",
+        "service": "api",
+        "description": "Danh sách người dùng, hỗ trợ phân trang và bộ lọc",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/users",
+        "method": "POST",
+        "service": "api",
+        "description": "Tạo người dùng mới",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/users/:id",
+        "method": "PUT",
+        "service": "api",
+        "description": "Cập nhật thông tin người dùng",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/users/:id/reset-password",
+        "method": "POST",
+        "service": "api",
+        "description": "Đặt lại mật khẩu, gửi email thông báo",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/groups",
+        "method": "GET",
+        "service": "api",
+        "description": "Danh sách nhóm người dùng",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/groups",
+        "method": "POST",
+        "service": "api",
+        "description": "Tạo nhóm mới",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/catalog/don-vi",
+        "method": "GET",
+        "service": "api",
+        "description": "Danh mục đơn vị Hải quan",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/catalog/canh-bao",
+        "method": "GET",
+        "service": "api",
+        "description": "Danh mục cảnh báo",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/seal/thiet-bi",
+        "method": "GET",
+        "service": "api",
+        "description": "Danh sách thiết bị seal",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/seal/thiet-bi",
+        "method": "POST",
+        "service": "api",
+        "description": "Thêm thiết bị seal mới",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/m3/thiet-lap-khoa",
+        "method": "POST",
+        "service": "iot-gateway",
+        "description": "Gửi lệnh thiết lập khóa điện tử đến thiết bị qua BES",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/m3/trang-thai",
+        "method": "GET",
+        "service": "iot-gateway",
+        "description": "Lấy trạng thái online/offline thiết bị seal",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/internal/catalog/notification-routing",
+        "method": "GET",
+        "service": "api",
+        "description": "API nội bộ cho notification service lấy cấu hình thông báo",
+        "auth": "internal-api-key"
+      },
+      {
+        "path": "/api/v1/m5/hang-hoa/import",
+        "method": "POST",
+        "service": "api",
+        "description": "Import batch thông tin hàng hóa từ file Excel",
+        "auth": true
+      },
+      {
+        "path": "/api/v1/m5/to-khai/import",
+        "method": "POST",
+        "service": "api",
+        "description": "Import batch tờ khai hải quan từ file Excel",
+        "auth": true
+      }
+    ],
+    "external_integrations": [
+      {
+        "name": "Back End Service (BES)",
+        "type": "HTTP/REST",
+        "direction": "Outbound",
+        "description": "Giao tiếp với thiết bị seal GPS vật lý. BES_MOCK=true trong UAT (BES_MOCK_DELAY_MS=2000ms).",
+        "env": "BES_MOCK, BES_CALLBACK_SECRET"
+      },
+      {
+        "name": "SMTP Email",
+        "type": "SMTP",
+        "direction": "Outbound",
+        "description": "Gửi email thông báo đặt lại mật khẩu và cảnh báo vi phạm.",
+        "env": "SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS"
+      },
+      {
+        "name": "SMS Gateway",
+        "type": "HTTP/REST",
+        "direction": "Outbound",
+        "description": "Gửi SMS thông báo cảnh báo vi phạm. [CẦN BỔ SUNG: nhà cung cấp SMS]",
+        "env": "[CẦN BỔ SUNG]"
+      },
+      {
+        "name": "Maps API",
+        "type": "JavaScript SDK",
+        "direction": "Inbound",
+        "description": "Hiển thị bản đồ GPS real-time cho phân hệ giám sát (M4b). [CẦN BỔ SUNG: Google Maps API key hoặc Leaflet/OpenStreetMap]",
+        "env": "[CẦN BỔ SUNG: MAPS_API_KEY]"
+      }
+    ],
+    "environments": [
+      {
+        "name": "Development",
+        "description": "Phát triển cục bộ. Chạy: pnpm dev (turbo). DB/Redis local.",
+        "config": ".env (copy từ .env.example)"
+      },
+      {
+        "name": "UAT",
+        "description": "Kiểm thử chấp nhận. Docker Compose toàn bộ stack. UAT_SEED=1 tạo dữ liệu mẫu.",
+        "config": "docker/uat.env"
+      },
+      {
+        "name": "Production",
+        "description": "Sản xuất. [CẦN BỔ SUNG: hạ tầng, domain, SSL, monitoring]",
+        "config": "[CẦN BỔ SUNG]"
+      }
+    ],
+    "containers": [
+      {
+        "name": "db",
+        "image": "postgres:16-alpine",
+        "port": "5432:5432",
+        "depends_on": [],
+        "healthcheck": "pg_isready",
+        "restart": "default"
+      },
+      {
+        "name": "cache",
+        "image": "redis:7-alpine",
+        "port": "6379:6379",
+        "depends_on": [],
+        "healthcheck": "redis-cli ping",
+        "restart": "default"
+      },
+      {
+        "name": "api",
+        "image": "build: src/services/api/Dockerfile",
+        "port": "3001:3001",
+        "depends_on": [
+          "db",
+          "cache"
+        ],
+        "healthcheck": "HTTP /health",
+        "restart": "unless-stopped"
+      },
+      {
+        "name": "iot-gateway",
+        "image": "build: src/services/iot-gateway/Dockerfile",
+        "port": "3002:3002",
+        "depends_on": [
+          "db",
+          "cache",
+          "api"
+        ],
+        "healthcheck": "HTTP /health",
+        "restart": "unless-stopped"
+      },
+      {
+        "name": "notification",
+        "image": "build: src/services/notification/Dockerfile",
+        "port": "3003:3003",
+        "depends_on": [
+          "cache"
+        ],
+        "healthcheck": "none",
+        "restart": "unless-stopped"
+      },
+      {
+        "name": "web-admin",
+        "image": "build: src/apps/web-admin/Dockerfile",
+        "port": "3000:3000",
+        "depends_on": [
+          "api"
+        ],
+        "healthcheck": "none",
+        "restart": "unless-stopped"
+      }
+    ],
+    "security_description": "Xác thực người dùng bằng JWT (JSON Web Token) tùy chỉnh, hiệu lực 8 giờ. Phân quyền RBAC (Role-Based Access Control) scoped theo mã đơn vị (ma_don_vi) và mã ứng dụng (ma_ung_dung). Global guard JwtAuthGuard tại api service — mọi endpoint đều yêu cầu token trừ /health và /auth/login. Internal API Key cho giao tiếp service-to-service (api ↔ notification). Chính sách mật khẩu: tối thiểu 8 ký tự, ≥3/4 loại ký tự (hoa/thường/số/đặc biệt), không trùng tài khoản, không trùng 2 lần gần nhất. CORS giới hạn theo CORS_ORIGIN.",
+    "auth_description": "JWT Bearer token, cấp tại POST /api/v1/auth/login, hiệu lực 8h (JWT_EXPIRES_IN=8h). Token chứa thông tin user_id, ma_don_vi, ma_ung_dung để xác định phạm vi phân quyền. Refresh token: [CẦN BỔ SUNG: cơ chế refresh]. Password reset do Admin thực hiện — gửi email thông báo cho user.",
+    "data_protection": "Dữ liệu cá nhân (họ tên, số CCCD/CMND, địa chỉ, số điện thoại, email) của cán bộ Hải quan được lưu trữ trong PostgreSQL. Mật khẩu được hash trước khi lưu. [CẦN BỔ SUNG: thuật toán hash mật khẩu]. Tuân thủ NĐ 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
+    "data_classification": "Dữ liệu cá nhân (PII) — NĐ 13/2023/NĐ-CP: họ tên, CCCD/CMND, ngày sinh, địa chỉ, số điện thoại, email cán bộ Hải quan. Dữ liệu nghiệp vụ nhạy cảm: thông tin tờ khai hải quan, lộ trình container, vi phạm. Dữ liệu hệ thống: log truy cập, lịch sử thiết lập khóa.",
+    "nfr": [
+      {
+        "criterion": "Khả năng mở rộng",
+        "requirement": "Hỗ trợ 422+ đơn vị Hải quan, hàng trăm thiết bị seal đồng thời",
+        "solution": "Kiến trúc microservices, Redis cache cho dữ liệu danh mục, horizontal scaling per service"
+      },
+      {
+        "criterion": "Hiệu năng realtime",
+        "requirement": "Cập nhật vị trí seal real-time (M4b)",
+        "solution": "Redis pub/sub + SSE. Poll interval M3 status: 15s (M3_STATUS_POLL_MS). M4b monitoring: 8s (NEXT_PUBLIC_M4B_POLL_MS)"
+      },
+      {
+        "criterion": "Độ tin cậy",
+        "requirement": "Các dịch vụ tự khởi động lại khi lỗi",
+        "solution": "Docker restart: unless-stopped. Healthcheck interval 5-15s, retry 5-10 lần. Start period 40-50s cho api/iot-gateway"
+      },
+      {
+        "criterion": "Giới hạn upload",
+        "requirement": "Import file hàng hóa/tờ khai an toàn",
+        "solution": "M5_MAX_UPLOAD_BYTES=10MB, RFID_BATCH_MAX_ROWS=2000"
+      },
+      {
+        "criterion": "Bảo mật",
+        "requirement": "Xác thực và phân quyền đầy đủ",
+        "solution": "JWT 8h, RBAC per đơn vị, CORS restricted, Internal API Key"
+      }
+    ],
+    "system_overview": "Kiến trúc microservices triển khai trên nền tảng Docker: ứng dụng web quản trị (Next.js 15), dịch vụ API nghiệp vụ (NestJS 10), cổng IoT (NestJS 10), dịch vụ thông báo (NestJS 10). Cơ sở dữ liệu PostgreSQL 16, cache Redis 7. Xác thực JWT tùy chỉnh, phân quyền RBAC theo đơn vị và ứng dụng."
+  },
+  "tkcs": {
+    "legal_basis": "[CẦN BỔ SUNG: Căn cứ pháp lý đầu tư - QĐ phê duyệt chủ trương đầu tư, NĐ 45/2026/NĐ-CP về quản lý đầu tư ứng dụng CNTT]",
+    "current_state": "[CẦN BỔ SUNG: Mô tả hiện trạng hạ tầng, hệ thống và quy trình nghiệp vụ hiện tại của đơn vị chủ đầu tư trước khi triển khai phần mềm]",
+    "necessity": "Hải quan Việt Nam cần giám sát hàng hóa vận chuyển quá cảnh qua hàng trăm đơn vị trên toàn quốc. Hệ thống seal GPS điện tử thay thế phương thức kiểm tra thủ công, cho phép phát hiện vi phạm lộ trình, mở khóa trái phép và các bất thường an ninh theo thời gian thực. Hiệu quả vận hành tăng đáng kể khi cảnh báo tự động giảm tải cho cán bộ giám sát.",
+    "objectives": "Triển khai hệ thống quản lý giám sát container bằng seal GPS điện tử phục vụ nghiệp vụ giám sát hải quan: (1) Quản lý toàn bộ vòng đời thiết bị seal GPS; (2) Giám sát real-time vị trí container trên bản đồ; (3) Phát hiện và cảnh báo tự động vi phạm lộ trình; (4) Cung cấp báo cáo thống kê phục vụ quản lý và thanh tra.",
+    "architecture_compliance": "[CẦN BỔ SUNG: Tuân thủ Khung Kiến trúc Chính phủ điện tử Việt Nam phiên bản 3.0/4.0 theo QĐ 2568/QĐ-BTTTT và QĐ 292/QĐ-BTTTT]",
+    "technology_rationale": "Next.js 15 + NestJS 10 được lựa chọn dựa trên hệ sinh thái TypeScript đồng nhất, hỗ trợ tốt cho TypeORM và microservices. PostgreSQL 16 đáp ứng yêu cầu 20+ bảng quan hệ phức tạp và tính toàn vẹn dữ liệu. Redis 7 cung cấp cache hiệu năng cao và pub/sub cho cập nhật real-time. Docker Compose đơn giản hóa triển khai và đảm bảo tính nhất quán môi trường.",
+    "timeline": "[CẦN BỔ SUNG: Lộ trình và tiến độ triển khai chi tiết]",
+    "total_investment": "[CẦN BỔ SUNG: Tổng mức đầu tư]",
+    "opex": "[CẦN BỔ SUNG: Chi phí vận hành hằng năm]",
+    "pm_method": "[CẦN BỔ SUNG: Phương pháp quản lý dự án]",
+    "stakeholders": "[CẦN BỔ SUNG: Các bên liên quan: chủ đầu tư, đơn vị vận hành, đơn vị người dùng]"
+  },
+  "troubleshooting": [
+    {
+      "situation": "Thiết bị seal hiển thị Offline dù đang hoạt động",
+      "cause": "Mất kết nối mạng di động (SIM), trễ cập nhật trạng thái từ Back End Service",
+      "resolution": "Kiểm tra trạng thái SIM card trong phân hệ Quản lý SIM Card. Nhấn Làm mới trong màn hình Theo dõi trạng thái. Liên hệ nhà cung cấp BES nếu vấn đề kéo dài."
+    },
+    {
+      "situation": "Thiết lập khóa điện tử kẹt ở trạng thái Chờ phản hồi",
+      "cause": "Back End Service chưa phản hồi do thiết bị offline hoặc BES bị gián đoạn",
+      "resolution": "Kiểm tra BES_MOCK trong cấu hình (UAT: BES_MOCK=true, BES_MOCK_DELAY_MS=2000). Trong môi trường production, kiểm tra kết nối đến Back End Service. Thiết lập lại lệnh sau khi thiết bị online."
+    },
+    {
+      "situation": "Import hàng hóa/tờ khai thất bại một phần",
+      "cause": "Dữ liệu trong file Excel không đúng định dạng, mã khóa ngoại không tồn tại",
+      "resolution": "Xem tab Danh sách lỗi để xác định bản ghi lỗi. Xuất file lỗi, sửa dữ liệu theo yêu cầu (mã kho/bãi/cảng phải tồn tại trong danh mục), import lại."
+    },
+    {
+      "situation": "Cảnh báo vi phạm không gửi đến người dùng",
+      "cause": "Chưa cấu hình cách thức thông báo hoặc kênh thông báo bị tắt",
+      "resolution": "Kiểm tra cấu hình trong Quản lý danh mục > Cách thức thông báo. Đảm bảo bật kênh phù hợp (SMS/Email/Web/App) cho người dùng và loại cảnh báo tương ứng."
+    },
+    {
+      "situation": "Đăng nhập thất bại sau khi đổi mật khẩu",
+      "cause": "Mật khẩu mới không đáp ứng chính sách hoặc nhập sai",
+      "resolution": "Mật khẩu phải: ≥8 ký tự, có ≥3/4 loại (hoa/thường/số/đặc biệt), không trùng tài khoản, không trùng 2 lần gần nhất. Yêu cầu Admin đặt lại mật khẩu qua phân hệ Quản trị hệ thống."
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-M1-001",
+      "feature_id": "M1-F001",
+      "name": "Tìm kiếm người dùng theo mã đơn vị chính xác",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Đăng nhập với tài khoản admin. Tồn tại ít nhất 1 người dùng với mã đơn vị HQ001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập menu Quản trị hệ thống > Quản lý người dùng"
+        },
+        {
+          "step": 2,
+          "action": "Nhập 'HQ001' vào ô Mã đơn vị"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn Tìm kiếm"
+        }
+      ],
+      "expected": "Danh sách chỉ hiển thị người dùng thuộc đơn vị HQ001",
+      "test_data": "ma_don_vi = 'HQ001'"
+    },
+    {
+      "id": "TC-M1-002",
+      "feature_id": "M1-F001",
+      "name": "Thêm mới người dùng thành công",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Đăng nhập admin. Tồn tại đơn vị HQ001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Nhấn nút Thêm mới trong màn hình Quản lý người dùng"
+        },
+        {
+          "step": 2,
+          "action": "Nhập Mã đơn vị: HQ001, Tên đăng nhập: testuser01, Họ tên: Nguyễn Văn A, Email: test@hq.gov.vn, Trạng thái: Kích hoạt"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Modal đóng, người dùng testuser01 xuất hiện trong danh sách",
+      "test_data": "Bộ dữ liệu hợp lệ"
+    },
+    {
+      "id": "TC-M1-003",
+      "feature_id": "M1-F001",
+      "name": "Xóa mềm người dùng",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Tồn tại người dùng testuser01 đang Kích hoạt.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Tìm người dùng testuser01, nhấn context menu"
+        },
+        {
+          "step": 2,
+          "action": "Chọn Xóa"
+        },
+        {
+          "step": 3,
+          "action": "Xác nhận xóa"
+        }
+      ],
+      "expected": "Người dùng không còn hiển thị trong danh sách (soft delete — trạng thái thay đổi)",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M1-004",
+      "feature_id": "M1-F001",
+      "name": "Validation: Tên đăng nhập vượt 25 ký tự",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Mở form Thêm mới người dùng.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Nhập tên đăng nhập 26 ký tự vào ô Tên đăng nhập"
+        },
+        {
+          "step": 2,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Hệ thống chặn input hoặc hiển thị lỗi 'Tên đăng nhập tối đa 25 ký tự'",
+      "test_data": "ten_dang_nhap = 'abcdefghijklmnopqrstuvwxyz' (26 ký tự)"
+    },
+    {
+      "id": "TC-M1-005",
+      "feature_id": "M1-F003",
+      "name": "Đặt lại mật khẩu đúng chính sách",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Tồn tại người dùng testuser01.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Mở dialog Đặt lại mật khẩu cho testuser01"
+        },
+        {
+          "step": 2,
+          "action": "Nhập mật khẩu mới: 'Abc@12345'"
+        },
+        {
+          "step": 3,
+          "action": "Nhập xác nhận: 'Abc@12345'"
+        },
+        {
+          "step": 4,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Thành công, email thông báo gửi đến email của testuser01",
+      "test_data": "password = 'Abc@12345' (đủ 4 loại ký tự)"
+    },
+    {
+      "id": "TC-M1-006",
+      "feature_id": "M1-F003",
+      "name": "Đặt lại mật khẩu vi phạm chính sách",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Mở dialog Đặt lại mật khẩu.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Nhập mật khẩu '12345678' (chỉ số, thiếu loại ký tự)"
+        },
+        {
+          "step": 2,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Hệ thống hiển thị lỗi vi phạm chính sách mật khẩu",
+      "test_data": "password = '12345678'"
+    },
+    {
+      "id": "TC-M1-007",
+      "feature_id": "M1-F004",
+      "name": "Tạo nhóm người dùng mới",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Đăng nhập admin. Tồn tại ứng dụng APP001 và đơn vị HQ001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Nhấn Thêm mới nhóm"
+        },
+        {
+          "step": 2,
+          "action": "Nhập Mã ứng dụng: APP001, Mã đơn vị: HQ001, Mã nhóm: GRP001, Tên nhóm: Nhóm quản trị viên"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Nhóm GRP001 xuất hiện trong danh sách",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M2-001",
+      "feature_id": "M2-F009",
+      "name": "Chỉnh sửa mức độ cảnh báo",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Đăng nhập admin.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Quản lý danh mục > Cảnh báo"
+        },
+        {
+          "step": 2,
+          "action": "Nhấn Sửa trên cảnh báo 'Pin yếu'"
+        },
+        {
+          "step": 3,
+          "action": "Thay đổi Mức độ từ 2 lên 3"
+        },
+        {
+          "step": 4,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Mức độ cảnh báo 'Pin yếu' cập nhật thành 3",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M2-002",
+      "feature_id": "M2-F009",
+      "name": "Không thể thêm mới loại cảnh báo",
+      "type": "UI",
+      "priority": "P2",
+      "preconditions": "Đăng nhập admin.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Quản lý danh mục > Cảnh báo"
+        },
+        {
+          "step": 2,
+          "action": "Tìm kiếm nút Thêm mới"
+        }
+      ],
+      "expected": "Không có nút Thêm mới — danh mục cảnh báo là cố định",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M2-003",
+      "feature_id": "M2-F011",
+      "name": "Bật kênh Email cho người dùng và cảnh báo sai lộ trình",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Tồn tại cấu hình thông báo cho người dùng testuser01 và cảnh báo Sai lộ trình.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Quản lý danh mục > Cách thức thông báo"
+        },
+        {
+          "step": 2,
+          "action": "Tìm dòng testuser01 - Sai lộ trình"
+        },
+        {
+          "step": 3,
+          "action": "Bật toggle Email"
+        },
+        {
+          "step": 4,
+          "action": "Lưu"
+        }
+      ],
+      "expected": "Kênh Email được bật, testuser01 nhận email khi có vi phạm Sai lộ trình",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M3-001",
+      "feature_id": "M3-F001",
+      "name": "Thêm mới thiết bị seal",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Đăng nhập admin. Tồn tại đơn vị HQ001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Quản lý Seal > Thiết bị seal, nhấn Thêm mới"
+        },
+        {
+          "step": 2,
+          "action": "Nhập Số seal: SEAL001, IMEI: 123456789012345, Mã quản lý: HQ001, SIM 1: 0912345678"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Thiết bị SEAL001 xuất hiện trong danh sách",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M3-002",
+      "feature_id": "M3-F001",
+      "name": "Xóa và khôi phục thiết bị seal",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Tồn tại thiết bị SEAL001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Xóa SEAL001 từ context menu"
+        },
+        {
+          "step": 2,
+          "action": "Xác nhận xóa"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn nút Khôi phục seal đã xóa"
+        },
+        {
+          "step": 4,
+          "action": "Tìm và khôi phục SEAL001"
+        }
+      ],
+      "expected": "SEAL001 xuất hiện lại trong danh sách hoạt động",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M3-003",
+      "feature_id": "M3-F003",
+      "name": "Gửi lệnh mở khóa bằng mật khẩu",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Tồn tại thiết bị SEAL001 đang Online.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Thiết lập khóa điện tử, chọn loại Mở khóa bằng mật khẩu"
+        },
+        {
+          "step": 2,
+          "action": "Chọn Khóa: SEAL001, nhập Mật khẩu"
+        },
+        {
+          "step": 3,
+          "action": "Nhấn Gửi lệnh"
+        }
+      ],
+      "expected": "Trạng thái chuyển sang Chờ phản hồi (BES_MOCK: sau 2s cập nhật Thiết lập thành công)",
+      "test_data": "BES_MOCK=true"
+    },
+    {
+      "id": "TC-M3-004",
+      "feature_id": "M3-F003",
+      "name": "Gán thẻ RFID chỉ cho seal không triển khai nhanh",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Tồn tại seal SEAL_FAST (flag triển khai nhanh = true) và SEAL_NORMAL (flag = false).",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Mở modal Gán thẻ mở khóa"
+        },
+        {
+          "step": 2,
+          "action": "Tìm kiếm SEAL_FAST trong danh sách khóa"
+        }
+      ],
+      "expected": "SEAL_FAST không xuất hiện trong danh sách chọn khóa (chỉ cho seal KHÔNG triển khai nhanh)",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M3-005",
+      "feature_id": "M3-F008",
+      "name": "Import hàng loạt thẻ RFID",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Chuẩn bị file Excel với 5 mã thẻ hợp lệ (10 chữ số).",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Thẻ RFID, chọn tab Nhập nhanh"
+        },
+        {
+          "step": 2,
+          "action": "Upload file Excel"
+        },
+        {
+          "step": 3,
+          "action": "Xác nhận import"
+        }
+      ],
+      "expected": "5 thẻ được thêm vào danh sách, tab Danh sách lỗi trống",
+      "test_data": "File Excel 5 mã thẻ 10 chữ số"
+    },
+    {
+      "id": "TC-M4b-001",
+      "feature_id": "M4b-F001",
+      "name": "Xem bản đồ giám sát seal real-time",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Đăng nhập cán bộ Hải quan. Có ít nhất 1 seal Online.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Giám sát > Bản đồ giám sát"
+        },
+        {
+          "step": 2,
+          "action": "Quan sát bản đồ"
+        }
+      ],
+      "expected": "Bản đồ GPS hiển thị marker vị trí của seal Online",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M4b-002",
+      "feature_id": "M4b-F001",
+      "name": "Xử lý cảnh báo vi phạm",
+      "type": "UI",
+      "priority": "P0",
+      "preconditions": "Có cảnh báo vi phạm đang chờ xử lý trên bản đồ.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Nhấn vào overlay cảnh báo trên bản đồ"
+        },
+        {
+          "step": 2,
+          "action": "Xem thông tin vi phạm"
+        },
+        {
+          "step": 3,
+          "action": "Cập nhật kết quả xử lý và ghi chú bổ sung"
+        },
+        {
+          "step": 4,
+          "action": "Nhấn Lưu"
+        }
+      ],
+      "expected": "Cảnh báo được ghi nhận kết quả, cập nhật trạng thái đã xử lý",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M5-001",
+      "feature_id": "M5-F002",
+      "name": "Import hàng hóa thành công",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Tồn tại mã kho/bãi/cảng hợp lệ trong danh mục.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Truy cập Quản lý thông tin > Hàng hóa"
+        },
+        {
+          "step": 2,
+          "action": "Tải file mẫu"
+        },
+        {
+          "step": 3,
+          "action": "Điền dữ liệu hàng hóa hợp lệ vào file mẫu"
+        },
+        {
+          "step": 4,
+          "action": "Upload file và Import"
+        }
+      ],
+      "expected": "Import thành công, danh sách hàng hóa cập nhật, tab lỗi trống",
+      "test_data": ""
+    },
+    {
+      "id": "TC-M5-002",
+      "feature_id": "M5-F002",
+      "name": "Import hàng hóa có lỗi",
+      "type": "UI",
+      "priority": "P1",
+      "preconditions": "Chuẩn bị file với 1 bản ghi lỗi (mã kho không tồn tại) và 2 bản ghi hợp lệ.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Import file hàng hóa có lỗi"
+        },
+        {
+          "step": 2,
+          "action": "Xem kết quả import"
+        },
+        {
+          "step": 3,
+          "action": "Chuyển tab Danh sách lỗi"
+        }
+      ],
+      "expected": "2 bản ghi import thành công, 1 bản ghi lỗi hiển thị trong tab lỗi",
+      "test_data": ""
+    },
+    {
+      "id": "TC-API-001",
+      "feature_id": "M1-F001",
+      "name": "API: Đăng nhập lấy JWT token",
+      "type": "API",
+      "priority": "P0",
+      "preconditions": "API service chạy tại port 3001.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "POST /api/v1/auth/login với body {username: 'admin', password: 'admin'}"
+        }
+      ],
+      "expected": "HTTP 200, response chứa access_token (JWT, hiệu lực 8h)",
+      "test_data": "{username: 'admin', password: 'admin'}"
+    },
+    {
+      "id": "TC-API-002",
+      "feature_id": "M1-F001",
+      "name": "API: Truy cập endpoint có bảo vệ không có token",
+      "type": "API",
+      "priority": "P0",
+      "preconditions": "API service chạy.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "GET /api/v1/users (không có Authorization header)"
+        }
+      ],
+      "expected": "HTTP 401 Unauthorized",
+      "test_data": ""
+    },
+    {
+      "id": "TC-API-003",
+      "feature_id": "M3-F003",
+      "name": "API: Gửi lệnh thiết lập khóa (BES Mock)",
+      "type": "API",
+      "priority": "P0",
+      "preconditions": "BES_MOCK=true. IoT gateway chạy tại port 3002. Có JWT token hợp lệ.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "POST /api/v1/m3/thiet-lap-khoa với Authorization JWT và body thiết lập mở khóa"
+        }
+      ],
+      "expected": "HTTP 201, trạng thái ban đầu Chờ phản hồi. Sau 2s BES mock callback cập nhật Thành công",
+      "test_data": "BES_MOCK=true, BES_MOCK_DELAY_MS=2000"
+    },
+    {
+      "id": "TC-API-004",
+      "feature_id": "M5-F002",
+      "name": "API: Import hàng hóa quá giới hạn kích thước file",
+      "type": "API",
+      "priority": "P1",
+      "preconditions": "API service chạy. M5_MAX_UPLOAD_BYTES=10485760 (10MB).",
+      "steps": [
+        {
+          "step": 1,
+          "action": "POST /api/v1/m5/hang-hoa/import với file > 10MB"
+        }
+      ],
+      "expected": "HTTP 413 Payload Too Large hoặc lỗi validation kích thước file",
+      "test_data": "File size > 10MB"
+    },
+    {
+      "id": "TC-API-005",
+      "feature_id": "M3-F005",
+      "name": "API: Lấy trạng thái seal từ IoT Gateway",
+      "type": "API",
+      "priority": "P1",
+      "preconditions": "IoT gateway chạy. JWT hợp lệ.",
+      "steps": [
+        {
+          "step": 1,
+          "action": "GET /api/v1/m3/trang-thai với Authorization JWT"
+        }
+      ],
+      "expected": "HTTP 200, danh sách trạng thái seal với Online/Offline",
+      "test_data": ""
+    }
+  ],
+  "tkct": {
+    "system_description": "Phan mem quan ly dinh vi Seal dien tu la he thong microservices gom 4 dich vu: web-admin (Next.js 15), api (NestJS 10), iot-gateway (NestJS 10), notification (NestJS 10). Xac thuc JWT tuy chinh, phan quyen RBAC theo don vi va ung dung.",
+    "architecture_reference": "Tai lieu Thiet ke Kien truc (TKKT) — thiet-ke-kien-truc.docx",
+    "modules": [
+      {
+        "name": "Quan tri he thong (M1)",
+        "description": "Quan ly nguoi dung, nhom, phan quyen. 5 chuc nang M1-F001 den M1-F005.",
+        "features": [
+          "M1-F001: Quan ly nguoi dung",
+          "M1-F002: Phan quyen nguoi dung",
+          "M1-F003: Dat lai mat khau",
+          "M1-F004: Quan ly nhom",
+          "M1-F005: Them nguoi dung vao nhom"
+        ]
+      },
+      {
+        "name": "Quan ly danh muc (M2)",
+        "description": "11 loai danh muc dung chung. M2-F001 den M2-F011.",
+        "features": [
+          "M2-F001 den M2-F011: 11 danh muc"
+        ]
+      },
+      {
+        "name": "Quan ly Seal GPS (M3)",
+        "description": "Quan ly thiet bi seal GPS va giao tiep IoT. M3-F001 den M3-F012.",
+        "features": [
+          "M3-F001 den M3-F012: 12 chuc nang seal"
+        ]
+      },
+      {
+        "name": "Bao cao thong ke (M4)",
+        "description": "8 bao cao va 1 bieu do. M4-F001 den M4-F008.",
+        "features": [
+          "M4-F001 den M4-F008: 8 bao cao"
+        ]
+      },
+      {
+        "name": "Giam sat & Lo trinh (M4b)",
+        "description": "Giam sat real-time tren ban do GPS. M4b-F001, M4b-F002.",
+        "features": [
+          "M4b-F001: Giam sat seal",
+          "M4b-F002: Lo trinh"
+        ]
+      },
+      {
+        "name": "Quan ly thong tin theo doi (M5)",
+        "description": "Import container, hang hoa, to khai. M5-F001 den M5-F004.",
+        "features": [
+          "M5-F001 den M5-F004"
+        ]
+      }
+    ],
+    "db_description": "Co so du lieu PostgreSQL 16. 20+ bang quan he. TypeORM autoLoadEntities.",
+    "db_tables": [
+      {
+        "name": "nguoi_dung",
+        "description": "Tai khoan nguoi dung",
+        "primary_key": "id",
+        "columns": [
+          {
+            "name": "ten_dang_nhap",
+            "type": "VARCHAR(25)",
+            "nullable": false,
+            "description": "UNIQUE"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(254)",
+            "nullable": false,
+            "description": "Email"
+          },
+          {
+            "name": "trang_thai",
+            "type": "ENUM",
+            "nullable": false,
+            "description": "Kich hoat/Khoa"
+          }
+        ]
+      },
+      {
+        "name": "thiet_bi_seal",
+        "description": "Thiet bi seal GPS",
+        "primary_key": "id",
+        "columns": [
+          {
+            "name": "so_seal",
+            "type": "VARCHAR(20)",
+            "nullable": false,
+            "description": "UNIQUE"
+          },
+          {
+            "name": "trang_thai",
+            "type": "ENUM",
+            "nullable": false,
+            "description": "Online/Offline"
+          },
+          {
+            "name": "thiet_bi_trien_khai_nhanh",
+            "type": "BOOLEAN",
+            "nullable": false,
+            "description": "Flag trien khai nhanh"
+          }
+        ]
+      }
+    ],
+    "api_description": "RESTful API. JWT Bearer token. Internal API Key cho service-to-service.",
+    "api_details": [
+      {
+        "path": "/api/v1/auth/login",
+        "method": "POST",
+        "summary": "Dang nhap",
+        "description": "Xac thuc, tra ve JWT 8h",
+        "auth": "none",
+        "request_body": "{username, password}",
+        "response_body": "{access_token}",
+        "parameters": [],
+        "error_codes": [
+          {
+            "code": "401",
+            "description": "Sai tai khoan"
+          }
+        ]
+      },
+      {
+        "path": "/api/v1/m3/thiet-lap-khoa",
+        "method": "POST",
+        "summary": "Thiet lap khoa dien tu",
+        "description": "Gui lenh qua BES async. BES_MOCK=true trong UAT (delay 2s).",
+        "auth": "JWT Bearer",
+        "request_body": "{so_seal, loai_thiet_lap}",
+        "response_body": "{id, trang_thai: 'Cho phan hoi'}",
+        "parameters": [],
+        "error_codes": [
+          {
+            "code": "400",
+            "description": "Thiet lap khong hop le"
+          }
+        ]
+      }
+    ],
+    "ui_guidelines": "Giao dien theo template app.jsx. Layout: sidebar + main content. Bang du lieu voi phan trang. Modal cho form them/sua. Context menu cho thao tac.",
+    "ui_layout": "Sidebar trai: menu phan he. Header: logo + thong tin nguoi dung. Main: breadcrumb + bo loc + bang du lieu.",
+    "screens": [
+      {
+        "name": "Danh sach nguoi dung",
+        "feature_id": "M1-F001",
+        "url": "/users",
+        "description": "Bang tim kiem nguoi dung voi context menu"
+      },
+      {
+        "name": "Ban do giam sat seal",
+        "feature_id": "M4b-F001",
+        "url": "/monitor/ban-do",
+        "description": "Ban do GPS real-time voi markers seal"
+      }
+    ],
+    "integration_design": "BES: HTTP/REST outbound qua IoT Gateway. BES_MOCK=true cho UAT. SMTP: email qua notification service. Maps API: client-side JS SDK.",
+    "security_design": "JWT Global Guard tai api service. CORS theo CORS_ORIGIN. Internal API Key cho /internal/*. Mat khau hash [CAN BO SUNG: thuat toan].",
+    "traceability_description": "Ma tran truy xuat: 42 chuc nang x 6 phan he x 24 test cases. Xem kich-ban-kiem-thu.xlsx."
+  },
+  "all_features": [
+    {
+      "service_name": "Quản trị hệ thống",
+      "name": "Quản lý người dùng",
+      "description": "Cho phép quản trị viên thực hiện đầy đủ thao tác CRUD đối với tài khoản người dùng: tìm kiếm, thêm mới, xem chi tiết, sửa thông tin, xóa mềm (thay đổi trạng thái). Hỗ trợ điều chuyển công tác.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản trị hệ thống",
+      "name": "Phân quyền người dùng",
+      "description": "Cho phép quản trị viên phân quyền truy cập chức năng cho người dùng dựa trên Mã ứng dụng và cây chức năng (function tree). Phân quyền scoped theo cấp đơn vị.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản trị hệ thống",
+      "name": "Đặt lại mật khẩu",
+      "description": "Quản trị viên đặt lại mật khẩu cho người dùng. Hệ thống kiểm tra chính sách mật khẩu và gửi email thông báo đến người dùng sau khi thay đổi thành công.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản trị hệ thống",
+      "name": "Quản lý nhóm người dùng",
+      "description": "CRUD nhóm người dùng. Nhóm được scope theo Mã ứng dụng và Mã đơn vị. Hỗ trợ phân quyền nhóm truy cập chức năng.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản trị hệ thống",
+      "name": "Thêm người dùng vào nhóm",
+      "description": "Gán hoặc gỡ người dùng vào/ra nhóm thông qua giao diện two-panel transfer. Người dùng được lọc theo đơn vị.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục đơn vị",
+      "description": "Quản lý danh sách đơn vị Hải quan có phân cấp (Cấp Tổng Cục, Cấp Đội). Hiện có 422 đơn vị trong hệ thống.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục phương thức vận tải",
+      "description": "Quản lý danh sách 35 phương thức vận tải: đường sông, biển, sắt, không, bộ và các loại container tương ứng.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục loại hình XNK",
+      "description": "Quản lý 275 loại hình xuất nhập khẩu phân theo nhóm: Vận chuyển, XCX, Chung.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục địa điểm lưu kho",
+      "description": "Quản lý danh sách kho hàng với thông tin mã kho, tên kho, tên viết tắt và đơn vị quản lý.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục địa điểm xếp/dỡ hàng hóa",
+      "description": "Quản lý 5 loại địa điểm xếp/dỡ: Cảng ICD, Cảng nước ngoài, Cửa khẩu đường bộ, Sân bay trong nước, Sân bay nước ngoài.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục doanh nghiệp XNK",
+      "description": "Quản lý danh sách doanh nghiệp xuất nhập khẩu với mã doanh nghiệp, tên, số điện thoại, địa chỉ.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục doanh nghiệp vận tải",
+      "description": "Quản lý danh sách doanh nghiệp vận tải với mã số thuế, tên, số điện thoại, địa chỉ.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục đầu mối",
+      "description": "Quản lý danh sách đầu mối liên hệ gồm tên, tài khoản người dùng, chức danh, số điện thoại, email và đơn vị.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Danh mục cảnh báo",
+      "description": "Cấu hình mức độ, màu sắc và âm thanh cho các loại cảnh báo cố định: pin yếu, xe sai lộ trình, mất GPS, quẹt thẻ khác, cắt dây. Không cho phép thêm/xóa loại cảnh báo.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Thiết lập thông số cảnh báo",
+      "description": "Cấu hình giá trị ngưỡng cho các thông số cảnh báo: AlertCountLowBattery, AlertPercentBattery, CloseSealCount, ExpiredMinuteSMSCode, FilterCount, LockSealCount, UnlockSealCount.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý danh mục",
+      "name": "Thiết lập cách thức thông báo",
+      "description": "Cấu hình kênh thông báo (SMS/Email/Web/App) cho từng người dùng theo từng loại cảnh báo và đơn vị Hải quan quản lý.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Quản lý danh mục thiết bị seal",
+      "description": "Tìm kiếm, thêm mới, chỉnh sửa, xóa mềm và khôi phục thiết bị seal GPS. Hỗ trợ đánh dấu thiết bị triển khai nhanh.",
+      "actors": [
+        "Quản trị viên",
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Gán khóa cho vùng cảnh báo",
+      "description": "Gán thiết bị seal vào vùng cảnh báo địa lý. Khi seal ra khỏi vùng hoặc vào khu vực quy định, hệ thống phát cảnh báo tự động. Gỡ seal để ngừng nhận cảnh báo.",
+      "actors": [
+        "Cán bộ quản lý seal"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Thiết lập khóa điện tử",
+      "description": "Gửi lệnh thiết lập khóa điện tử đến thiết bị seal qua Back End Service. Hỗ trợ 6 loại: Mở khóa bằng mật khẩu, Đổi mật khẩu, Nạp SĐT, Xóa SĐT, Gán thẻ mở khóa, Thiết lập tần suất gửi tin. Trạng thái cập nhật async khi nhận phản hồi.",
+      "actors": [
+        "Cán bộ quản lý seal"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Phân công quản lý seal",
+      "description": "Phân công cán bộ Hải quan chịu trách nhiệm quản lý thiết bị seal cụ thể. Hỗ trợ hủy phân công.",
+      "actors": [
+        "Quản trị viên",
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Theo dõi trạng thái seal",
+      "description": "Xem trạng thái kết nối (Online/Offline), phiên bản firmware và thời gian online của thiết bị seal. Hỗ trợ làm mới thời gian thực.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Quản lý tình trạng thiết bị",
+      "description": "Theo dõi vòng đời thiết bị seal: gán -> sử dụng -> hoàn trả -> xác nhận hoàn trả. Lưu lịch sử tình trạng và phương thức hoàn trả.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục SIM Card",
+      "description": "Xem thông tin SIM card của thiết bị seal (SIM 1, SIM 2, số dư, đơn vị quản lý). Hỗ trợ nhập nhanh thông tin SIM.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục thẻ RFID",
+      "description": "Quản lý thẻ RFID dùng để mở khóa thiết bị seal. Hỗ trợ thêm đơn lẻ và nhập nhanh hàng loạt (batch import). Mỗi mã số thẻ 10 chữ số, tối đa 60 thẻ/seal.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục tuyến điểm checkpoint",
+      "description": "Quản lý danh sách tuyến điểm checkpoint phục vụ giám sát lộ trình container.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục khu vực - tuyến đường - lộ trình",
+      "description": "Quản lý khu vực địa lý, tuyến đường và lộ trình được phép di chuyển cho phương tiện vận tải.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục tuyến đường GPS/GSM",
+      "description": "Quản lý tuyến đường dựa trên tín hiệu GPS/GSM của thiết bị seal.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Quản lý Seal GPS",
+      "name": "Danh mục điểm cơ quan chuyên môn",
+      "description": "Quản lý danh sách điểm cơ quan chuyên môn phục vụ định nghĩa vùng cảnh báo và checkpoint.",
+      "actors": [
+        "Quản trị viên"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC tổng hợp DN vận tải theo khu vực",
+      "description": "Báo cáo tổng hợp doanh nghiệp vận tải hoạt động theo khu vực trong khoảng thời gian xác định.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC thống kê số lần mở khóa container",
+      "description": "Thống kê số lần mở khóa container theo nơi đi hoặc nơi đến trong khoảng thời gian. Xuất Excel, PDF, In.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC thống kê thời gian vào khu vực quy định",
+      "description": "Thống kê thời gian các seal/phương tiện vào khu vực quy định theo loại cảnh báo.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC thống kê liên quan đến lộ trình",
+      "description": "Thống kê các sự kiện liên quan đến lộ trình di chuyển của phương tiện.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC tổng hợp số lần vi phạm",
+      "description": "Báo cáo tổng hợp số lần vi phạm theo seal và container trong khoảng thời gian.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "BC thống kê thời gian ra khỏi vùng quy định",
+      "description": "Thống kê thời gian các seal/phương tiện ra khỏi vùng quy định.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "Biểu đồ tổng hợp vi phạm",
+      "description": "Biểu đồ tròn (pie chart) thống kê 9 loại vi phạm: ra khỏi khu vực, mất GSM, mở nắp lưng, vượt thời gian, sai mật khẩu quá 5 lần, vào khu vực, mất GPS, đỗ vượt thời gian, rung động.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Báo cáo thống kê",
+      "name": "Xem lịch sử báo cáo thống kê",
+      "description": "Xem lịch sử các báo cáo đã được tạo và trạng thái xử lý.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Giám sát & Lộ trình",
+      "name": "Giám sát thiết bị seal",
+      "description": "Giám sát real-time thiết bị seal trên bản đồ GPS. Hiển thị cảnh báo vi phạm tự động. Cán bộ xử lý cảnh báo và cập nhật kết quả/thông tin bổ sung.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Giám sát & Lộ trình",
+      "name": "Lộ trình",
+      "description": "Xem lịch sử di chuyển của seal, so sánh tuyến đường thực tế với tuyến đường thiết lập để phát hiện sai lệch.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý thông tin theo dõi",
+      "name": "Danh sách container/PTVT",
+      "description": "Tìm kiếm và quản lý danh sách container và phương tiện vận tải trong hệ thống.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý thông tin theo dõi",
+      "name": "Thông tin hàng hóa",
+      "description": "Import batch và tìm kiếm thông tin hàng hóa. Quy trình: tải file mẫu → chọn file → import. Hỗ trợ xem và xuất danh sách lỗi import.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý thông tin theo dõi",
+      "name": "Thông tin tờ khai",
+      "description": "Import batch và tìm kiếm thông tin tờ khai hải quan. Cấu trúc tương tự import hàng hóa.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    },
+    {
+      "service_name": "Quản lý thông tin theo dõi",
+      "name": "Thông tin ưu tiên giám sát",
+      "description": "Cấu hình thứ tự ưu tiên giám sát cho các container/phương tiện đặc biệt.",
+      "actors": [
+        "Cán bộ Hải quan"
+      ]
+    }
+  ]
+}
