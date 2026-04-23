@@ -38,14 +38,13 @@ jobs:
 
       - name: Type check (mypy)
         run: mypy src/etc_docgen
-        continue-on-error: true  # Gradual typing — don't block MVP
 
       - name: Unit tests
-        run: pytest tests/unit -v
+        run: pytest tests/unit -v --cov=etc_docgen --cov-report=term-missing --cov-fail-under=60
 
       - name: Integration tests
-        run: pytest tests/integration -v -m "not slow"
-        continue-on-error: true
+        run: pytest tests/integration -v -m "integration"
+        continue-on-error: true  # Requires running Docker — skipped in CI without services
 
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
@@ -73,7 +72,6 @@ jobs:
 
       - name: Smoke test — export from sample data
         run: |
-          etc-docgen init examples/minimal || true
           etc-docgen validate examples/minimal/content-data.json
           etc-docgen export --config examples/minimal/etc-docgen.yaml \
             --data examples/minimal/content-data.json \

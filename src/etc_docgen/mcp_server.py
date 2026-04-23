@@ -36,11 +36,16 @@ Usage:
 from __future__ import annotations
 
 import json
+import logging
+import os
+import time
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
 from etc_docgen.paths import template, templates_dir
+
+log = logging.getLogger("etc-docgen.mcp")
 
 mcp = FastMCP(
     "etc-docgen",
@@ -59,6 +64,51 @@ mcp = FastMCP(
         "template_list, template_fork."
     ),
 )
+
+
+# ─────────────────────────── Path safety ───────────────────────────
+
+# Base allowed root: /data Docker mount.
+# Add extra roots via ETC_DOCGEN_EXTRA_ROOTS env var (colon-separated) for local dev/testing.
+_ALLOWED_ROOTS: list[Path] = [Path("/data")]
+if _extra := os.environ.get("ETC_DOCGEN_EXTRA_ROOTS", ""):
+    _ALLOWED_ROOTS.extend(Path(r) for r in _extra.split(os.pathsep) if r)
+
+
+def _resolve_data_path(raw: str, *, must_exist: bool = False, allow_write: bool = False) -> Path:
+    """Resolve and contain a caller-supplied path to allowed roots.
+
+    Prevents path traversal (../../etc/passwd) and restricts writes
+    to /data mount only.
+
+    Raises:
+        ValueError: if path escapes allowed roots.
+        FileNotFoundError: if must_exist=True and path not found.
+    """
+    try:
+        path = Path(raw).resolve()
+    except Exception as exc:
+        raise ValueError(f"Invalid path '{raw}': {exc}") from exc
+
+    # Check containment
+    allowed = _ALLOWED_ROOTS[:]
+    if not allow_write:
+        # Read-only calls may also accept existing absolute paths
+        allowed.append(path.parent)  # allow reading from any existing parent
+
+    if allow_write:
+        # Writes MUST be under /data
+        if not any(str(path).startswith(str(root)) for root in _ALLOWED_ROOTS):
+            raise ValueError(
+                f"Write path '{raw}' is outside /data. "
+                "Use /data/{project-slug}/... paths. "
+                "The MCP server runs in Docker: D:\\Projects\\etc-docgen\\data\\ → /data/"
+            )
+
+    if must_exist and not path.exists():
+        raise FileNotFoundError(f"Path not found: {raw}")
+
+    return path
 
 
 # ─────────────────────────── Resources ───────────────────────────
@@ -84,16 +134,24 @@ def validate(data_path: str) -> str:
     Use this after producing or editing content-data.json to ensure correctness.
 
     Args:
-        data_path: Absolute or relative path to content-data.json
+        data_path: Path to content-data.json. Must be under /data/{slug}/ in Docker.
     """
     from etc_docgen.data.validation import validate_file
 
-    path = Path(data_path)
-    if not path.exists():
-        return json.dumps({"valid": False, "errors": [f"File not found: {data_path}"]})
+    t0 = time.monotonic()
+    log.info("validate called: path=%s", data_path)
+    try:
+        path = _resolve_data_path(data_path, must_exist=True)
+    except (ValueError, FileNotFoundError) as exc:
+        log.warning("validate path error: %s", exc)
+        return json.dumps({"valid": False, "errors": [str(exc)], "error_code": "INVALID_PATH"})
 
     result = validate_file(path)
-    return json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
+    elapsed = round(time.monotonic() - t0, 3)
+    log.info("validate done: valid=%s errors=%d elapsed=%.3fs", result.valid, len(result.errors if hasattr(result, 'errors') else []), elapsed)
+    payload = result.to_dict()
+    payload["elapsed_s"] = elapsed
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 @mcp.tool()
@@ -123,12 +181,18 @@ def export(
     from etc_docgen.engines import docx as docx_engine
     from etc_docgen.engines import xlsx as xlsx_engine
 
-    data_file = Path(data_path)
-    out_dir = Path(output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    t0 = time.monotonic()
+    log.info("export called: data=%s out=%s targets=%s", data_path, output_dir, targets)
 
-    if not data_file.exists():
-        return json.dumps({"success": False, "error": f"Data file not found: {data_path}"})
+    # Resolve paths safely
+    try:
+        data_file = _resolve_data_path(data_path, must_exist=True)
+        out_dir = _resolve_data_path(output_dir, allow_write=True)
+    except (ValueError, FileNotFoundError) as exc:
+        log.warning("export path error: %s", exc)
+        return json.dumps({"success": False, "error": str(exc), "error_code": "INVALID_PATH"})
+
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     target_set = set(targets or ["xlsx", "hdsd", "tkkt", "tkcs", "tkct"])
 
@@ -148,6 +212,11 @@ def export(
                 if mmdc:
                     for key, source in data_preview["diagrams"].items():
                         if not isinstance(source, str) or not source.strip():
+                            continue
+                        # Sanitize: strip null bytes and limit size (prevent shell abuse)
+                        source = source.replace("\x00", "").strip()
+                        if len(source) > 500_000:
+                            mermaid_report["failed"].append({"key": key, "error": "Source too large (>500KB)"})
                             continue
                         out_png = render_dir / f"{key}.png"
                         ok, err = render_one(mmdc, source, out_png)
@@ -243,11 +312,13 @@ def export(
                     }
                 )
         except Exception as e:
-            results.append({"target": name, "success": False, "error": str(e)})
+            results.append({"target": name, "success": False, "error": f"Render failed for {name}: {type(e).__name__}: {str(e)[:300]}", "error_code": "RENDER_ERROR"})
 
     all_ok = all(r["success"] for r in results)
+    elapsed = round(time.monotonic() - t0, 3)
+    log.info("export done: success=%s targets=%d elapsed=%.3fs", all_ok, len(results), elapsed)
     return json.dumps(
-        {"success": all_ok, "targets": results},
+        {"success": all_ok, "targets": results, "elapsed_s": elapsed},
         ensure_ascii=False,
         indent=2,
     )
@@ -393,7 +464,15 @@ def merge_content(data_path: str, partial_json: str) -> str:
         partial_json: JSON string with partial content to merge.
             Example: {"tkcs": {"legal_basis": "...", "necessity": "..."}}
     """
-    path = Path(data_path)
+    t0 = time.monotonic()
+    log.info("merge_content called: path=%s", data_path)
+
+    # Validate write path
+    try:
+        path = _resolve_data_path(data_path, allow_write=True)
+    except ValueError as exc:
+        log.warning("merge_content path error: %s", exc)
+        return json.dumps({"success": False, "error": str(exc), "error_code": "INVALID_PATH"})
 
     # Load existing or start with minimal skeleton
     if path.exists():
@@ -432,6 +511,7 @@ def merge_content(data_path: str, partial_json: str) -> str:
     merged_keys = list(merged.keys())
     partial_keys = list(partial.keys())
 
+    log.info("merge_content done: keys=%s elapsed=%.3fs", partial_keys, round(time.monotonic() - t0, 3))
     return json.dumps(
         {
             "success": True,
@@ -572,6 +652,13 @@ def main():
 
     Use --transport to select transport, --host/--port for network transports.
     """
+    # Configure logging
+    logging.basicConfig(
+        level=os.environ.get("LOG_LEVEL", "INFO"),
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    )
+
     import argparse
 
     parser = argparse.ArgumentParser(

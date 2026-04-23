@@ -1,23 +1,19 @@
-Proprietary License
-===================
+PROPRIETARY SOFTWARE LICENSE
 
-Copyright (c) 2026 Công ty CP Hệ thống Công nghệ ETC.
-
+Copyright (c) 2026 Công ty CP Hệ thống Công nghệ ETC
 All rights reserved.
 
-This software and associated documentation files (the "Software") are
-proprietary to Công ty CP Hệ thống Công nghệ ETC ("ETC"). The Software
-may be used internally within ETC and its authorized partners, subject to
-the terms of any applicable agreement.
+This software and associated documentation files (the "Software") are the
+proprietary and confidential property of Công ty CP Hệ thống Công nghệ ETC.
 
-Redistribution or use of the Software in source or binary forms, with or
-without modification, outside of ETC's authorized scope is not permitted
-without prior written consent of ETC.
+RESTRICTIONS:
+- You may not copy, modify, merge, publish, distribute, sublicense, or sell
+  copies of the Software without express written permission.
+- You may not reverse engineer, decompile, or disassemble the Software.
+- Internal evaluation and testing for potential customers is permitted.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY ARISING FROM USE OF THE SOFTWARE.
 
-For licensing inquiries: contact@etc.vn
+Contact: dev@etc.vn
