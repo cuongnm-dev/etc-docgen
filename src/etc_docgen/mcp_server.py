@@ -35,6 +35,7 @@ Usage:
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import os
@@ -90,20 +91,31 @@ def _resolve_data_path(raw: str, *, must_exist: bool = False, allow_write: bool 
     except Exception as exc:
         raise ValueError(f"Invalid path '{raw}': {exc}") from exc
 
-    # Check containment
-    allowed = _ALLOWED_ROOTS[:]
-    if not allow_write:
-        # Read-only calls may also accept existing absolute paths
-        allowed.append(path.parent)  # allow reading from any existing parent
+    # Check containment — both reads and writes MUST stay within allowed roots.
+    # Use Path.is_relative_to (PurePath semantics) to avoid prefix-string false positives
+    # like "/data2/foo" matching "/data".
+    def _is_contained(p: Path) -> bool:
+        for root in _ALLOWED_ROOTS:
+            try:
+                root_resolved = root.resolve()
+            except Exception:
+                root_resolved = root
+            try:
+                if p.is_relative_to(root_resolved):
+                    return True
+            except AttributeError:  # pragma: no cover — Python < 3.9
+                if str(p).startswith(str(root_resolved) + os.sep) or p == root_resolved:
+                    return True
+        return False
 
-    if allow_write:
-        # Writes MUST be under /data
-        if not any(str(path).startswith(str(root)) for root in _ALLOWED_ROOTS):
-            raise ValueError(
-                f"Write path '{raw}' is outside /data. "
-                "Use /data/{project-slug}/... paths. "
-                "The MCP server runs in Docker: D:\\Projects\\etc-docgen\\data\\ → /data/"
-            )
+    if not _is_contained(path):
+        verb = "Write" if allow_write else "Read"
+        raise ValueError(
+            f"{verb} path '{raw}' is outside allowed roots "
+            f"({[str(r) for r in _ALLOWED_ROOTS]}). "
+            "Use /data/{project-slug}/... paths. "
+            "The MCP server runs in Docker: D:\\Projects\\etc-docgen\\data\\ → /data/"
+        )
 
     if must_exist and not path.exists():
         raise FileNotFoundError(f"Path not found: {raw}")
@@ -172,11 +184,20 @@ def export(
       - thiet-ke-co-so.docx (basic design — TKCS)
       - thiet-ke-chi-tiet.docx (detailed design — TKCT)
 
+    Auto-renders diagrams declared in `data.diagrams` (SVG Jinja2 hero + Mermaid)
+    into `{output_dir}/diagrams/` before filling DOCX. Supported entry forms:
+      - Mermaid (string):   "arch": "graph TD\\n..."
+      - SVG hero (dict):    "T1": {"template": "kien-truc-4-lop", "data": {...}}
+        Available SVG templates: kien-truc-4-lop (T1), ndxp-hub-spoke (T2),
+        swimlane-workflow (T3).
+
     Args:
         data_path: Path to content-data.json
         output_dir: Directory to write output files
         targets: Which files to export. Options: xlsx, hdsd, tkkt, tkcs, tkct. Default: all.
         screenshots_dir: Directory containing screenshots for HDSD (optional)
+        diagrams_dir: Pre-rendered diagrams directory. If set, auto-render is skipped.
+        auto_render_mermaid: If True (default), render `data.diagrams` before DOCX fill.
     """
     from etc_docgen.engines import docx as docx_engine
     from etc_docgen.engines import xlsx as xlsx_engine
@@ -196,37 +217,24 @@ def export(
 
     target_set = set(targets or ["xlsx", "hdsd", "tkkt", "tkcs", "tkct"])
 
-    # Auto-render Mermaid diagrams if data has `diagrams` block (Mermaid source)
-    # and caller didn't provide pre-rendered diagrams_dir.
-    mermaid_report = None
+    # Auto-render diagrams (SVG hero + Mermaid) if data has `diagrams` block
+    # and caller didn't provide a pre-rendered diagrams_dir.
+    diagram_report = None
     if auto_render_mermaid and diagrams_dir is None:
         try:
             data_preview = json.loads(data_file.read_text(encoding="utf-8"))
             if data_preview.get("diagrams"):
-                from etc_docgen.tools.render_mermaid import check_mmdc, render_one
+                from etc_docgen.engines import diagram as diagram_engine
 
                 render_dir = out_dir / "diagrams"
-                render_dir.mkdir(parents=True, exist_ok=True)
-                mmdc = check_mmdc()
-                mermaid_report = {"rendered": [], "failed": [], "mmdc_available": bool(mmdc)}
-                if mmdc:
-                    for key, source in data_preview["diagrams"].items():
-                        if not isinstance(source, str) or not source.strip():
-                            continue
-                        # Sanitize: strip null bytes and limit size (prevent shell abuse)
-                        source = source.replace("\x00", "").strip()
-                        if len(source) > 500_000:
-                            mermaid_report["failed"].append({"key": key, "error": "Source too large (>500KB)"})
-                            continue
-                        out_png = render_dir / f"{key}.png"
-                        ok, err = render_one(mmdc, source, out_png)
-                        if ok:
-                            mermaid_report["rendered"].append(key)
-                        else:
-                            mermaid_report["failed"].append({"key": key, "error": err[:200]})
+                dr = diagram_engine.render_all(data_preview, render_dir)
+                diagram_report = dr.to_dict()
+                if dr.rendered or any(
+                    (render_dir / f).exists() for f in ("",)  # render_dir created
+                ):
                     diagrams_dir = str(render_dir)
         except Exception as e:
-            mermaid_report = {"error": str(e)}
+            diagram_report = {"status": "failed", "error": f"{type(e).__name__}: {e}"}
 
     jobs = {
         "xlsx": {
@@ -317,11 +325,10 @@ def export(
     all_ok = all(r["success"] for r in results)
     elapsed = round(time.monotonic() - t0, 3)
     log.info("export done: success=%s targets=%d elapsed=%.3fs", all_ok, len(results), elapsed)
-    return json.dumps(
-        {"success": all_ok, "targets": results, "elapsed_s": elapsed},
-        ensure_ascii=False,
-        indent=2,
-    )
+    payload = {"success": all_ok, "targets": results, "elapsed_s": elapsed}
+    if diagram_report is not None:
+        payload["diagrams"] = diagram_report
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 @mcp.tool()
@@ -492,14 +499,15 @@ def merge_content(data_path: str, partial_json: str) -> str:
     if not isinstance(partial, dict):
         return json.dumps({"success": False, "error": "partial_json must be a JSON object"})
 
-    # Deep merge
+    # Deep merge — produces a new dict, never mutates caller inputs.
     def _deep_merge(base: dict, patch: dict) -> dict:
+        out = copy.deepcopy(base)
         for k, v in patch.items():
-            if k in base and isinstance(base[k], dict) and isinstance(v, dict):
-                _deep_merge(base[k], v)
+            if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+                out[k] = _deep_merge(out[k], v)
             else:
-                base[k] = v
-        return base
+                out[k] = copy.deepcopy(v)
+        return out
 
     merged = _deep_merge(existing, partial)
 

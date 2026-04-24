@@ -413,6 +413,8 @@ class Architecture(BaseModel):
     scope: str = ""
     system_overview: str = ""
     scope_description: str = ""
+    business_overview: str = Field(default="", description="Tổng quan nghiệp vụ — Business view per Khung KT CPĐT 4.0")
+    design_principles: str = Field(default="", description="Nguyên tắc thiết kế kiến trúc (scalability, security-by-design, modularity)")
     tech_stack: list[TechStackItem] = Field(default_factory=list)
     logical_description: str = ""
     components: list[ArchComponent] = Field(default_factory=list)
@@ -493,6 +495,43 @@ class TkcsData(BaseModel):
     # Diagrams (image filenames)
     architecture_diagram: str = Field(default="", description="Sơ đồ kiến trúc phương án chọn")
     data_model_diagram: str = Field(default="", description="Sơ đồ mô hình dữ liệu tổng quan")
+
+    # ── NĐ 45/2026 Điều 13 — 11-section expansion (added 2026-04) ──
+    # Sec 3c — Mục tiêu đầu tư (tách khỏi necessity)
+    objectives: str = Field(default="", description="Mục tiêu đầu tư tổng quát + cụ thể, có KPI đo được")
+
+    # Sec 5 — Phân tích lựa chọn công nghệ (chi tiết)
+    software_arch_pattern: str = Field(default="", description="Pattern kiến trúc phần mềm (microservices/monolith/SOA)")
+    dbms_choice: str = Field(default="", description="Lựa chọn DBMS có biện luận (RDBMS vs NoSQL, vendor)")
+    os_choice: str = Field(default="", description="Lựa chọn hệ điều hành máy chủ (Linux distro / Windows Server)")
+    standards: str = Field(default="", description="Tiêu chuẩn áp dụng (TCVN, ISO, IEEE, OpenAPI)")
+
+    # Sec 6d — Thiết kế phần mềm + hạ tầng chi tiết
+    software_design: str = Field(default="", description="Thiết kế phần mềm tổng quan (module, layer, interface)")
+    infrastructure_design: str = Field(default="", description="Thiết kế hạ tầng (server, network, storage)")
+
+    # Sec 7 — An toàn thông tin (chi tiết)
+    security_design: str = Field(default="", description="Thiết kế bảo mật chi tiết theo TCVN 11930 (quản lý/kỹ thuật/vật lý/con người/vận hành)")
+    security_tech: str = Field(default="", description="Giải pháp kỹ thuật ATTT (WAF, SIEM, IDS/IPS, mã hóa)")
+
+    # Sec 8 — Vận hành & chuẩn bị
+    prep_resources: str = Field(default="", description="Chuẩn bị nhân lực, thiết bị, hạ tầng vận hành")
+    prep_policies: str = Field(default="", description="Chuẩn bị quy chế, quy trình vận hành")
+    user_support: str = Field(default="", description="Phương án hỗ trợ, đào tạo người dùng")
+
+    # Sec 9 — Tiến độ chi tiết
+    milestones: str = Field(default="", description="Các mốc (milestone) chính của dự án")
+    schedule: str = Field(default="", description="Bảng tiến độ Gantt / WBS")
+
+    # Sec 10 — Kinh phí chi tiết
+    budget_detail: str = Field(default="", description="Chi tiết dự toán theo TT 04/2020/TT-BTTTT")
+    opex: str = Field(default="", description="Chi phí vận hành chi tiết (O&M) hàng năm")
+    warranty: str = Field(default="", description="Điều khoản bảo hành, bảo trì")
+
+    # Sec 11 — Quản lý dự án chi tiết
+    pm_form: str = Field(default="", description="Hình thức QLDA (BQL chuyên trách / kiêm nhiệm / thuê tư vấn)")
+    stakeholders: str = Field(default="", description="Các bên liên quan: chủ đầu tư, nhà thầu, tư vấn, thẩm định")
+    pm_method: str = Field(default="", description="Phương pháp QLDA (waterfall/agile/hybrid)")
 
 
 class DbColumn(BaseModel):
@@ -668,8 +707,12 @@ class ContentData(BaseModel):
 
     project: ProjectInfo
     dev_unit: str = Field(
-        default="Công ty CP Hệ thống Công nghệ ETC",
-        description="Development company name",
+        default="",
+        description=(
+            "Development company name. Left blank by default so downstream "
+            "renderers can flag it as '[CẦN BỔ SUNG]' instead of silently "
+            "stamping a hardcoded vendor on third-party projects."
+        ),
     )
     meta: Meta
     overview: Overview = Field(default_factory=Overview)

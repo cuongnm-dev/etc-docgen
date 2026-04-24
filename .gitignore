@@ -96,3 +96,6 @@ credentials.json
 
 # User content-data samples (not bundled, user-provided)
 content-data-local.json
+
+.env.local
+*.api-key

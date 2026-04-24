@@ -324,8 +324,14 @@ def _unmerge_data_region(ws, start_row: int, end_row: int, report: FillReport) -
 # ─────────────────────────── Row formatting helpers ───────────────────────────
 
 
-def _capture_row_styles(ws, row_num: int, max_col: int = 13) -> dict[int, dict]:
-    """Capture cell styles from a reference row for later replication."""
+def _capture_row_styles(ws, row_num: int, max_col: int | None = None) -> dict[int, dict]:
+    """Capture cell styles from a reference row for later replication.
+
+    If max_col is None, falls back to ws.max_column — avoids hardcoded 13-col
+    assumption which silently drops styles for wider templates.
+    """
+    if max_col is None:
+        max_col = ws.max_column or 1
     styles: dict[int, dict] = {}
     for col in range(1, max_col + 1):
         c = ws.cell(row=row_num, column=col)
