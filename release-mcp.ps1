@@ -1,4 +1,4 @@
-# release-mcp — Build, push, and roll out a new etc-platform MCP image.
+﻿# release-mcp — Build, push, and roll out a new etc-platform MCP image.
 # Usage:
 #   .\release-mcp.ps1 v3.1.0                  # build + push (no team-config bump)
 #   .\release-mcp.ps1 v3.1.0 -BumpTeam        # also update team-ai-config .env.example + git push

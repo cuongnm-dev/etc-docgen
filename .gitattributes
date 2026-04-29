@@ -1,0 +1,11 @@
+# Windows scripts: store as-is (BOM + CRLF preserved). PS 5.1 needs UTF-8 BOM to parse correctly;
+# `-text` tells git not to normalize line endings or strip BOM.
+*.ps1        -text
+*.cmd        -text
+*.bat        -text
+
+# Shell scripts: LF only
+*.sh         text eol=lf
+
+# Python: LF
+*.py         text eol=lf
