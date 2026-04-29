@@ -1,14 +1,14 @@
 # Cursor 3 integration
 
-Thin skill wrapper that orchestrates `etc-docgen` CLI from within Cursor agent chat.
+Thin skill wrapper that orchestrates `etc-platform` CLI from within Cursor agent chat.
 
 ## Installation
 
-1. Install `etc-docgen`:
+1. Install `etc-platform`:
    ```bash
-   pip install etc-docgen
+   pip install etc-platform
    # or editable from source
-   pip install -e /path/to/etc-docgen
+   pip install -e /path/to/etc-platform
    ```
 
 2. Copy skill to Cursor:
@@ -26,17 +26,17 @@ In Cursor chat:
 ```
 
 Skill guides you through:
-1. Create/edit `etc-docgen.yaml` (@-mention to help fill fields)
+1. Create/edit `etc-platform.yaml` (@-mention to help fill fields)
 2. Set credentials in environment
-3. Run `etc-docgen generate`
+3. Run `etc-platform generate`
 4. Review output + [CẦN BỔ SUNG] markers
 
 ## Cursor 3 optimizations
 
 | Phase | Cursor native leverage |
 |---|---|
-| Research | `@Codebase` semantic search → pass hints to `etc-docgen research` |
-| Capture | Playwright MCP directly OR `etc-docgen capture` (v0.2+) |
+| Research | `@Codebase` semantic search → pass hints to `etc-platform research` |
+| Capture | Playwright MCP directly OR `etc-platform capture` (v0.2+) |
 | Data review | Composer diff for `content-data.json` before save |
 | Export | Integrated terminal + multi-terminal parallel |
 

@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "services": {
+    "web-admin": {
+      "base_url": "http://localhost:3000",
+      "auth_required": true,
+      "auth_type": "JWT cookie + session",
+      "route_groups": [
+        {
+          "id": "auth",
+          "title": "Xác thực",
+          "routes": [
+            { "path": "/login", "auth_required": false, "title": "Đăng nhập" },
+            { "path": "/403", "auth_required": false, "title": "Không có quyền" }
+          ]
+        },
+        {
+          "id": "m01",
+          "title": "1. Kiểm tra hồ sơ",
+          "feature_id": "TQCS-20260420-001",
+          "routes": [
+            { "path": "/m01", "title": "Danh sách tờ khai", "roles": ["HQDK", "LANH_DAO"] },
+            { "path": "/m01/xac-nhan", "title": "Xác nhận đủ điều kiện", "roles": ["HQDK"] },
+            { "path": "/m01/yeu-cau-bo-sung", "title": "Yêu cầu bổ sung", "roles": ["HQDK"] },
+            { "path": "/m01/lich-su", "title": "Lịch sử hồ sơ", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m02",
+          "title": "2. Kiểm hóa",
+          "feature_id": "TQCS-20260420-002",
+          "routes": [
+            { "path": "/m02", "title": "Danh sách kiểm hóa", "roles": ["HQDK", "KIEM_HOA", "PHAN_CONG"] },
+            { "path": "/m02/dang-kiem", "title": "Đang kiểm", "roles": ["PHAN_CONG", "KIEM_HOA"] },
+            { "path": "/m02/:toKhaiId/ket-qua", "title": "Kết quả kiểm hóa", "roles": ["KIEM_HOA"] },
+            { "path": "/m02/:toKhaiId/phe-duyet", "title": "Phê duyệt kết quả", "roles": ["LANH_DAO"] },
+            { "path": "/m02/:toKhaiId/in", "title": "In phiếu kiểm hóa", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m03",
+          "title": "3. Chuyển luồng",
+          "feature_id": "TQCS-20260420-003",
+          "routes": [
+            { "path": "/m03", "title": "Danh sách chuyển luồng", "roles": ["HQDK"] },
+            { "path": "/m03/:toKhaiId", "title": "Chi tiết phân luồng", "roles": ["HQDK"] },
+            { "path": "/m03/:toKhaiId/de-xuat", "title": "Đề xuất chuyển luồng", "roles": ["HQDK"] },
+            { "path": "/m03/:toKhaiId/phe-duyet", "title": "Phê duyệt chuyển luồng", "roles": ["LANH_DAO"] },
+            { "path": "/m03/lich-su", "title": "Lịch sử chuyển luồng", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m04",
+          "title": "4. Thuế",
+          "feature_id": "TQCS-20260420-004",
+          "routes": [
+            { "path": "/m04", "title": "Danh sách thuế", "roles": ["HQDK"] },
+            { "path": "/m04/:toKhaiId/xac-nhan", "title": "Xác nhận nghĩa vụ thuế", "roles": ["HQDK"] },
+            { "path": "/m04/lich-su", "title": "Lịch sử thuế", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m05",
+          "title": "5. Thông quan",
+          "feature_id": "TQCS-20260420-005",
+          "routes": [
+            { "path": "/m05", "title": "Danh sách chờ thông quan", "roles": ["HQDK", "LANH_DAO"] },
+            { "path": "/m05/:toKhaiId", "title": "Chi tiết thông quan", "roles": ["HQDK", "LANH_DAO"] },
+            { "path": "/m05/:toKhaiId/in", "title": "In giấy thông quan", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m06",
+          "title": "6. Biên bản bàn giao",
+          "feature_id": "TQCS-20260420-006",
+          "routes": [
+            { "path": "/m06", "title": "Danh sách biên bản", "roles": ["HQDK", "LANH_DAO"] },
+            { "path": "/m06/de-xuat", "title": "Tạo biên bản", "roles": ["HQDK"] },
+            { "path": "/m06/phe-duyet", "title": "Phê duyệt biên bản", "roles": ["LANH_DAO"] },
+            { "path": "/m06/:bbbgId/xac-nhan-den", "title": "Xác nhận đến", "roles": ["HQDK"] },
+            { "path": "/m06/:bbbgId/xac-nhan-hang", "title": "Xác nhận hàng", "roles": ["HQDK"] },
+            { "path": "/m06/:bbbgId/yeu-cau-sua", "title": "Yêu cầu sửa", "roles": ["HQDK"] },
+            { "path": "/m06/:bbbgId/yeu-cau-huy", "title": "Yêu cầu hủy", "roles": ["HQDK"] },
+            { "path": "/m06/:bbbgId/cap-nhat", "title": "Cập nhật biên bản", "roles": ["HQDK"] },
+            { "path": "/m06/:bbbgId/in", "title": "In biên bản", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m07",
+          "title": "7. Kiểm hóa hộ",
+          "feature_id": "TQCS-20260420-007",
+          "routes": [
+            { "path": "/m07/danh-sach", "title": "Danh sách kiểm hóa hộ", "roles": ["HQDK", "PHAN_CONG", "KIEM_HOA"] },
+            { "path": "/m07/de-xuat", "title": "Tạo đơn kiểm hóa hộ", "roles": ["HQDK"] },
+            { "path": "/m07/phe-duyet", "title": "Phê duyệt", "roles": ["LANH_DAO"] },
+            { "path": "/m07/:kiemHoaHoId/phan-cong", "title": "Phân công", "roles": ["PHAN_CONG"] },
+            { "path": "/m07/:kiemHoaHoId/ket-qua", "title": "Kết quả", "roles": ["KIEM_HOA"] },
+            { "path": "/m07/:kiemHoaHoId/sua", "title": "Sửa đơn", "roles": ["HQDK"] },
+            { "path": "/m07/:kiemHoaHoId/huy", "title": "Hủy đơn", "roles": ["HQDK"] },
+            { "path": "/m07/:kiemHoaHoId/in", "title": "In kết quả", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m08",
+          "title": "8. Niêm phong",
+          "feature_id": "TQCS-20260420-008",
+          "routes": [
+            { "path": "/m08/de-xuat-bo", "title": "Đề xuất bỏ niêm phong", "roles": ["HQDK"] },
+            { "path": "/m08/de-xuat-moi", "title": "Đề xuất niêm phong mới", "roles": ["HQDK"] },
+            { "path": "/m08/xac-nhan", "title": "Xác nhận niêm phong", "roles": ["LANH_DAO"] },
+            { "path": "/m08/kiem-tra", "title": "Kiểm tra niêm phong", "roles": ["HQDK"] }
+          ]
+        },
+        {
+          "id": "m09",
+          "title": "9. Xác nhận hàng qua KVGS",
+          "feature_id": "TQCS-20260420-009",
+          "routes": [
+            { "path": "/m09/xac-nhan", "title": "Xác nhận qua KVGS", "roles": ["HQDK", "GIAM_SAT"] },
+            { "path": "/m09/bang-ke-container", "title": "Bảng kê container", "roles": ["HQDK"] },
+            { "path": "/m09/bang-ke-hang-roi", "title": "Bảng kê hàng rời", "roles": ["HQDK"] },
+            { "path": "/m09/huy-container", "title": "Hủy XN container", "roles": ["HQDK"] },
+            { "path": "/m09/huy-hang-roi", "title": "Hủy XN hàng rời", "roles": ["HQDK"] },
+            { "path": "/m09/container-chung", "title": "Container chung", "roles": ["HQDK"] },
+            { "path": "/m09/tra-cuu", "title": "Tra cứu KVGS", "roles": ["HQDK", "GIAM_SAT"] }
+          ]
+        },
+        {
+          "id": "m10",
+          "title": "10. KVGS / Lệnh dừng",
+          "feature_id": "TQCS-20260420-010",
+          "routes": [
+            { "path": "/m10/giam-sat", "title": "Giám sát KVGS", "roles": ["GIAM_SAT", "HQDK"] },
+            { "path": "/m10/lenh-dung", "title": "Danh sách lệnh dừng", "roles": ["GIAM_SAT", "LANH_DAO"] },
+            { "path": "/m10/:lenhDungId/giai-phong", "title": "Giải phóng lệnh dừng", "roles": ["LANH_DAO"] }
+          ]
+        },
+        {
+          "id": "m11",
+          "title": "11. Nghiệp vụ khác",
+          "feature_id": "TQCS-20260420-011",
+          "routes": [
+            { "path": "/m11", "title": "Hub M11", "roles": ["HQDK", "LANH_DAO"] },
+            { "path": "/m11/chuyen-dia-diem", "title": "Chuyển ĐDGS", "roles": ["HQDK"] },
+            { "path": "/m11/container/kvgs", "title": "Container KVGS", "roles": ["HQDK"] },
+            { "path": "/m11/nhap-container", "title": "Nhập container bulk", "roles": ["HQDK"] },
+            { "path": "/m11/duyet/yeu-cau-huy", "title": "Duyệt hủy TK", "roles": ["LANH_DAO"] },
+            { "path": "/m11/duyet/yeu-cau-sua", "title": "Duyệt sửa TK", "roles": ["LANH_DAO"] },
+            { "path": "/m11/khoi-phuc", "title": "Khôi phục TK", "roles": ["HQDK"] },
+            { "path": "/m11/huy-het-hieu-luc", "title": "Hủy hết hiệu lực", "roles": ["HQDK"] },
+            { "path": "/m11/ctdt/duyet-sua", "title": "Duyệt sửa CTDT", "roles": ["LANH_DAO"] },
+            { "path": "/m11/ctdt/duyet-huy", "title": "Duyệt hủy CTDT", "roles": ["LANH_DAO"] },
+            { "path": "/m11/yeu-cau/sua-danh-sach-container", "title": "YC sửa DS container", "roles": ["HQDK"] },
+            { "path": "/m11/duyet/sua-danh-sach-container", "title": "Duyệt sửa DS container", "roles": ["LANH_DAO"] },
+            { "path": "/m11/yeu-cau/huy-danh-sach-container", "title": "YC hủy DS container", "roles": ["HQDK"] },
+            { "path": "/m11/duyet/huy-danh-sach-container", "title": "Duyệt hủy DS container", "roles": ["LANH_DAO"] }
+          ]
+        },
+        {
+          "id": "m13",
+          "title": "13. Soi chiếu",
+          "feature_id": "TQCS-20260420-013",
+          "routes": [
+            { "path": "/m13/nhap-container", "title": "Nhập container soi chiếu", "roles": ["HQDK"] },
+            { "path": "/m13/ket-qua", "title": "Danh sách kết quả", "roles": ["HQDK", "GIAM_SAT"] },
+            { "path": "/m13/ket-qua/:id", "title": "Chi tiết kết quả soi chiếu", "roles": ["HQDK", "GIAM_SAT"] }
+          ]
+        }
+      ]
+    },
+    "api": {
+      "base_url": "http://localhost:4000",
+      "protocol": "HTTP REST + SSE"
+    },
+    "barcode-gateway": {
+      "base_url": "ws://localhost:4001",
+      "protocol": "WebSocket (Socket.IO)"
+    }
+  },
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

@@ -1,0 +1,187 @@
+# Schema for industry-grade test-case.xlsx (v2.0)
+# Reference: IEEE 829-2008, ISO/IEC/IEEE 29119-3, ISTQB Foundation
+# Structure: 9 sheets, 25 columns on UI/API Test Cases
+#
+# Philosophy:
+#   - Template generated programmatically by build_test_case_template.py
+#   - Engine fills CONTENT only (values + minor style touches);
+#     all formulas/dropdowns/conditional formatting baked into template
+#   - Data rows start at row 13 (header at row 12, summary bands rows 6-11)
+
+template: test-case.xlsx
+template_version: "v2.0"  # rebuilt 2026-04-27 from scratch
+analyzed_at: "2026-04-27"
+
+required_sheets:
+  - Trang bìa
+  - Hướng dẫn
+  - Tổng quan
+  - Tổng hợp kết quả
+  - Tên chức năng
+  - Tên API
+  - Dữ liệu test
+  - _Tra cứu
+
+# ─── Priority + Severity mappings (UI Vietnamese → English when needed) ───
+priority_map:           # already VN-native in v2 — identity map
+  "Rất cao": "Rất cao"
+  "Cao": "Cao"
+  "Trung bình": "Trung bình"
+  "Thấp": "Thấp"
+priority_default: "Trung bình"
+
+severity_default: "Major"
+
+# ─── Sheet writes ───
+sheets:
+  "Trang bìa":
+    preserve:
+      reason: "Generated from build_test_case_template.py — content driven by --data project block"
+    writes:
+      # Project info table cells (rows 11-16)
+      - cell: C11
+        source: $.project.display_name
+      - cell: C12
+        source: $.project.code
+      - cell: C13
+        source: $.project.client
+      - cell: C14
+        source: $.dev_unit
+      - cell: C15
+        source: $.project.description
+      - cell: C16
+        source: $.project.tech_stack
+      # Change history first row (row 20)
+      - cell: B20
+        source: $.meta.today
+      - cell: C20
+        source: $.meta.version
+        default: "1.0"
+      - cell: F20
+        source: $.dev_unit
+
+  "Tổng quan":
+    writes:
+      # Section values (rows 4-15) — keys hardcoded in template, values fill via $.project + $.meta
+      - cell: C4
+        source: $.project.description
+      - cell: C5
+        source: $.dev_unit
+      - cell: C6
+        source: $.project.client
+      - cell: C7
+        source: $.meta.version
+        default: "1.0"
+      - cell: C8
+        source: $.project.tech_stack
+      - cell: C9
+        source: $.project.test_env
+        default: "Web (Chrome/Edge/Firefox), backend localhost Docker"
+      - cell: C10
+        source: $.meta.test_period
+
+  "Tổng hợp kết quả":
+    preserve:
+      reason: "Pure formula sheet — no writes needed"
+
+  "Tên chức năng":
+    writes:
+      # Project metadata band rows 2-4
+      - cell: B2
+        source: $.project.display_name
+      - cell: B3
+        source: $.meta.version
+        default: "1.0"
+      - cell: B4
+        source: $.project.primary_tester
+        default: "[CẦN BỔ SUNG: Tester]"
+
+    data_table:
+      start_row: 13
+      end_row_hard_cap: 1000
+      clear_columns: [A, B, C, D, E, F, G, H, I, J, K, L, M, N]
+      source: $.test_cases.ui
+      format:
+        reference_row: 13
+        # data_row_height intentionally omitted → Excel auto-fit based on wrap_text
+        # Engine will NOT set row.height when this field is missing (line ~500 process_data_table)
+      row_template:
+        A: { source: $.tc_id, fallback_source: $.id }                                                       # Mã TC
+        B: { source: $.name }                                                     # Mục đích (title + role + module inline)
+        C: { source: $.priority }                                                 # Mức ưu tiên
+        D: { source: $.severity, default: "Major" }                               # Mức nghiêm trọng
+        E: { source: $.preconditions }                                            # Tiền điều kiện
+        F: { source: $.data_set, default: "" }                                    # Dữ liệu test
+        G: { source: $.steps, transform: "numbered_join" }                        # Các bước
+        H: { source: $.expected, transform: "numbered_join", fallback_source: $.steps, fallback_key: "expected" }  # Kết quả mong đợi
+        # I-L: Cycle 1+2 blank — tester fills (Pass/Fail + Open/Closed)
+        # M: ID Bug — tester fills
+        N: { source: $.notes, default: "" }                                       # Ghi chú
+
+  "Tên API":
+    writes:
+      - cell: B2
+        source: $.project.display_name
+      - cell: B3
+        source: $.meta.version
+        default: "1.0"
+      - cell: B4
+        source: $.project.primary_tester
+        default: "[CẦN BỔ SUNG: Tester]"
+
+    data_table:
+      start_row: 13
+      end_row_hard_cap: 1000
+      clear_columns: [A, B, C, D, E, F, G, H, I, J, K, L, M, N]
+      source: $.test_cases.api
+      format:
+        reference_row: 13
+        # data_row_height intentionally omitted → Excel auto-fit based on wrap_text
+        # Engine will NOT set row.height when this field is missing (line ~500 process_data_table)
+      row_template:
+        A: { source: $.tc_id, fallback_source: $.id }
+        B: { source: $.name }
+        C: { source: $.priority }
+        D: { source: $.preconditions }
+        E: { source: $.data_set, default: "" }
+        F: { source: $.steps, transform: "numbered_join" }
+        G: { source: $.expected, transform: "numbered_join", fallback_source: $.steps, fallback_key: "expected" }
+        M: { source: $.notes, default: "" }
+
+  "Danh sách lỗi":
+    preserve:
+      formula_cells: [C2]
+    writes: []   # tester fills manually OR populated from intel test-evidence.execution.failures[]
+
+  "Dữ liệu test":
+    preserve:
+      reason: "Static reference — no per-project writes"
+
+  "_Tra cứu":
+    writes:
+      # Backfill roles list at fill-time from project actor-registry
+      # Engine writes D2, D3, ... from $.lookups.roles[] when present
+      - cell: D2
+        source: $.lookups.roles
+        transform: "expand_to_column"
+
+# ─── Validators (post-fill) ───
+validators:
+  - name: "All required sheets present"
+    type: sheet_names_match
+    expected: ["Trang bìa", "Hướng dẫn", "Tổng quan", "Tổng hợp kết quả", "Tên chức năng", "Tên API", "Dữ liệu test", "_Tra cứu"]
+
+  - name: "Priority enum on Tên chức năng (col C)"
+    type: cell_values_in_set
+    sheet: "Tên chức năng"
+    column: C
+    start_row: 13
+    end_row: 1000
+    allowed: ["", "Rất cao", "Cao", "Trung bình", "Thấp", null]
+
+  - name: "TC count >= 1 on UI"
+    type: row_count_min
+    sheet: "Tên chức năng"
+    column: A
+    start_row: 13
+    min_count: 1

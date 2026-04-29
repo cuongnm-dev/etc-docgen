@@ -1,0 +1,159 @@
+{
+  "auth_interpretation": {
+    "M13": "Per Gate 1: any authenticated user with valid tenant (maHq) may call M13 endpoints unless future code adds @Roles; current code: JwtAuthGuard only.",
+    "non_M13": "End-user flows rely on @Roles per handler; ADMIN bypasses allow-list in RolesGuard"
+  },
+  "flows": [
+    {
+      "id": "FL-M01",
+      "module": "M01",
+      "name": "Kiểm tra hồ sơ tờ khai",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "steps": [
+        "Đăng nhập JWT theo Mã HQ",
+        "Tìm kiếm tờ khai (GET /api/to-khai/search)",
+        "Gửi yêu cầu bổ sung hoặc xác nhận đủ điều kiện",
+        "Xem lịch sử chứng từ"
+      ]
+    },
+    {
+      "id": "FL-M02",
+      "module": "M02",
+      "name": "Kiểm hóa tờ khai",
+      "primary_roles": ["LANH_DAO", "KIEM_HOA", "HQDK"],
+      "steps": [
+        "Lãnh đạo/ HQDK: xem tồn đọng, phân công bộ phận",
+        "Kiểm hóa: nhập kết quả",
+        "Lãnh đạo: phê duyệt kết quả",
+        "Tra cứu tờ khai đang xử lý (active)"
+      ]
+    },
+    {
+      "id": "FL-M03",
+      "module": "M03",
+      "name": "Chuyển luồng / phân luồng",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "steps": [
+        "Xem tình trạng kênh hiện tại",
+        "HQDK: tạo đề xuất chuyển luồng",
+        "LANH_DAO: phê duyệt chuyển luồng",
+        "Xem lịch sử và trạng thái sync"
+      ]
+    },
+    {
+      "id": "FL-M04",
+      "module": "M04",
+      "name": "Nghĩa vụ thuế",
+      "primary_roles": ["HQDK"],
+      "steps": [
+        "Mở nghĩa vụ thuế theo tờ khai",
+        "Xác nhận nghĩa vụ",
+        "Xem lịch sử thuế"
+      ]
+    },
+    {
+      "id": "FL-M05",
+      "module": "M05",
+      "name": "Thông quan / cấp G",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "steps": [
+        "Danh sách chờ cấp G",
+        "Cấp giấy thông quan / in",
+        "Tìm kiếm, đồng bộ trạng thái từ hệ thống liên quan"
+      ]
+    },
+    {
+      "id": "FL-M06",
+      "module": "M06",
+      "name": "Biên bản bàn giao",
+      "primary_roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+      "steps": [
+        "Lập/ cập nhật biên bản, xác nhận hàng/đến nơi",
+        "Giám sát: thao tác theo bước nghiệp vụ",
+        "Lãnh đạo: phê duyệt, in"
+      ]
+    },
+    {
+      "id": "FL-M07",
+      "module": "M07",
+      "name": "Kiểm hóa hộ",
+      "primary_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+      "steps": [
+        "Tạo/ xem phiên kiểm hóa hộ",
+        "Phân công khi thuộc thẩm quyền",
+        "Ghi kết quả, yêu cầu sửa/hủy, đính kèm",
+        "Duyệt hàng chờ; in xem trước"
+      ]
+    },
+    {
+      "id": "FL-M08",
+      "module": "M08",
+      "name": "Niêm phong",
+      "primary_roles": ["HQDK", "GIAM_SAT"],
+      "steps": [
+        "Tạo đề xuất bỏ/ mới niêm phong",
+        "Danh sách chờ, xác nhận, kiểm tra",
+        "Sẵn sàng KVGS khi xong bước nghiệp vụ"
+      ]
+    },
+    {
+      "id": "FL-M09",
+      "module": "M09",
+      "name": "Xác nhận qua KVGS",
+      "primary_roles": ["GIAM_SAT", "HQDK"],
+      "steps": [
+        "Xác nhận hàng qua trạm (container/hàng rời)",
+        "Hủy xác nhận, container chung",
+        "Cổng nội bộ: post scan từ thiết bị (InternalToken)"
+      ]
+    },
+    {
+      "id": "FL-M10",
+      "module": "M10",
+      "name": "KVGS / lệnh dừng",
+      "primary_roles": ["GIAM_SAT", "LANH_DAO", "HQDK"],
+      "steps": [
+        "Tạo lệnh dừng, xem tồn lệnh",
+        "Lãnh đạo/ giám sát: gỡ lệnh theo nghiệp vụ"
+      ]
+    },
+    {
+      "id": "FL-M11",
+      "module": "M11",
+      "name": "Nghiệp vụ khác (CTDD, tờ khai, container)",
+      "primary_roles": ["HQDK", "LANH_DAO", "GIAM_SAT"],
+      "steps": [
+        "Vận hành CTDT, chuyển ĐDGS, yêu cầu/duyệt tờ khai",
+        "Duyệt sửa/hủy danh sách container",
+        "Hủy toàn bộ hiện lực, khôi phục, nhập container bulk"
+      ]
+    },
+    {
+      "id": "FL-M12",
+      "module": "M12",
+      "maturity": "assumed",
+      "name": "Tra cứu & báo cáo (chỉ đọc)",
+      "note": "Chưa có implementation trong repo; mapping nghiệp vụ từ TQCS-20260420-012",
+      "primary_roles": ["HQDK", "GIAM_SAT"],
+      "steps": [
+        "Tìm theo Mã HQ và tiêu chí màn hình (spec)",
+        "Xem/ in báo cáo read-only, không sửa trạng thái nghiệp vụ"
+      ]
+    },
+    {
+      "id": "FL-M13",
+      "module": "M13",
+      "name": "Soi chiếu container tại cảng",
+      "primary_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+      "steps": [
+        "Đăng nhập tenant bất kỳ (Gate 1 auth interpretation)",
+        "Tạo bản ghi soi chiếu / tra cứu e-manifest, tờ khai XK",
+        "Ghi nhận kết quả soi chiếu"
+      ]
+    }
+  ],
+  "meta": {
+    "date": "2026-04-25",
+    "stage": 2
+  }
+}

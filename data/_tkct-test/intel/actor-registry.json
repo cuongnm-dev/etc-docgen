@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "auth_mode": "RBAC",
+  "tenant_isolation": {
+    "enabled": true,
+    "field": "maHq",
+    "description": "Mọi query đều filter theo maHq từ JWT — TenantRepository enforce WHERE ma_hq = :maHq"
+  },
+  "roles": [
+    {
+      "slug": "ADMIN",
+      "display_name": "Quản trị viên",
+      "description": "Full access — bypass tất cả @Roles() checks (dùng cho QA/dev)",
+      "permissions": ["*"]
+    },
+    {
+      "slug": "HQDK",
+      "display_name": "Cán bộ Hải quan đăng ký",
+      "description": "Nghiệp vụ chính: kiểm tra hồ sơ, phân luồng, thông quan, niêm phong",
+      "modules": ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m11", "m13"]
+    },
+    {
+      "slug": "KIEM_HOA",
+      "display_name": "Cán bộ kiểm hóa",
+      "description": "Thực hiện kiểm hóa thực tế (M02), kiểm hóa hộ (M07)",
+      "modules": ["m02", "m07"]
+    },
+    {
+      "slug": "PHAN_CONG",
+      "display_name": "Cán bộ phân công kiểm hóa",
+      "description": "Phân công cán bộ thực hiện kiểm hóa",
+      "modules": ["m02", "m07"]
+    },
+    {
+      "slug": "LANH_DAO",
+      "display_name": "Lãnh đạo hải quan",
+      "description": "Phê duyệt: chuyển luồng, thông quan, KVGS lệnh dừng, biên bản bàn giao",
+      "modules": ["m03", "m05", "m06", "m07", "m10", "m11"]
+    },
+    {
+      "slug": "GIAM_SAT",
+      "display_name": "Giám sát KVGS",
+      "description": "Vận hành khu vực giám sát: lệnh dừng, xem active holds, SSE events",
+      "modules": ["m09", "m10"]
+    }
+  ],
+  "extracted_at": "2026-04-25T00:00:00Z",
+  "source": "src/services/api/src/common/auth/role.enum.ts + roles.guard.ts + tenant.repository.ts"
+}

@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "etc-docgen"
-version = "1.0.0"
+name = "etc-platform"
+version = "3.0.0"
 description = "Template-first documentation generator for ETC projects — turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,6 +34,9 @@ dependencies = [
     "rich>=13.0.0",                # Pretty CLI output
     "jinja2>=3.1.0",
     "mcp>=1.0.0",                  # MCP server SDK
+    "fastapi>=0.110.0",            # HTTP job API
+    "python-multipart>=0.0.9",     # multipart/form-data for /uploads
+    "starlette>=0.36.0",           # ASGI plumbing (mount MCP + HTTP)
 ]
 
 [project.optional-dependencies]
@@ -42,7 +45,8 @@ capture = [
     "requests>=2.31.0",
 ]
 serve = [
-    "uvicorn>=0.27.0",             # SSE / streamable-http transport
+    "uvicorn[standard]>=0.27.0",   # ASGI server with httptools + websockets
+    "httpx>=0.27.0",               # used by FastAPI test client
 ]
 web = [
     "mkdocs>=1.5.0",
@@ -55,29 +59,31 @@ dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.21.0",
+    "httpx>=0.27.0",
     "ruff>=0.1.0",
     "mypy>=1.7.0",
     "types-PyYAML",
     "types-Pillow",
 ]
-all = ["etc-docgen[capture,serve,web,xray,dev]"]
+all = ["etc-platform[capture,serve,web,xray,dev]"]
 
 [project.scripts]
-etc-docgen = "etc_docgen.cli:app"
-etc-docgen-mcp = "etc_docgen.mcp_server:main"
+etc-platform = "etc_platform.cli:app"
+etc-platform-mcp = "etc_platform.mcp_server:main"
+etc-platform-server = "etc_platform.server:main"
 
 [project.urls]
-Homepage = "https://github.com/etc-vn/etc-docgen"
-Documentation = "https://etc-vn.github.io/etc-docgen/"
-Repository = "https://github.com/etc-vn/etc-docgen"
-Changelog = "https://github.com/etc-vn/etc-docgen/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/etc-vn/etc-platform"
+Documentation = "https://etc-vn.github.io/etc-platform/"
+Repository = "https://github.com/etc-vn/etc-platform"
+Changelog = "https://github.com/etc-vn/etc-platform/blob/main/CHANGELOG.md"
 
 # ─── Hatch build config (src layout) ───
 [tool.hatch.build.targets.wheel]
-packages = ["src/etc_docgen"]
+packages = ["src/etc_platform"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/etc_docgen/assets" = "etc_docgen/assets"
+"src/etc_platform/assets" = "etc_platform/assets"
 
 # ─── Tooling ───
 [tool.ruff]
@@ -118,7 +124,7 @@ python_files = ["test_*.py"]
 addopts = [
     "-ra",
     "--strict-markers",
-    "--cov=etc_docgen",
+    "--cov=etc_platform",
     "--cov-report=term-missing",
 ]
 markers = [
@@ -127,8 +133,8 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/etc_docgen"]
+source = ["src/etc_platform"]
 omit = [
-    "src/etc_docgen/__main__.py",
+    "src/etc_platform/__main__.py",
     "tests/*",
 ]

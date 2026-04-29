@@ -1,0 +1,68 @@
+{
+  "authn": {
+    "dev_token": {
+      "body": ["maHq", "role", "userId?"],
+      "enabled_when": "ENABLE_DEV_TOKEN=true",
+      "path": "POST /api/dev/token",
+      "ref": "src/services/api/src/common/auth/dev-token.controller.ts"
+    },
+    "login": {
+      "path": "POST /api/auth/login",
+      "ref": "src/services/api/src/common/auth/auth.controller.ts"
+    },
+    "jwt": {
+      "optional_claims": ["hoTen"],
+      "ref": "src/services/api/src/common/auth/jwt.strategy.ts",
+      "required_claims": ["maHq", "role", "sub"],
+      "source": "Authorization: Bearer"
+    }
+  },
+  "discovery_path": "B-code-first",
+  "rbac": {
+    "assignment": "JWT carries one Role enum per session; AppUser.role persisted",
+    "decorator": "@Roles",
+    "guards": ["JwtAuthGuard", "RolesGuard"],
+    "notes": "ADMIN bypasses @Roles allow-list",
+    "ref_admin_bypass": "src/services/api/src/common/auth/roles.guard.ts",
+    "ref_decorator": "src/services/api/src/common/auth/roles.decorator.ts"
+  },
+  "roles": [
+    {
+      "id": "ADMIN",
+      "jwt": "ADMIN",
+      "notes": "Bypasses @Roles checks (QA)",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    },
+    {
+      "id": "GIAM_SAT",
+      "jwt": "GIAM_SAT",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    },
+    {
+      "id": "HQDK",
+      "jwt": "HQDK",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    },
+    {
+      "id": "KIEM_HOA",
+      "jwt": "KIEM_HOA",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    },
+    {
+      "id": "LANH_DAO",
+      "jwt": "LANH_DAO",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    },
+    {
+      "id": "PHAN_CONG",
+      "jwt": "PHAN_CONG",
+      "ref": "src/services/api/src/common/auth/role.enum.ts"
+    }
+  ],
+  "tenant": {
+    "claim": "maHq",
+    "length": 5,
+    "ref": "src/services/api/src/common/auth/jwt-user.interface.ts",
+    "rule": "Validated at JWT issue (login + dev/token); missing maHq rejects in JwtStrategy"
+  }
+}

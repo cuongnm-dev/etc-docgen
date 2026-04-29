@@ -236,7 +236,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Show what would be changed, don't write")
     args = ap.parse_args()
 
-    root = Path(__file__).parent.parent / "src" / "etc_docgen" / "assets" / "templates"
+    root = Path(__file__).parent.parent / "src" / "etc_platform" / "assets" / "templates"
     targets = [Path(p) for p in args.templates] if args.templates else list(root.glob("*.docx"))
 
     if not targets:

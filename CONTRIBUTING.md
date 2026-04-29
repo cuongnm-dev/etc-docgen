@@ -1,10 +1,10 @@
-# Contributing to etc-docgen
+# Contributing to etc-platform
 
 ## Development setup
 
 ```bash
-git clone https://github.com/etc-vn/etc-docgen
-cd etc-docgen
+git clone https://github.com/etc-vn/etc-platform
+cd etc-platform
 python -m venv .venv
 .venv/Scripts/activate   # Windows
 # source .venv/bin/activate   # Unix
@@ -16,24 +16,29 @@ pip install -e ".[dev]"
 ```bash
 pytest                           # All tests
 pytest tests/unit               # Unit only
+pytest tests/integration/http   # HTTP integration tests (requires uvicorn)
 pytest -m "not slow"            # Fast tests
 pytest --cov                    # With coverage
 ```
+
+> **Note:** HTTP integration tests (`tests/integration/http/`) import `httpx`, which is
+> included in `.[dev]`. For the full test suite (including integration), install with
+> `pip install -e ".[dev]"` — no extra extras needed.
 
 ## Lint + format
 
 ```bash
 ruff check .                    # Lint
 ruff format .                   # Auto-format
-mypy src/etc_docgen             # Type check
+mypy src/etc_platform           # Type check
 ```
 
 ## Adding a new template (ETC version upgrade)
 
-1. Save new ETC template to `src/etc_docgen/assets/templates/source/`
+1. Save new ETC template to `src/etc_platform/assets/templates/source/`
 2. Fork via CLI:
    ```bash
-   etc-docgen template fork src/etc_docgen/assets/templates/source/new-hdsd.docx --kind hdsd
+   etc-platform template fork src/etc_platform/assets/templates/source/new-hdsd.docx --kind hdsd
    ```
 3. Run regression test:
    ```bash
@@ -45,15 +50,16 @@ mypy src/etc_docgen             # Type check
 ## Project structure
 
 ```
-src/etc_docgen/
+src/etc_platform/
 ├── cli.py               # User-facing CLI (typer)
 ├── config.py            # Pydantic config model
 ├── paths.py             # Resolve bundled assets
 ├── engines/             # Pure render logic (xlsx, docx)
 ├── capture/             # Playwright + auth
-├── research/            # Codebase analysis (v0.2+)
+├── research/            # Codebase analysis
 ├── data/                # content-data builder + schema
-├── sharding/            # Enterprise-scale splitter (v0.2+)
+├── jobs/                # Async job queue + HTTP API
+├── sharding/            # Enterprise-scale splitter
 ├── integrations/        # Jira, Confluence, etc.
 ├── assets/              # Bundled templates + schemas (PEP 302)
 └── tools/               # One-time utilities (jinjafy, extract)
@@ -90,8 +96,8 @@ Closes #12
 
 ## Release process (for maintainers)
 
-1. Update version in `src/etc_docgen/__init__.py` + `pyproject.toml`
+1. Update version in `src/etc_platform/__init__.py` + `pyproject.toml`
 2. Update `CHANGELOG.md`
-3. Tag: `git tag v0.1.1 -m "Release v0.1.1"`
+3. Tag: `git tag v3.0.1 -m "Release v3.0.1"`
 4. Push: `git push --tags`
 5. GitHub Actions auto-builds wheel + publishes

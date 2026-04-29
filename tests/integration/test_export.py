@@ -55,7 +55,7 @@ def data_file(tmp_path):
 
 @pytest.mark.integration
 def test_export_hdsd(data_file, tmp_path):
-    from etc_docgen.mcp_server import export
+    from etc_platform.mcp_server import export
     out_dir = tmp_path / "output"
     result = export(str(data_file), str(out_dir), targets=["hdsd"])
     parsed = json.loads(result)
@@ -67,7 +67,7 @@ def test_export_hdsd(data_file, tmp_path):
 
 @pytest.mark.integration
 def test_export_xlsx(data_file, tmp_path):
-    from etc_docgen.mcp_server import export
+    from etc_platform.mcp_server import export
     out_dir = tmp_path / "output"
     result = export(str(data_file), str(out_dir), targets=["xlsx"])
     parsed = json.loads(result)
@@ -76,7 +76,7 @@ def test_export_xlsx(data_file, tmp_path):
 
 @pytest.mark.integration
 def test_export_missing_data_file(tmp_path):
-    from etc_docgen.mcp_server import export
+    from etc_platform.mcp_server import export
     out_dir = tmp_path / "output"
     result = export(str(tmp_path / "nonexistent.json"), str(out_dir))
     parsed = json.loads(result)
@@ -86,7 +86,7 @@ def test_export_missing_data_file(tmp_path):
 @pytest.mark.integration
 def test_export_all_targets(data_file, tmp_path):
     """Export all 5 doc types and verify all files created."""
-    from etc_docgen.mcp_server import export
+    from etc_platform.mcp_server import export
     out_dir = tmp_path / "output"
     result = export(str(data_file), str(out_dir))
     parsed = json.loads(result)

@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "pipeline": "from-code",
+  "pipeline_version": "1.0",
+  "workspace_path": "d:/Projects/customs-clearance-system",
+  "produced_at": "2026-04-25T00:00:00Z",
+  "producer": "from-code --rescan",
+  "ttl_days": 30,
+  "merged_from": ["from-code-p1a", "from-code-p1b", "from-code-p1c", "from-code-p1d", "from-code-p1e", "from-code-p1g"],
+  "artifacts": {
+    "stack-facts.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1a",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "auth-rules.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1d",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "routes.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1b",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "entities.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1c",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "integrations.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1e",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "test-map.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1g",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "code-facts.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-merge",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "actor-registry.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1.5",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "permission-matrix.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p1.5",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "feature-catalog.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p3",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    },
+    "sitemap.json": {
+      "status": "fresh",
+      "produced_at": "2026-04-25T00:00:00Z",
+      "producer": "from-code-p3",
+      "ttl_days": 30,
+      "stale": false,
+      "locked_fields": []
+    }
+  }
+}

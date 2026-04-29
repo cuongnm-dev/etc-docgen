@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "created": "2026-04-25T00:00:00Z",
+  "workspace_path": "d:/Projects/customs-clearance-system",
+  "repo_type": "mono",
+  "current_step": "8",
+  "steps": {
+    "0":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "1":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z", "sub": {"1a":"done","1b":"done","1c":"done","1d":"done","1e":"done","1f":"skipped","1g":"done"} },
+    "2":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "gate-0": { "status": "done", "confirmed": true, "iterations": 0 },
+    "3":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "4":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "5":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "gate-a": { "status": "done", "confirmed": true, "iterations": 0 },
+    "6":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "gate-b": { "status": "done", "confirmed": true, "iterations": 0 },
+    "7":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" },
+    "8":  { "status": "done", "completed_at": "2026-04-25T00:00:00Z" }
+  },
+  "config": {
+    "repo_path": "d:/Projects/customs-clearance-system",
+    "detected_stack": {
+      "repo_type": "mono",
+      "services": ["web-admin", "api", "barcode-gateway"],
+      "frameworks": ["nextjs@15", "nestjs@10", "nestjs@10"],
+      "databases": ["postgresql", "redis"],
+      "build_tool": "turbo",
+      "package_manager": "pnpm"
+    },
+    "selected_adapters": ["nestjs", "nextjs"],
+    "services": ["web-admin", "api", "barcode-gateway"],
+    "per_service_docs": true,
+    "interview_context": {
+      "stack_context": {
+        "repo_type": "mono",
+        "domain": "customs-clearance",
+        "modules": ["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m13"],
+        "auth": "JWT RBAC with 6 roles + tenant isolation by maHq",
+        "integrations": ["VNACCS", "eTax", "eManifest", "KVGS-barcode"]
+      },
+      "feature_notes": {},
+      "arch_context": {},
+      "nfr_targets": {},
+      "domain_boundaries": {}
+    }
+  },
+  "artifacts": {
+    "stack-facts.json": { "step": "1a", "status": "done" },
+    "auth-rules.json": { "step": "1d", "status": "done" }
+  }
+}

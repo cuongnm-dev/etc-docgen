@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-003",
+  "feature_name": "Phân luồng / Chuyển luồng (M03)",
+  "module": "m03",
+  "feature_catalog_fingerprint": "sha256:0cac34648ce4761e7010c238781191da6bd376c648beb20bfeb92c77b00f34d3",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Login admin/admin",
+  "steps": [
+    {
+      "step": 1,
+      "state": "main",
+      "page_url": "http://localhost:3000/m03",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-003-step-01-main.png"
+    },
+    {
+      "step": 2,
+      "state": "history",
+      "page_url": "http://localhost:3000/m03/lich-su",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-003-step-02-history.png"
+    }
+  ]
+}

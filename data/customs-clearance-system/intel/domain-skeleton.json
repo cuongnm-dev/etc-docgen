@@ -1,0 +1,140 @@
+{
+  "aggregate": {
+    "name": "ToKhai",
+    "ref": "src/services/api/src/modules/clearance-domain/entities/to-khai.entity.ts"
+  },
+  "discovery_path": "B-code-first",
+  "fe_surface": {
+    "layout": "src/apps/web-admin/src/app/(clearance)",
+    "modules": ["m01", "m02", "m03", "m04", "m05", "m06", "m07", "m08", "m09", "m10", "m11", "m13"],
+    "note": "No m12 route tree under (clearance) in repo scan"
+  },
+  "modules": [
+    {
+      "entities": ["yeu-cau-bo-sung"],
+      "fe": "m01",
+      "id": "M01",
+      "nest": "DocumentCheckModule",
+      "paths": ["api/to-khai"]
+    },
+    {
+      "entities": ["kiem-hoa"],
+      "fe": "m02",
+      "id": "M02",
+      "nest": "InspectionModule",
+      "paths": ["api/inspection"]
+    },
+    {
+      "entities": ["de-xuat-chuyen-luong", "phan-luong", "vnaccs-outbox"],
+      "fe": "m03",
+      "id": "M03",
+      "nest": "ChannelModule",
+      "paths": ["api/channel"]
+    },
+    {
+      "entities": ["nghia-vu-thue"],
+      "fe": "m04",
+      "id": "M04",
+      "nest": "TaxModule",
+      "paths": ["api/tax"]
+    },
+    {
+      "entities": ["giay-thong-quan"],
+      "fe": "m05",
+      "id": "M05",
+      "nest": "ClearanceModule",
+      "paths": ["api/clearance"]
+    },
+    {
+      "entities": ["bien-ban-ban-giao"],
+      "fe": "m06",
+      "id": "M06",
+      "nest": "HandoverModule",
+      "paths": ["api/handover"]
+    },
+    {
+      "entities": ["approval-request", "kiem-hoa-ho", "ket-qua-kiem-hoa-ho", "m07-attachment"],
+      "fe": "m07",
+      "id": "M07",
+      "nest": "M07ProxyInspectionModule",
+      "paths": ["api/m07/kiem-hoa-ho"]
+    },
+    {
+      "entities": ["container", "niem-phong"],
+      "fe": "m08",
+      "id": "M08",
+      "nest": "SealingModule",
+      "paths": ["api/sealing"]
+    },
+    {
+      "entities": ["container-to-khai", "hang-roi", "kvgs-xac-nhan"],
+      "fe": "m09",
+      "id": "M09",
+      "nest": "M09KvgsConfirmationModule",
+      "paths": ["api/kvgs/xac-nhan", "api/internal/kvgs"]
+    },
+    {
+      "entities": ["lenh-dung"],
+      "fe": "m10",
+      "id": "M10",
+      "nest": "KvgsModule",
+      "paths": ["api/kvgs"]
+    },
+    {
+      "entities": [
+        "container-list-yeu-cau",
+        "container-manifest-pending",
+        "ctdt",
+        "dia-diem-giam-sat",
+        "lich-su-dia-diem",
+        "to-khai-dia-diem-giam-sat",
+        "to-khai-huy-snapshot",
+        "yeu-cau-to-khai"
+      ],
+      "fe": "m11",
+      "id": "M11",
+      "nest": "M11Module",
+      "paths": [
+        "api/m11/batch-huy",
+        "api/m11/container",
+        "api/m11/ctdt",
+        "api/m11/dia-diem",
+        "api/m11/duyet/huy-danh-sach-container",
+        "api/m11/duyet/sua-danh-sach-container",
+        "api/m11/to-khai",
+        "api/m11/yeu-cau-to-khai"
+      ]
+    },
+    {
+      "entities": ["container-soi-chieu", "ket-qua-soi-chieu"],
+      "fe": "m13",
+      "id": "M13",
+      "nest": "M13SoiChieuModule",
+      "paths": ["api/m13/containers"],
+      "rbac_note": "Controller uses JwtAuthGuard only; no @Roles on class"
+    },
+    {
+      "cross_cutting": true,
+      "entities": ["audit-log"],
+      "id": "audit",
+      "nest": "AuditModule",
+      "paths": []
+    },
+    {
+      "cross_cutting": true,
+      "entities": ["app-user"],
+      "id": "auth_store",
+      "nest": "AuthModule",
+      "paths": ["api/auth", "api/dev"]
+    }
+  ],
+  "observed_gap": {
+    "m12": "Referenced in feature docs under src/services/api/docs/features but no M12 Nest module in app.module.ts"
+  },
+  "peripheral": {
+    "barcode_gateway": {
+      "paths": ["internal/barcode"],
+      "ref": "src/services/barcode-gateway/src/barcode/barcode-simulate.controller.ts"
+    }
+  }
+}

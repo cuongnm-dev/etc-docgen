@@ -1,18 +1,24 @@
-# etc-docgen MCP Server — SSE transport for remote IDE integration
+# etc-platform unified server — HTTP job API + MCP transports.
 #
 # Build:
-#   docker build -t etc-docgen-mcp .
+#   docker build -t etc-platform .
 #
 # Run:
-#   docker run -p 8000:8000 etc-docgen-mcp
+#   docker run -p 8001:8000 -v $(pwd)/data:/data etc-platform
 #
-# Connect from IDE:
-#   SSE endpoint: http://localhost:8000/sse
+# Endpoints:
+#   POST /uploads             — multipart upload of content_data.json
+#   POST /jobs                — create render job
+#   GET  /jobs/{id}           — poll status
+#   GET  /jobs/{id}/files/... — download outputs
+#   /mcp                      — MCP streamable-http transport
+#   /sse                      — MCP SSE transport (legacy)
+#   /healthz, /readyz         — probes
 
 FROM python:3.12-slim
 
 LABEL maintainer="Công ty CP Hệ thống Công nghệ ETC"
-LABEL description="etc-docgen MCP Server (SSE transport)"
+LABEL description="etc-platform MCP Server (SSE transport)"
 
 WORKDIR /app
 
@@ -42,7 +48,7 @@ RUN pip install --no-cache-dir --upgrade pip
 COPY pyproject.toml README.md LICENSE ./
 COPY src/ src/
 
-# Install etc-docgen with serve (uvicorn) extra
+# Install etc-platform with serve (uvicorn) extra
 RUN pip install --no-cache-dir ".[serve]"
 
 # Non-root user for security
@@ -51,10 +57,11 @@ USER docgen
 
 EXPOSE 8000
 
-# Health check — SSE endpoint responds
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/sse')" || exit 1
+# Health check — HTTP /healthz responds quickly without touching storage.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz', timeout=3).status==200 else 1)" \
+    || exit 1
 
-# Default: SSE on all interfaces
-ENTRYPOINT ["etc-docgen-mcp"]
-CMD ["--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
+# Default: unified ASGI server (HTTP + MCP) on all interfaces.
+ENTRYPOINT ["etc-platform-server"]
+CMD ["--host", "0.0.0.0", "--port", "8000"]

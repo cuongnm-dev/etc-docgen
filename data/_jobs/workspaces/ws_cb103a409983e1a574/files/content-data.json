@@ -1,0 +1,5104 @@
+{
+  "project": {
+    "display_name": "Hệ thống Thông quan Hải quan Cơ sở",
+    "code": "TQCS",
+    "client": "Tổng cục Hải quan",
+    "description": "TQCS — kiểm tra, phân luồng, kiểm hóa, thông quan",
+    "tech_stack": "NestJS + Next.js + PostgreSQL + Docker"
+  },
+  "dev_unit": "Công ty TNHH ETC",
+  "meta": {
+    "today": "28/04/2026",
+    "version": "1.0",
+    "test_period": ""
+  },
+  "overview": {
+    "purpose": "Tài liệu Thiết kế Chi tiết (TKCT) trình bày chi tiết kỹ thuật để đội phát triển triển khai thi công hệ thống theo Thiết kế Cơ sở đã được phê duyệt.",
+    "scope": "Phạm vi tài liệu bao gồm 12 phân hệ chức năng, 21 bảng cơ sở dữ liệu, 103 điểm cuối API, 24 màn hình giao diện, và 4 điểm tích hợp bên ngoài.",
+    "terms": [
+      {
+        "short": "TKCT",
+        "full": "Thiết kế Chi tiết",
+        "explanation": "Tài liệu thiết kế kỹ thuật chi tiết phục vụ thi công"
+      },
+      {
+        "short": "TKCS",
+        "full": "Thiết kế Cơ sở",
+        "explanation": "Tài liệu thiết kế tổng quan phục vụ phê duyệt chủ trương"
+      },
+      {
+        "short": "TKKT",
+        "full": "Thiết kế Kiến trúc",
+        "explanation": "Tài liệu kiến trúc hệ thống tổng thể"
+      },
+      {
+        "short": "API",
+        "full": "Application Programming Interface",
+        "explanation": "Giao diện lập trình ứng dụng"
+      },
+      {
+        "short": "JWT",
+        "full": "JSON Web Token",
+        "explanation": "Chuẩn mã hóa token xác thực"
+      },
+      {
+        "short": "RBAC",
+        "full": "Role-Based Access Control",
+        "explanation": "Kiểm soát truy cập dựa trên vai trò"
+      },
+      {
+        "short": "PII",
+        "full": "Personally Identifiable Information",
+        "explanation": "Thông tin cá nhân nhạy cảm"
+      },
+      {
+        "short": "ERD",
+        "full": "Entity Relationship Diagram",
+        "explanation": "Sơ đồ quan hệ thực thể CSDL"
+      }
+    ],
+    "references": [
+      {
+        "stt": "1",
+        "name": "Tài liệu Thiết kế Cơ sở (TKCS)",
+        "ref": "—"
+      },
+      {
+        "stt": "2",
+        "name": "Tài liệu Thiết kế Kiến trúc (TKKT)",
+        "ref": "—"
+      },
+      {
+        "stt": "3",
+        "name": "Hướng dẫn sử dụng (HDSD)",
+        "ref": "—"
+      },
+      {
+        "stt": "4",
+        "name": "Kịch bản kiểm thử (Test Case)",
+        "ref": "—"
+      }
+    ]
+  },
+  "services": [
+    {
+      "display_name": "Hướng dẫn cho Cán bộ Hải quan đăng ký",
+      "name": "Cán bộ Hải quan đăng ký",
+      "features": [
+        {
+          "id": "F-001",
+          "name": "Kiểm tra hồ sơ (M01)",
+          "description": "Chức năng này hỗ trợ Cán bộ Hải quan đăng ký tiếp nhận và rà soát hồ sơ tờ khai hải quan trước khi đưa sang bước phân luồng kiểm tra.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai cần kiểm tra đã được doanh nghiệp gửi vào hệ thống.",
+          "ui_elements": [
+            {
+              "label": "Menu **1. Kiểm tra hồ sơ**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Khi hồ sơ đã đầy đủ, nhấn **[Xác nhận đủ điều kiện]** để chuyển tờ khai sang bước phân luồng.",
+              "screenshot": "TQCS-20260420-001-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-002",
+          "name": "Phân luồng / Chuyển luồng (M03)",
+          "description": "Chức năng này giúp xác định mức độ kiểm tra cho mỗi tờ khai theo nguyên tắc phân loại rủi ro với ba luồng Xanh, Vàng, Đỏ.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã hoàn tất bước kiểm tra hồ sơ.",
+          "ui_elements": [
+            {
+              "label": "Menu **3. Chuyển luồng**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Chọn tờ khai cần chuyển luồng, nhấn **[Đề xuất chuyển luồng]**, chọn luồng đích, nhập **lý do** và nhấn **[Gửi đề xuất]**.",
+              "screenshot": "TQCS-20260420-003-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-003",
+          "name": "Thuế (M04)",
+          "description": "Chức năng này giúp Cán bộ Hải quan đăng ký kiểm tra và xác nhận nghĩa vụ thuế của doanh nghiệp trước khi thông quan.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký. Tờ khai đã có kết quả phân luồng.",
+          "ui_elements": [
+            {
+              "label": "Menu **4. Thuế**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Truy cập menu **4. Thuế** để xem danh sách tờ khai đang chờ xác nhận nghĩa vụ thuế.",
+              "screenshot": "TQCS-20260420-004-step-01-main.png"
+            },
+            {
+              "no": 2,
+              "action": "Chọn tờ khai và nhấn **[Tra cứu eTax]** để hệ thống truy vấn tình trạng nộp thuế của doanh nghiệp.",
+              "screenshot": "TQCS-20260420-004-step-02-history.png"
+            },
+            {
+              "no": 3,
+              "action": "Khi hệ thống hiển thị doanh nghiệp đã hoàn thành nghĩa vụ, nhấn **[Xác nhận]** để chuyển tờ khai sang bước thông quan.",
+              "screenshot": "TQCS-20260420-004-step-01-main.png"
+            },
+            {
+              "no": 4,
+              "action": "Mở mục **Lịch sử** để xem lại các tờ khai đã xác nhận thuế.",
+              "screenshot": "TQCS-20260420-004-step-02-history.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 4,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-004",
+          "name": "Thông quan — Giấy thông quan (M05)",
+          "description": "Chức năng này cho phép Cán bộ Hải quan đăng ký và Lãnh đạo hải quan cấp giấy thông quan cho các tờ khai đã hoàn thành đầy đủ điều kiện ở các bước trước...",
+          "actors": [
+            "Cán bộ Hải quan đăng ký",
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã hoàn tất tất cả điều kiện tiền đề.",
+          "ui_elements": [
+            {
+              "label": "Menu **5. Thông quan**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Nhấn **[Cấp giấy thông quan]**; sau khi hệ thống xác nhận, nhấn **[In giấy thông quan]** để in cho doanh nghiệp.",
+              "screenshot": "TQCS-20260420-005-step-01-main.png"
+            },
+            {
+              "no": 2,
+              "action": "Sử dụng ô **Tìm kiếm** để tra cứu lại các tờ khai đã thông quan khi cần.",
+              "screenshot": "TQCS-20260420-005-step-02-detail.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 2,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-005",
+          "name": "Biên bản bàn giao (M06)",
+          "description": "Chức năng này quản lý vòng đời biên bản bàn giao hàng hóa từ cơ quan hải quan sang đơn vị bảo quản, gồm các bước: tạo biên bản, Lãnh đạo phê duyệt, xác nhận...",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Hàng hóa đã được phân vào diện cần bàn giao về kho bảo quản.",
+          "ui_elements": [
+            {
+              "label": "Menu **6. Biên bản bàn giao**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Nhấn **[Đề xuất biên bản mới]**, nhập thông tin tờ khai, đơn vị nhận và nhấn **[Lưu]**.",
+              "screenshot": "TQCS-20260420-006-step-01-main.png"
+            },
+            {
+              "no": 2,
+              "action": "Khi hàng đến kho, nhấn **[Xác nhận đến]**, sau đó nhấn **[Xác nhận hàng]** sau khi đối chiếu thực tế.",
+              "screenshot": "TQCS-20260420-006-step-02-proposal.png"
+            },
+            {
+              "no": 3,
+              "action": "Nhấn **[In biên bản]** để in bản giấy giao cho đơn vị bảo quản.",
+              "screenshot": "TQCS-20260420-006-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 3,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-006",
+          "name": "Kiểm hóa hộ (M07)",
+          "description": "Chức năng này hỗ trợ thực hiện kiểm hóa thay mặt cho cảng khác theo yêu cầu, áp dụng khi hàng hóa được khai báo tại một cảng nhưng kiểm tra thực tế lại được...",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký, Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa hoặc Lãnh đạo hải quan. Có yêu cầu kiểm hóa hộ từ cảng khác.",
+          "ui_elements": [
+            {
+              "label": "Menu **7. Kiểm hóa hộ**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Nhấn **[Đề xuất]** để tạo đơn mới, nhập thông tin tờ khai và lý do, sau đó nhấn **[Gửi]**.",
+              "screenshot": "TQCS-20260420-007-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-007",
+          "name": "Niêm phong hàng hóa (M08)",
+          "description": "Chức năng này quản lý việc niêm phong và bỏ niêm phong container hoặc kiện hàng trong quá trình bảo quản, vận chuyển.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Đã có thông tin container/kiện hàng cần niêm phong.",
+          "ui_elements": [
+            {
+              "label": "Menu **8. Niêm phong**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Truy cập menu **8. Niêm phong**, chọn mục **Đề xuất mới** để lập đề xuất niêm phong.",
+              "screenshot": "TQCS-20260420-008-step-01-propose-seal.png"
+            },
+            {
+              "no": 2,
+              "action": "Nhập **mã container**, **số seal**, lý do niêm phong và nhấn **[Gửi đề xuất]**.",
+              "screenshot": "TQCS-20260420-008-step-02-confirm.png"
+            },
+            {
+              "no": 3,
+              "action": "Khi cần, mở mục **Đề xuất bỏ niêm phong** để lập yêu cầu bỏ seal cho container đã đủ điều kiện.",
+              "screenshot": "TQCS-20260420-008-step-01-propose-seal.png"
+            },
+            {
+              "no": 4,
+              "action": "Sử dụng mục **Kiểm tra** để tra cứu trạng thái niêm phong của container theo mã.",
+              "screenshot": "TQCS-20260420-008-step-02-confirm.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 4,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-008",
+          "name": "Xác nhận hàng qua KVGS (M09)",
+          "description": "Chức năng này dùng để xác nhận hàng hóa đã thực sự đi qua khu vực giám sát (KVGS) tại cổng cảng.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký",
+            "Giám sát KVGS"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Giám sát KVGS. Hàng hóa đã được thông quan và đang chuẩn bị rời cảng.",
+          "ui_elements": [
+            {
+              "label": "Menu **9. Xác nhận hàng qua KVGS**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Truy cập menu **9. Xác nhận hàng qua KVGS**, mở mục **Xác nhận** để xem các sự kiện hàng qua cổng đã ghi nhận.",
+              "screenshot": "TQCS-20260420-009-step-01-kvgs-confirm.png"
+            },
+            {
+              "no": 2,
+              "action": "Khi cần hủy một xác nhận sai, chọn dòng tương ứng và nhấn **[Hủy xác nhận]**, nhập lý do và nhấn **[Lưu]**.",
+              "screenshot": "TQCS-20260420-009-step-02-lookup.png"
+            },
+            {
+              "no": 3,
+              "action": "Sử dụng mục **Tra cứu** để tìm dữ liệu KVGS theo mã container, ngày, tờ khai.",
+              "screenshot": "TQCS-20260420-009-step-01-kvgs-confirm.png"
+            },
+            {
+              "no": 4,
+              "action": "Mở **Bảng kê container** hoặc **Bảng kê hàng rời** để đối chiếu danh sách hàng đã qua KVGS.",
+              "screenshot": "TQCS-20260420-009-step-02-lookup.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 4,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-009",
+          "name": "Soi chiếu tại cảng (M13)",
+          "description": "Chức năng này quản lý hoạt động soi chiếu container bằng máy soi không xâm lấn tại cảng.",
+          "actors": [
+            "Cán bộ Hải quan đăng ký"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Giám sát KVGS. Container đã được đưa đến vị trí soi chiếu.",
+          "ui_elements": [
+            {
+              "label": "Menu **13. Soi chiếu**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Nhập **mã container**, **số tờ khai** và nhấn **[Tra cứu eManifest]** để hệ thống lấy thông tin khai báo.",
+              "screenshot": "TQCS-20260420-013-step-01-input.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ Hải quan đăng ký. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        }
+      ],
+      "slug": "huong-dan-cho-can-bo-hai-quan-ang-ky"
+    },
+    {
+      "display_name": "Hướng dẫn cho Cán bộ phân công kiểm hóa",
+      "name": "Cán bộ phân công kiểm hóa",
+      "features": [
+        {
+          "id": "F-010",
+          "name": "Kiểm hóa (M02)",
+          "description": "Chức năng này phục vụ quy trình kiểm tra thực tế hàng hóa tại cảng.",
+          "actors": [
+            "Cán bộ phân công kiểm hóa"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa, Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã được phân vào luồng cần kiểm hóa.",
+          "ui_elements": [
+            {
+              "label": "Menu **2. Kiểm hóa**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Cán bộ phân công chọn tờ khai, nhấn **[Phân công]**, chọn cán bộ kiểm hóa và nhấn **[Lưu]**.",
+              "screenshot": "TQCS-20260420-002-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ phân công kiểm hóa. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-011",
+          "name": "Kiểm hóa hộ (M07)",
+          "description": "Chức năng này hỗ trợ thực hiện kiểm hóa thay mặt cho cảng khác theo yêu cầu, áp dụng khi hàng hóa được khai báo tại một cảng nhưng kiểm tra thực tế lại được...",
+          "actors": [
+            "Cán bộ phân công kiểm hóa"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký, Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa hoặc Lãnh đạo hải quan. Có yêu cầu kiểm hóa hộ từ cảng khác.",
+          "ui_elements": [
+            {
+              "label": "Menu **7. Kiểm hóa hộ**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Cán bộ phân công nhấn **[Phân công]** và chọn cán bộ kiểm hóa thực hiện.",
+              "screenshot": "TQCS-20260420-007-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ phân công kiểm hóa. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        }
+      ],
+      "slug": "huong-dan-cho-can-bo-phan-cong-kiem-hoa"
+    },
+    {
+      "display_name": "Hướng dẫn cho Cán bộ kiểm hóa",
+      "name": "Cán bộ kiểm hóa",
+      "features": [
+        {
+          "id": "F-012",
+          "name": "Kiểm hóa (M02)",
+          "description": "Chức năng này phục vụ quy trình kiểm tra thực tế hàng hóa tại cảng.",
+          "actors": [
+            "Cán bộ kiểm hóa"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa, Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã được phân vào luồng cần kiểm hóa.",
+          "ui_elements": [
+            {
+              "label": "Menu **2. Kiểm hóa**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Cán bộ kiểm hóa mở mục **Đang kiểm**, nhập kết quả kiểm hóa vào biểu mẫu và nhấn **[Lưu kết quả]**.",
+              "screenshot": "TQCS-20260420-002-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ kiểm hóa. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-013",
+          "name": "Kiểm hóa hộ (M07)",
+          "description": "Chức năng này hỗ trợ thực hiện kiểm hóa thay mặt cho cảng khác theo yêu cầu, áp dụng khi hàng hóa được khai báo tại một cảng nhưng kiểm tra thực tế lại được...",
+          "actors": [
+            "Cán bộ kiểm hóa"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký, Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa hoặc Lãnh đạo hải quan. Có yêu cầu kiểm hóa hộ từ cảng khác.",
+          "ui_elements": [
+            {
+              "label": "Menu **7. Kiểm hóa hộ**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Cán bộ kiểm hóa nhập kết quả, đính kèm tệp chứng từ và nhấn **[Lưu kết quả]**; Lãnh đạo nhấn **[Phê duyệt]** rồi nhấn **[In kết quả]**.",
+              "screenshot": "TQCS-20260420-007-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Cán bộ kiểm hóa. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        }
+      ],
+      "slug": "huong-dan-cho-can-bo-kiem-hoa"
+    },
+    {
+      "display_name": "Hướng dẫn cho Giám sát KVGS",
+      "name": "Giám sát KVGS",
+      "features": [
+        {
+          "id": "F-014",
+          "name": "KVGS / Lệnh dừng (M10)",
+          "description": "Chức năng này cho phép Giám sát KVGS hoặc Lãnh đạo hải quan ra lệnh dừng đối với hàng hóa đang chuẩn bị qua khu vực giám sát khi phát hiện dấu hiệu bất thường.",
+          "actors": [
+            "Giám sát KVGS"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Giám sát KVGS, Lãnh đạo hải quan hoặc Cán bộ Hải quan đăng ký.",
+          "ui_elements": [
+            {
+              "label": "Menu **10. KVGS / Lệnh dừng**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Truy cập menu **10. KVGS / Lệnh dừng**, mở mục **Giám sát** để theo dõi các sự kiện thời gian thực.",
+              "screenshot": "TQCS-20260420-010-step-01-hold-order.png"
+            },
+            {
+              "no": 2,
+              "action": "Nhấn **[Tạo lệnh dừng]**, nhập **số tờ khai**, **mã container**, lý do dừng và nhấn **[Gửi]**.",
+              "screenshot": "TQCS-20260420-010-step-02-monitor.png"
+            },
+            {
+              "no": 3,
+              "action": "Mở mục **Lệnh dừng** để xem danh sách lệnh đang có hiệu lực.",
+              "screenshot": "TQCS-20260420-010-step-01-hold-order.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 3,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Giám sát KVGS. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        }
+      ],
+      "slug": "huong-dan-cho-giam-sat-kvgs"
+    },
+    {
+      "display_name": "Hướng dẫn cho Lãnh đạo hải quan",
+      "name": "Lãnh đạo hải quan",
+      "features": [
+        {
+          "id": "F-015",
+          "name": "Kiểm hóa (M02)",
+          "description": "Chức năng này phục vụ quy trình kiểm tra thực tế hàng hóa tại cảng.",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ phân công kiểm hóa, Cán bộ kiểm hóa, Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã được phân vào luồng cần kiểm hóa.",
+          "ui_elements": [
+            {
+              "label": "Menu **2. Kiểm hóa**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Lãnh đạo nhấn **[Phê duyệt]** kết quả; sau đó nhấn **[In phiếu kiểm hóa]** để in phiếu cho hồ sơ.",
+              "screenshot": "TQCS-20260420-002-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-016",
+          "name": "Phân luồng / Chuyển luồng (M03)",
+          "description": "Chức năng này giúp xác định mức độ kiểm tra cho mỗi tờ khai theo nguyên tắc phân loại rủi ro với ba luồng Xanh, Vàng, Đỏ.",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Tờ khai đã hoàn tất bước kiểm tra hồ sơ.",
+          "ui_elements": [
+            {
+              "label": "Menu **3. Chuyển luồng**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Lãnh đạo mở đề xuất, nhấn **[Phê duyệt]** hoặc **[Từ chối]** kèm ý kiến.",
+              "screenshot": "TQCS-20260420-003-step-01-main.png"
+            },
+            {
+              "no": 2,
+              "action": "Mở mục **Lịch sử** để theo dõi trạng thái đồng bộ với VNACCS sau khi đề xuất được phê duyệt.",
+              "screenshot": "TQCS-20260420-003-step-02-history.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 2,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-017",
+          "name": "Biên bản bàn giao (M06)",
+          "description": "Chức năng này quản lý vòng đời biên bản bàn giao hàng hóa từ cơ quan hải quan sang đơn vị bảo quản, gồm các bước: tạo biên bản, Lãnh đạo phê duyệt, xác nhận...",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Hàng hóa đã được phân vào diện cần bàn giao về kho bảo quản.",
+          "ui_elements": [
+            {
+              "label": "Menu **6. Biên bản bàn giao**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Lãnh đạo mở biên bản và nhấn **[Phê duyệt]**.",
+              "screenshot": "TQCS-20260420-006-step-01-main.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-018",
+          "name": "Niêm phong hàng hóa (M08)",
+          "description": "Chức năng này quản lý việc niêm phong và bỏ niêm phong container hoặc kiện hàng trong quá trình bảo quản, vận chuyển.",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Đã có thông tin container/kiện hàng cần niêm phong.",
+          "ui_elements": [
+            {
+              "label": "Menu **8. Niêm phong**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Lãnh đạo mở mục **Xác nhận**, kiểm tra đề xuất và nhấn **[Xác nhận]** hoặc **[Từ chối]**.",
+              "screenshot": "TQCS-20260420-008-step-01-propose-seal.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-019",
+          "name": "KVGS / Lệnh dừng (M10)",
+          "description": "Chức năng này cho phép Giám sát KVGS hoặc Lãnh đạo hải quan ra lệnh dừng đối với hàng hóa đang chuẩn bị qua khu vực giám sát khi phát hiện dấu hiệu bất thường.",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Giám sát KVGS, Lãnh đạo hải quan hoặc Cán bộ Hải quan đăng ký.",
+          "ui_elements": [
+            {
+              "label": "Menu **10. KVGS / Lệnh dừng**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Lãnh đạo chọn lệnh cần xử lý, nhấn **[Giải phóng]**, nhập ý kiến và nhấn **[Xác nhận]**.",
+              "screenshot": "TQCS-20260420-010-step-01-hold-order.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        },
+        {
+          "id": "F-020",
+          "name": "Nghiệp vụ khác — CTDT & Tờ khai (M11)",
+          "description": "Chức năng này tập hợp các nghiệp vụ ngoại lệ và điều chỉnh phát sinh trong quá trình thông quan, gồm: chuyển địa điểm giám sát, quản lý container tại KVGS, nhập container theo lô,...",
+          "actors": [
+            "Lãnh đạo hải quan"
+          ],
+          "preconditions": "Đã đăng nhập với vai trò Cán bộ Hải quan đăng ký hoặc Lãnh đạo hải quan. Có yêu cầu phát sinh ngoài luồng nghiệp vụ chuẩn.",
+          "ui_elements": [
+            {
+              "label": "Menu **11. Nghiệp vụ khác**",
+              "type": "menu",
+              "rules": "Truy cập từ thanh điều hướng chính của hệ thống"
+            },
+            {
+              "label": "Bảng danh sách tờ khai",
+              "type": "table",
+              "rules": "Hiển thị các tờ khai theo trạng thái nghiệp vụ"
+            },
+            {
+              "label": "Nút thao tác",
+              "type": "button",
+              "rules": "Hiển thị/ẩn theo vai trò người dùng đăng nhập"
+            }
+          ],
+          "dialogs": [],
+          "steps": [
+            {
+              "no": 1,
+              "action": "Nhập đầy đủ thông tin theo biểu mẫu (số tờ khai, lý do, tài liệu kèm theo) và nhấn **[Gửi yêu cầu]**.",
+              "screenshot": "TQCS-20260420-011-step-01-hub.png"
+            },
+            {
+              "no": 2,
+              "action": "Lãnh đạo mở mục **Duyệt** tương ứng để phê duyệt hoặc từ chối yêu cầu.",
+              "screenshot": "TQCS-20260420-011-step-02-transfer-site.png"
+            }
+          ],
+          "error_cases": [
+            {
+              "trigger_step": 1,
+              "condition": "Hệ thống chuyển bạn về trang đăng nhập khi đang thao tác.",
+              "message": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại để tiếp tục."
+            },
+            {
+              "trigger_step": 2,
+              "condition": "Hệ thống thông báo \"Không đủ quyền\" khi nhấn nút thao tác.",
+              "message": "Tài khoản hiện tại không có vai trò Lãnh đạo hải quan. Vui lòng liên hệ quản trị viên để được cấp quyền."
+            }
+          ]
+        }
+      ],
+      "slug": "huong-dan-cho-lanh-ao-hai-quan"
+    }
+  ],
+  "architecture": {
+    "purpose": "Tài liệu Thiết kế Chi tiết mô tả đầy đủ cấu trúc kỹ thuật của hệ thống.",
+    "scope": "Bao quát toàn bộ phân hệ, cơ sở dữ liệu, API, giao diện và tích hợp.",
+    "tech_stack": [
+      {
+        "layer": "Frontend Admin",
+        "technology": "nextjs",
+        "version": "-",
+        "role": "—"
+      },
+      {
+        "layer": "Backend API",
+        "technology": "nestjs",
+        "version": "-",
+        "role": "—"
+      },
+      {
+        "layer": "Gateway thiết bị",
+        "technology": "nestjs",
+        "version": "-",
+        "role": "—"
+      },
+      {
+        "layer": "Cơ sở dữ liệu",
+        "technology": "postgresql",
+        "version": "-",
+        "role": "Lưu trữ dữ liệu nghiệp vụ chính"
+      },
+      {
+        "layer": "Cơ sở dữ liệu",
+        "technology": "redis",
+        "version": "-",
+        "role": "Lưu trữ dữ liệu nghiệp vụ chính"
+      }
+    ],
+    "data_entities": [
+      {
+        "name": "ToKhai",
+        "purpose": "Lưu trữ dữ liệu 'ToKhai' thuộc phân hệ clearance-domain, có 10 thuộc tính"
+      },
+      {
+        "name": "YeuCauBoSung",
+        "purpose": "Lưu trữ dữ liệu 'YeuCauBoSung' thuộc phân hệ m01-document-check, có 8 thuộc tính"
+      },
+      {
+        "name": "KiemHoa",
+        "purpose": "Lưu trữ dữ liệu 'KiemHoa' thuộc phân hệ m02-inspection, có 12 thuộc tính"
+      },
+      {
+        "name": "PhanLuong",
+        "purpose": "Lưu trữ dữ liệu 'PhanLuong' thuộc phân hệ m03-channel, có 10 thuộc tính"
+      },
+      {
+        "name": "DeXuatChuyenLuong",
+        "purpose": "Lưu trữ dữ liệu 'DeXuatChuyenLuong' thuộc phân hệ m03-channel, có 12 thuộc tính"
+      },
+      {
+        "name": "NghiaVuThue",
+        "purpose": "Lưu trữ dữ liệu 'NghiaVuThue' thuộc phân hệ m04-tax, có 12 thuộc tính"
+      },
+      {
+        "name": "GiayThongQuan",
+        "purpose": "Lưu trữ dữ liệu 'GiayThongQuan' thuộc phân hệ m05-clearance, có 8 thuộc tính"
+      },
+      {
+        "name": "BienBanBanGiao",
+        "purpose": "Lưu trữ dữ liệu 'BienBanBanGiao' thuộc phân hệ m06-handover, có 18 thuộc tính"
+      },
+      {
+        "name": "KiemHoaHo",
+        "purpose": "Lưu trữ dữ liệu 'KiemHoaHo' thuộc phân hệ m07-proxy-inspection, có 15 thuộc tính"
+      },
+      {
+        "name": "KetQuaKiemHoaHo",
+        "purpose": "Lưu trữ dữ liệu 'KetQuaKiemHoaHo' thuộc phân hệ m07-proxy-inspection, có 6 thuộc tính"
+      },
+      {
+        "name": "ApprovalRequest",
+        "purpose": "Lưu trữ dữ liệu 'ApprovalRequest' thuộc phân hệ m07-proxy-inspection, có 13 thuộc tính"
+      },
+      {
+        "name": "NiemPhong",
+        "purpose": "Lưu trữ dữ liệu 'NiemPhong' thuộc phân hệ m08-sealing, có 15 thuộc tính"
+      },
+      {
+        "name": "Container",
+        "purpose": "Lưu trữ dữ liệu 'Container' thuộc phân hệ m08-sealing, có 8 thuộc tính"
+      },
+      {
+        "name": "KvgsXacNhan",
+        "purpose": "Lưu trữ dữ liệu 'KvgsXacNhan' thuộc phân hệ m09-kvgs-confirmation, có 12 thuộc tính"
+      },
+      {
+        "name": "ContainerToKhai",
+        "purpose": "Lưu trữ dữ liệu 'ContainerToKhai' thuộc phân hệ m09-kvgs-confirmation, có 5 thuộc tính"
+      },
+      {
+        "name": "HangRoi",
+        "purpose": "Lưu trữ dữ liệu 'HangRoi' thuộc phân hệ m09-kvgs-confirmation, có 7 thuộc tính"
+      },
+      {
+        "name": "LenhDung",
+        "purpose": "Lưu trữ dữ liệu 'LenhDung' thuộc phân hệ m10-kvgs, có 12 thuộc tính"
+      },
+      {
+        "name": "Ctdt",
+        "purpose": "Lưu trữ dữ liệu 'Ctdt' thuộc phân hệ m11-nghiep-vu-khac, có 9 thuộc tính"
+      },
+      {
+        "name": "ContainerSoiChieu",
+        "purpose": "Lưu trữ dữ liệu 'ContainerSoiChieu' thuộc phân hệ m13-soi-chieu, có 9 thuộc tính"
+      },
+      {
+        "name": "KetQuaSoiChieu",
+        "purpose": "Lưu trữ dữ liệu 'KetQuaSoiChieu' thuộc phân hệ m13-soi-chieu, có 6 thuộc tính"
+      },
+      {
+        "name": "AppUser",
+        "purpose": "Lưu trữ dữ liệu 'AppUser' thuộc phân hệ auth, có 8 thuộc tính"
+      }
+    ],
+    "apis": [
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "summary": "Tạo mới / Thực thi: /auth/login"
+      },
+      {
+        "method": "GET",
+        "path": "/to-khai/search",
+        "summary": "Truy vấn: /to-khai/search"
+      },
+      {
+        "method": "POST",
+        "path": "/to-khai/:id/yeu-cau-bo-sung",
+        "summary": "Tạo mới / Thực thi: /to-khai/:id/yeu-cau-bo-sung"
+      },
+      {
+        "method": "POST",
+        "path": "/to-khai/:id/confirm-eligible",
+        "summary": "Tạo mới / Thực thi: /to-khai/:id/confirm-eligible"
+      },
+      {
+        "method": "GET",
+        "path": "/to-khai/:id/document-history",
+        "summary": "Truy vấn: /to-khai/:id/document-history"
+      },
+      {
+        "method": "GET",
+        "path": "/inspection/pending",
+        "summary": "Truy vấn: /inspection/pending"
+      },
+      {
+        "method": "POST",
+        "path": "/inspection/:toKhaiId/assign",
+        "summary": "Tạo mới / Thực thi: /inspection/:toKhaiId/assign"
+      },
+      {
+        "method": "PUT",
+        "path": "/inspection/:toKhaiId/result",
+        "summary": "Cập nhật toàn phần: /inspection/:toKhaiId/result"
+      },
+      {
+        "method": "POST",
+        "path": "/inspection/:toKhaiId/approve",
+        "summary": "Tạo mới / Thực thi: /inspection/:toKhaiId/approve"
+      },
+      {
+        "method": "GET",
+        "path": "/inspection/active",
+        "summary": "Truy vấn: /inspection/active"
+      },
+      {
+        "method": "GET",
+        "path": "/channel/:toKhaiId",
+        "summary": "Truy vấn: /channel/:toKhaiId"
+      },
+      {
+        "method": "POST",
+        "path": "/channel/:toKhaiId/de-xuat",
+        "summary": "Tạo mới / Thực thi: /channel/:toKhaiId/de-xuat"
+      },
+      {
+        "method": "POST",
+        "path": "/channel/:toKhaiId/approve-transfer",
+        "summary": "Tạo mới / Thực thi: /channel/:toKhaiId/approve-transfer"
+      },
+      {
+        "method": "GET",
+        "path": "/channel/:toKhaiId/history",
+        "summary": "Truy vấn: /channel/:toKhaiId/history"
+      },
+      {
+        "method": "GET",
+        "path": "/channel/:toKhaiId/sync-status",
+        "summary": "Truy vấn: /channel/:toKhaiId/sync-status"
+      },
+      {
+        "method": "GET",
+        "path": "/tax/:toKhaiId",
+        "summary": "Truy vấn: /tax/:toKhaiId"
+      },
+      {
+        "method": "POST",
+        "path": "/tax/:toKhaiId/confirm",
+        "summary": "Tạo mới / Thực thi: /tax/:toKhaiId/confirm"
+      },
+      {
+        "method": "GET",
+        "path": "/tax/:toKhaiId/history",
+        "summary": "Truy vấn: /tax/:toKhaiId/history"
+      },
+      {
+        "method": "GET",
+        "path": "/clearance/pending",
+        "summary": "Truy vấn: /clearance/pending"
+      },
+      {
+        "method": "POST",
+        "path": "/clearance/:toKhaiId/issue",
+        "summary": "Tạo mới / Thực thi: /clearance/:toKhaiId/issue"
+      },
+      {
+        "method": "GET",
+        "path": "/clearance/:toKhaiId/print",
+        "summary": "Truy vấn: /clearance/:toKhaiId/print"
+      },
+      {
+        "method": "GET",
+        "path": "/clearance/search",
+        "summary": "Truy vấn: /clearance/search"
+      },
+      {
+        "method": "GET",
+        "path": "/clearance/:toKhaiId/sync-status",
+        "summary": "Truy vấn: /clearance/:toKhaiId/sync-status"
+      },
+      {
+        "method": "GET",
+        "path": "/handover",
+        "summary": "Truy vấn: /handover"
+      },
+      {
+        "method": "GET",
+        "path": "/handover/pending-approval",
+        "summary": "Truy vấn: /handover/pending-approval"
+      },
+      {
+        "method": "GET",
+        "path": "/handover/:id/print",
+        "summary": "Truy vấn: /handover/:id/print"
+      },
+      {
+        "method": "GET",
+        "path": "/handover/:id",
+        "summary": "Truy vấn: /handover/:id"
+      },
+      {
+        "method": "POST",
+        "path": "/handover/:id/confirm-arrival",
+        "summary": "Tạo mới / Thực thi: /handover/:id/confirm-arrival"
+      }
+    ],
+    "external_integrations": [
+      {
+        "system": "VNACCS",
+        "purpose": "",
+        "protocol": "HTTP/API"
+      },
+      {
+        "system": "eTax",
+        "purpose": "",
+        "protocol": "HTTP/API"
+      },
+      {
+        "system": "eManifest",
+        "purpose": "",
+        "protocol": "HTTP/API"
+      },
+      {
+        "system": "KVGS",
+        "purpose": "",
+        "protocol": "SSE (Server-Sent Events via RxJS Subject)"
+      }
+    ],
+    "data_description": "Hệ thống quản lý 21 đối tượng dữ liệu nghiệp vụ chính, tổ chức theo phân hệ và sử dụng PostgreSQL làm DBMS chính.",
+    "data_protection": "Mã hóa kết nối TLS 1.2+, mật khẩu hashed bcrypt, PII masking ở tầng presentation, audit log mọi action ghi/sửa/xóa.",
+    "auth_description": "RBAC dựa trên vai trò + tenant isolation theo mã đơn vị Hải quan (maHq). JWT Bearer token, refresh token TTL 8h.",
+    "architecture_diagram_image": "architecture_overview.png",
+    "data_diagram_image": "db_erd.png",
+    "integration_diagram_image": "integration_topology.png"
+  },
+  "tkct": {
+    "system_description": "Hệ thống gồm 12 phân hệ chính, 103 điểm cuối API, 21 bảng dữ liệu, 24 màn hình giao diện.",
+    "architecture_reference": "Tham chiếu Tài liệu Thiết kế Kiến trúc (TKKT) cùng dự án.",
+    "modules": [
+      {
+        "name": "M01. 1. Kiểm tra hồ sơ",
+        "description": "Đảm bảo tờ khai đủ hồ sơ trước khi phân luồng kiểm tra",
+        "flow_description": "HQDK tìm tờ khai → kiểm tra hồ sơ → yêu cầu bổ sung (nếu thiếu) → xác nhận đủ điều kiện → chuyển sang M03",
+        "flow_diagram": "m01_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: HQDK tìm được tờ khai theo số; Tạo được yêu cầu bổ sung hồ sơ; Xác nhận tờ khai đủ điều kiện; Xem lịch sử hồ sơ",
+        "input_data": "Đối tượng dữ liệu: ToKhai, YeuCauBoSung",
+        "output_data": "Bản ghi cập nhật: ToKhai, YeuCauBoSung",
+        "feature_ids": [
+          "TQCS-20260420-001"
+        ]
+      },
+      {
+        "name": "M02. 2. Kiểm hóa",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "flow_description": "PHAN_CONG phân công → KIEM_HOA kiểm tra → nhập kết quả → LANH_DAO phê duyệt → in phiếu",
+        "flow_diagram": "m02_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Phân công cán bộ kiểm hóa; Nhập kết quả kiểm hóa; Phê duyệt kết quả; In phiếu kiểm hóa",
+        "input_data": "Đối tượng dữ liệu: KetQuaKiemHoa, KiemHoa",
+        "output_data": "Bản ghi cập nhật: KetQuaKiemHoa, KiemHoa",
+        "feature_ids": [
+          "TQCS-20260420-002"
+        ]
+      },
+      {
+        "name": "M03. 3. Chuyển luồng",
+        "description": "Phân loại rủi ro tờ khai và quyết định mức độ kiểm tra",
+        "flow_description": "HQDK xem kết quả phân luồng → đề xuất chuyển luồng → LANH_DAO phê duyệt → đồng bộ VNACCS",
+        "flow_diagram": "m03_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Xem trạng thái phân luồng hiện tại; Đề xuất chuyển luồng; Lãnh đạo phê duyệt chuyển luồng; Theo dõi trạng thái đồng bộ VNACCS",
+        "input_data": "Đối tượng dữ liệu: DeXuatChuyenLuong, PhanLuong, VnaccsOutbox",
+        "output_data": "Bản ghi cập nhật: DeXuatChuyenLuong, PhanLuong, VnaccsOutbox",
+        "feature_ids": [
+          "TQCS-20260420-003"
+        ]
+      },
+      {
+        "name": "M04. 4. Thuế",
+        "description": "Đảm bảo doanh nghiệp hoàn thành nghĩa vụ thuế trước khi thông quan",
+        "flow_description": "HQDK xem danh sách tờ khai chờ xác nhận thuế → kiểm tra eTax → xác nhận hoàn thành nghĩa vụ",
+        "flow_diagram": "m04_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Xem tờ khai chờ xác nhận thuế; Tra cứu trạng thái thuế eTax; Xác nhận hoàn thành nghĩa vụ thuế",
+        "input_data": "Đối tượng dữ liệu: NghiaVuThue",
+        "output_data": "Bản ghi cập nhật: NghiaVuThue",
+        "feature_ids": [
+          "TQCS-20260420-004"
+        ]
+      },
+      {
+        "name": "M05. 5. Thông quan",
+        "description": "Chính thức cấp phép thông quan hàng hóa",
+        "flow_description": "HQDK/LANH_DAO xem tờ khai pending → kiểm tra điều kiện prerequisites → cấp giấy thông quan → in giấy → đồng bộ VNACCS",
+        "flow_diagram": "m05_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Xem danh sách tờ khai đủ điều kiện thông quan; Cấp giấy thông quan; In giấy thông quan; Tìm kiếm tờ khai đã thông quan",
+        "input_data": "Đối tượng dữ liệu: GiayThongQuan",
+        "output_data": "Bản ghi cập nhật: GiayThongQuan",
+        "feature_ids": [
+          "TQCS-20260420-005"
+        ]
+      },
+      {
+        "name": "M06. 6. Biên bản bàn giao",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "flow_description": "HQDK tạo BB → lãnh đạo phê duyệt → xác nhận đến → xác nhận hàng → in biên bản",
+        "flow_diagram": "m06_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Tạo biên bản bàn giao; Lãnh đạo phê duyệt; Xác nhận đến kho; Xác nhận hàng hóa; Yêu cầu sửa/hủy; In biên bản",
+        "input_data": "Đối tượng dữ liệu: BienBanBanGiao",
+        "output_data": "Bản ghi cập nhật: BienBanBanGiao",
+        "feature_ids": [
+          "TQCS-20260420-006"
+        ]
+      },
+      {
+        "name": "M07. 7. Kiểm hóa hộ",
+        "description": "Cho phép kiểm hóa tại cảng thay mặt cảng khác theo yêu cầu",
+        "flow_description": "HQDK tạo đơn → PHAN_CONG phân công → KIEM_HOA thực hiện → nhập kết quả → LANH_DAO phê duyệt → in",
+        "flow_diagram": "m07_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Tạo đơn kiểm hóa hộ; Phân công cán bộ; Nhập kết quả; Đính kèm tệp chứng từ; Phê duyệt kết quả; Yêu cầu sửa/hủy; In kết quả",
+        "input_data": "Đối tượng dữ liệu: ApprovalRequest, KetQuaKiemHoaHo, KiemHoaHo, M07Attachment",
+        "output_data": "Bản ghi cập nhật: ApprovalRequest, KetQuaKiemHoaHo, KiemHoaHo, M07Attachment",
+        "feature_ids": [
+          "TQCS-20260420-007"
+        ]
+      },
+      {
+        "name": "M08. 8. Niêm phong",
+        "description": "Đảm bảo an ninh hàng hóa trong quá trình bảo quản và vận chuyển",
+        "flow_description": "HQDK đề xuất niêm phong/bỏ → LANH_DAO xác nhận → HQDK kiểm tra trạng thái",
+        "flow_diagram": "m08_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Đề xuất niêm phong mới; Đề xuất bỏ niêm phong; Xác nhận đề xuất; Kiểm tra trạng thái niêm phong",
+        "input_data": "Đối tượng dữ liệu: Container, NiemPhong",
+        "output_data": "[CẦN BỔ SUNG: dữ liệu đầu ra]",
+        "feature_ids": [
+          "TQCS-20260420-008"
+        ]
+      },
+      {
+        "name": "M09. 9. Xác nhận hàng qua KVGS",
+        "description": "Kiểm soát hàng hóa đi qua cổng KVGS để đảm bảo hàng thực sự rời kho",
+        "flow_description": "KVGS quét barcode → barcode-gateway nhận → api xác nhận → HQDK xem bảng kê → hủy nếu cần",
+        "flow_diagram": "m09_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Xác nhận xác nhận qua KVGS; Xem bảng kê container; Xem bảng kê hàng rời; Hủy xác nhận container; Hủy xác nhận hàng rời; Tra cứu dữ liệu KVGS",
+        "input_data": "Đối tượng dữ liệu: ContainerToKhai, HangRoi, KvgsXacNhan",
+        "output_data": "[CẦN BỔ SUNG: dữ liệu đầu ra]",
+        "feature_ids": [
+          "TQCS-20260420-009"
+        ]
+      },
+      {
+        "name": "M10. 10. KVGS / Lệnh dừng",
+        "description": "Cho phép dừng hàng ngay lập tức khi phát hiện bất thường tại khu vực giám sát",
+        "flow_description": "GIAM_SAT/LANH_DAO tạo lệnh dừng → HQDK xem active holds → LANH_DAO giải phóng → SSE notify",
+        "flow_diagram": "m10_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Tạo lệnh dừng hàng; Xem danh sách lệnh dừng active; Giải phóng lệnh dừng; Nhận thông báo real-time qua SSE",
+        "input_data": "Đối tượng dữ liệu: LenhDung",
+        "output_data": "Bản ghi cập nhật: LenhDung",
+        "feature_ids": [
+          "TQCS-20260420-010"
+        ]
+      },
+      {
+        "name": "M11. 11. Nghiệp vụ khác",
+        "description": "Xử lý các nghiệp vụ ngoại lệ và điều chỉnh sau thông quan",
+        "flow_description": "Nhiều sub-flow: chuyển ĐDGS / hủy sửa tờ khai (có approval) / CTDT sửa hủy (có approval) / container bulk",
+        "flow_diagram": "m11_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Chuyển địa điểm giám sát; Nhập container KVGS; Nhập container bulk; Yêu cầu hủy/sửa tờ khai; Duyệt hủy/sửa tờ khai; Khôi phục tờ khai; Hủy hết hiệu lực; Duyệt sửa/hủy CTDT",
+        "input_data": "Đối tượng dữ liệu: ContainerListYeuCau, Ctdt, DiaDiemGiamSat, YeuCauToKhai",
+        "output_data": "[CẦN BỔ SUNG: dữ liệu đầu ra]",
+        "feature_ids": [
+          "TQCS-20260420-011"
+        ]
+      },
+      {
+        "name": "M13. 13. Soi chiếu",
+        "description": "Phát hiện hàng cấm/nguy hiểm qua máy soi không xâm lấn tại cổng cảng",
+        "flow_description": "HQDK nhập container → tra cứu eManifest → thực hiện soi → nhập kết quả → xem lịch sử",
+        "flow_diagram": "m13_flow_diagram.png",
+        "business_rules": "Tiêu chí nghiệm thu: Nhập container cần soi chiếu; Tra cứu thông tin eManifest; Nhập kết quả soi chiếu; Xem danh sách kết quả",
+        "input_data": "Đối tượng dữ liệu: ContainerSoiChieu, KetQuaSoiChieu",
+        "output_data": "Bản ghi cập nhật: ContainerSoiChieu, KetQuaSoiChieu",
+        "feature_ids": [
+          "TQCS-20260420-013"
+        ]
+      }
+    ],
+    "db_description": "Hệ thống quản lý 21 đối tượng dữ liệu nghiệp vụ chính, tổ chức theo phân hệ và sử dụng PostgreSQL làm DBMS chính.",
+    "db_tables": [
+      {
+        "name": "to_khai",
+        "description": "Bảng dữ liệu 'ToKhai' — phân hệ: clearance-domain. Tổng cộng 10 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "soToKhai",
+            "type": "Chuỗi (varchar(12))",
+            "nullable": true,
+            "description": "Số tờ khai hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "loaiHinh",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Loại hình XNK (NK/XK)",
+            "constraints": "ENUM(NK, XK)"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(tiep_nhan, cho_phan_luong, thong_quan, da_huy)"
+          },
+          {
+            "name": "ngayDangKy",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay dang ky",
+            "constraints": "—"
+          },
+          {
+            "name": "version",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Phiên bản (optimistic locking)",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "yeu_cau_bo_sung",
+        "description": "Bảng dữ liệu 'YeuCauBoSung' — phân hệ: m01-document-check. Tổng cộng 8 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "noiDung",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Noi dung",
+            "constraints": "—"
+          },
+          {
+            "name": "hanNop",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Han nop",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_xu_ly, da_giai_quyet)"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "kiem_hoa",
+        "description": "Bảng dữ liệu 'KiemHoa' — phân hệ: m02-inspection. Tổng cộng 12 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoKiemHoa",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Can bo kiem hoa",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_kiem, dang_kiem, hoan_thanh, da_xac_nhan, tu_choi)"
+          },
+          {
+            "name": "ketQua",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Ket qua",
+            "constraints": "ENUM(chua_kiem, dat, khong_dat)"
+          },
+          {
+            "name": "ghiChu",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ghi chú nghiệp vụ",
+            "constraints": "—"
+          },
+          {
+            "name": "dinhKem",
+            "type": "JSON (jsonb)",
+            "nullable": true,
+            "description": "Dinh kem",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayKiemHoa",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay kiem hoa",
+            "constraints": "—"
+          },
+          {
+            "name": "assignedBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Assigned by",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "phan_luong",
+        "description": "Bảng dữ liệu 'PhanLuong' — phân hệ: m03-channel. Tổng cộng 10 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "luong",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Luong",
+            "constraints": "ENUM(xanh, vang, do)"
+          },
+          {
+            "name": "nguon",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Nguon",
+            "constraints": "ENUM(vnaccs, manual_upgrade)"
+          },
+          {
+            "name": "lyDo",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(hieu_luc, da_chuyen)"
+          },
+          {
+            "name": "ngayPhanLuong",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay phan luong",
+            "constraints": "—"
+          },
+          {
+            "name": "approvedBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Approved by",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "de_xuat_chuyen_luong",
+        "description": "Bảng dữ liệu 'DeXuatChuyenLuong' — phân hệ: m03-channel. Tổng cộng 12 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "luongHienTai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Luong hien tai",
+            "constraints": "ENUM(xanh, vang, do)"
+          },
+          {
+            "name": "luongDeXuat",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Luong de xuat",
+            "constraints": "ENUM(xanh, vang, do)"
+          },
+          {
+            "name": "lyDo",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_phe_duyet, da_duyet, tu_choi)"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "reviewedBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Reviewed by",
+            "constraints": "—"
+          },
+          {
+            "name": "yKienReview",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Y kien review",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "nghia_vu_thue",
+        "description": "Bảng dữ liệu 'NghiaVuThue' — phân hệ: m04-tax. Tổng cộng 12 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "tongTienThue",
+            "type": "Số thập phân (decimal(18,2))",
+            "nullable": true,
+            "description": "Tong tien thue",
+            "constraints": "—"
+          },
+          {
+            "name": "daNop",
+            "type": "Số thập phân (decimal(18,2))",
+            "nullable": true,
+            "description": "Da nop",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(chua_nop, da_nop, mien_thue)"
+          },
+          {
+            "name": "ngayNop",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay nop",
+            "constraints": "—"
+          },
+          {
+            "name": "confirmedBy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Confirmed by",
+            "constraints": "—"
+          },
+          {
+            "name": "confirmedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Confirmed at",
+            "constraints": "—"
+          },
+          {
+            "name": "queriedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Queried at",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "giay_thong_quan",
+        "description": "Bảng dữ liệu 'GiayThongQuan' — phân hệ: m05-clearance. Tổng cộng 8 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "soQuyetDinh",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "So quyet dinh",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayCap",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay cap",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoKy",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Can bo ky",
+            "constraints": "—"
+          },
+          {
+            "name": "version",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Phiên bản (optimistic locking)",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "bien_ban_ban_giao",
+        "description": "Bảng dữ liệu 'BienBanBanGiao' — phân hệ: m06-handover. Tổng cộng 18 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "soToKhai",
+            "type": "Chuỗi (varchar(12))",
+            "nullable": true,
+            "description": "Số tờ khai hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayTao",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Thời điểm tạo bản ghi",
+            "constraints": "—"
+          },
+          {
+            "name": "maHqNoiDi",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Ma hq noi di",
+            "constraints": "—"
+          },
+          {
+            "name": "diaDiemVcDi",
+            "type": "Chuỗi (varchar(200))",
+            "nullable": true,
+            "description": "Dia diem vc di",
+            "constraints": "—"
+          },
+          {
+            "name": "maHqNoiDen",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Ma hq noi den",
+            "constraints": "—"
+          },
+          {
+            "name": "diaDiemVcDen",
+            "type": "Chuỗi (varchar(200))",
+            "nullable": true,
+            "description": "Dia diem vc den",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoDeXuat",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo de xuat",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayDeXuat",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay de xuat",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_phe_duyet, da_phe_duyet, tu_choi, da_cap_nhat, da_xac_nhan)"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "lyDoSuaHuy",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do sua huy",
+            "constraints": "—"
+          },
+          {
+            "name": "loaiYeuCau",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Loai yeu cau",
+            "constraints": "ENUM(sua, huy)"
+          },
+          {
+            "name": "yKienPheDuyet",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Y kien phe duyet",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Updated by",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "kiem_hoa_ho",
+        "description": "Bảng dữ liệu 'KiemHoaHo' — phân hệ: m07-proxy-inspection. Tổng cộng 15 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "soToKhai",
+            "type": "Chuỗi (varchar(12))",
+            "nullable": true,
+            "description": "Số tờ khai hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoDeXuat",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo de xuat",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayDeXuat",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay de xuat",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoPhanCong",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo phan cong",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayPhanCong",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay phan cong",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_phan_cong, da_phan_cong, dang_kiem_hoa, da_co_ket_qua, da_huy)"
+          },
+          {
+            "name": "lyDoSuaHuy",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do sua huy",
+            "constraints": "—"
+          },
+          {
+            "name": "yKienPheDuyet",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Y kien phe duyet",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Updated by",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "ket_qua_kiem_hoa",
+        "description": "Bảng dữ liệu 'KetQuaKiemHoaHo' — phân hệ: m07-proxy-inspection. Tổng cộng 6 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "kiemHoaHoId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Kiem hoa ho id",
+            "constraints": "—"
+          },
+          {
+            "name": "ketQua",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ket qua",
+            "constraints": "—"
+          },
+          {
+            "name": "ghiChu",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ghi chú nghiệp vụ",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayNhap",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Ngay nhap",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "approval_request",
+        "description": "Bảng dữ liệu 'ApprovalRequest' — phân hệ: m07-proxy-inspection. Tổng cộng 13 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "entityType",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Entity type",
+            "constraints": "ENUM(bien_ban_ban_giao, kiem_hoa_ho)"
+          },
+          {
+            "name": "entityId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Entity id",
+            "constraints": "—"
+          },
+          {
+            "name": "requestType",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Request type",
+            "constraints": "ENUM(amend, cancel)"
+          },
+          {
+            "name": "lyDo",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(pending, approved, rejected)"
+          },
+          {
+            "name": "yKienPheDuyet",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Y kien phe duyet",
+            "constraints": "—"
+          },
+          {
+            "name": "lyDoTuChoi",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do tu choi",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "decidedBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Decided by",
+            "constraints": "—"
+          },
+          {
+            "name": "decidedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Decided at",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "niem_phong",
+        "description": "Bảng dữ liệu 'NiemPhong' — phân hệ: m08-sealing. Tổng cộng 15 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "loaiHang",
+            "type": "Chuỗi (varchar(20))",
+            "nullable": true,
+            "description": "Loai hang",
+            "constraints": "ENUM(hang_roi, hang_container)"
+          },
+          {
+            "name": "soSeal",
+            "type": "Chuỗi (varchar(50))",
+            "nullable": true,
+            "description": "So seal",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(de_xuat, xac_nhan_niem_phong, xac_nhan_bo_niem_phong, da_kiem_tra, tu_choi)"
+          },
+          {
+            "name": "lyDoBo",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do bo",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoDeXuat",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo de xuat",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoXacNhan",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo xac nhan",
+            "constraints": "—"
+          },
+          {
+            "name": "thoiGianXacNhan",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Thoi gian xac nhan",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoKiemTra",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo kiem tra",
+            "constraints": "—"
+          },
+          {
+            "name": "thoiGianKiemTra",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Thoi gian kiem tra",
+            "constraints": "—"
+          },
+          {
+            "name": "ghiChu",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ghi chú nghiệp vụ",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "container",
+        "description": "Bảng dữ liệu 'Container' — phân hệ: m08-sealing. Tổng cộng 8 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "soContainer",
+            "type": "Chuỗi (varchar(20))",
+            "nullable": true,
+            "description": "So container",
+            "constraints": "UNIQUE"
+          },
+          {
+            "name": "soSeal",
+            "type": "Chuỗi (varchar(50))",
+            "nullable": true,
+            "description": "So seal",
+            "constraints": "—"
+          },
+          {
+            "name": "soVanDon",
+            "type": "Chuỗi (varchar(30))",
+            "nullable": true,
+            "description": "So van don",
+            "constraints": "—"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThaiKvgs",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trang thai kvgs",
+            "constraints": "ENUM(chua_qua, da_qua, da_huy)"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "kvgs_xac_nhan",
+        "description": "Bảng dữ liệu 'KvgsXacNhan' — phân hệ: m09-kvgs-confirmation. Tổng cộng 12 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "loai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Loai",
+            "constraints": "ENUM(container, hang_roi)"
+          },
+          {
+            "name": "refId",
+            "type": "Số nguyên lớn (bigint)",
+            "nullable": true,
+            "description": "Ref id",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(xac_nhan_thanh_cong, da_huy)"
+          },
+          {
+            "name": "thoiGian",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Thoi gian",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoXacNhan",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo xac nhan",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "lyDoHuy",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do huy",
+            "constraints": "—"
+          },
+          {
+            "name": "thoiGianHuy",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Thoi gian huy",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Updated by",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "container_to_khai",
+        "description": "Bảng dữ liệu 'ContainerToKhai' — phân hệ: m09-kvgs-confirmation. Tổng cộng 5 cột.",
+        "columns": [
+          {
+            "name": "containerId",
+            "type": "Số nguyên lớn (bigint)",
+            "nullable": false,
+            "description": "Container id",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên lớn (bigint)",
+            "nullable": false,
+            "description": "To khai id",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "createdBy",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Created by",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "hang_roi",
+        "description": "Bảng dữ liệu 'HangRoi' — phân hệ: m09-kvgs-confirmation. Tổng cộng 7 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "maVach",
+            "type": "Chuỗi (varchar(50))",
+            "nullable": true,
+            "description": "Ma vach",
+            "constraints": "UNIQUE"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "thongTin",
+            "type": "JSON (jsonb)",
+            "nullable": true,
+            "description": "Thong tin",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "lenh_dung",
+        "description": "Bảng dữ liệu 'LenhDung' — phân hệ: m10-kvgs. Tổng cộng 12 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "lyDoDung",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ly do dung",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoRaLenh",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Can bo ra lenh",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayDung",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay dung",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayGiaiPhong",
+            "type": "Ngày (date)",
+            "nullable": true,
+            "description": "Ngay giai phong",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoGiaiPhong",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Can bo giai phong",
+            "constraints": "—"
+          },
+          {
+            "name": "yKienGiaiPhong",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Y kien giai phong",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(dang_dung, da_giai_phong)"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "ctdt",
+        "description": "Bảng dữ liệu 'Ctdt' — phân hệ: m11-nghiep-vu-khac. Tổng cộng 9 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "toKhaiId",
+            "type": "Số nguyên lớn (bigint)",
+            "nullable": true,
+            "description": "To khai id",
+            "constraints": "—"
+          },
+          {
+            "name": "ctdtType",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Ctdt type",
+            "constraints": "ENUM(giay_phep, giay_phep_trich, van_ban_chap_thuan, co, bang_ke, hop_dong, to_khai_tri_gia, danh_muc_may_moc, chung_tu_thue, van_don, hoa_don)"
+          },
+          {
+            "name": "metadata",
+            "type": "JSON (jsonb)",
+            "nullable": true,
+            "description": "Metadata",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(hoat_dong, cho_duyet_sua, da_duyet_sua, tu_choi_sua, cho_duyet_huy, da_huy, tu_choi_huy)"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "version",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Phiên bản (optimistic locking)",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          },
+          {
+            "name": "updatedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Updated at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "container_soi_chieu",
+        "description": "Bảng dữ liệu 'ContainerSoiChieu' — phân hệ: m13-soi-chieu. Tổng cộng 9 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "soContainer",
+            "type": "Chuỗi (varchar(20))",
+            "nullable": true,
+            "description": "So container",
+            "constraints": "—"
+          },
+          {
+            "name": "nguonNhap",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Nguon nhap",
+            "constraints": "ENUM(thu_cong, emanifest, to_khai_xk)"
+          },
+          {
+            "name": "ngayNhap",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Ngay nhap",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(10))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoNhap",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo nhap",
+            "constraints": "—"
+          },
+          {
+            "name": "trangThai",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Trạng thái xử lý",
+            "constraints": "ENUM(cho_soi_chieu, da_soi_chieu)"
+          },
+          {
+            "name": "version",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Phiên bản (optimistic locking)",
+            "constraints": "—"
+          },
+          {
+            "name": "deletedAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Deleted at",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "ket_qua_soi_chieu",
+        "description": "Bảng dữ liệu 'KetQuaSoiChieu' — phân hệ: m13-soi-chieu. Tổng cộng 6 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "ketQua",
+            "type": "Enum (enum)",
+            "nullable": true,
+            "description": "Ket qua",
+            "constraints": "ENUM(dat, khong_dat, nghi_van)"
+          },
+          {
+            "name": "ghiChu",
+            "type": "Văn bản dài (text)",
+            "nullable": true,
+            "description": "Ghi chú nghiệp vụ",
+            "constraints": "—"
+          },
+          {
+            "name": "ngayNhap",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Ngay nhap",
+            "constraints": "—"
+          },
+          {
+            "name": "canBoSoiChieu",
+            "type": "Chuỗi (varchar(100))",
+            "nullable": true,
+            "description": "Can bo soi chieu",
+            "constraints": "—"
+          },
+          {
+            "name": "version",
+            "type": "Số nguyên (integer)",
+            "nullable": true,
+            "description": "Phiên bản (optimistic locking)",
+            "constraints": "—"
+          }
+        ]
+      },
+      {
+        "name": "app_user",
+        "description": "Bảng dữ liệu 'AppUser' — phân hệ: auth. Tổng cộng 8 cột.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "Số nguyên (integer)",
+            "nullable": false,
+            "description": "Khóa chính",
+            "constraints": "PRIMARY KEY"
+          },
+          {
+            "name": "username",
+            "type": "Chuỗi (varchar(50))",
+            "nullable": true,
+            "description": "Username",
+            "constraints": "UNIQUE"
+          },
+          {
+            "name": "passwordHash",
+            "type": "Chuỗi (varchar)",
+            "nullable": true,
+            "description": "Password hash",
+            "constraints": "—"
+          },
+          {
+            "name": "maHq",
+            "type": "Chuỗi (varchar(5))",
+            "nullable": true,
+            "description": "Mã đơn vị Hải quan",
+            "constraints": "—"
+          },
+          {
+            "name": "role",
+            "type": "Chuỗi (varchar(30))",
+            "nullable": true,
+            "description": "Role",
+            "constraints": "—"
+          },
+          {
+            "name": "hoTen",
+            "type": "Chuỗi (varchar(200))",
+            "nullable": true,
+            "description": "Ho ten",
+            "constraints": "—"
+          },
+          {
+            "name": "isActive",
+            "type": "Boolean (boolean)",
+            "nullable": true,
+            "description": "Is active",
+            "constraints": "—"
+          },
+          {
+            "name": "createdAt",
+            "type": "Thời điểm (timestamptz)",
+            "nullable": true,
+            "description": "Created at",
+            "constraints": "—"
+          }
+        ]
+      }
+    ],
+    "api_description": "Hệ thống cung cấp 103 điểm cuối REST API, tổ chức theo phân hệ nghiệp vụ. Mọi endpoint yêu cầu xác thực JWT + RBAC, trả về JSON theo cấu trúc thống nhất {data, error, meta}.",
+    "api_details": [
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /auth/login",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/auth/login]",
+        "auth": "Public",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/to-khai/search",
+        "method": "GET",
+        "summary": "Truy vấn - /to-khai/search",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/to-khai/search]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/to-khai/:id/yeu-cau-bo-sung",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /to-khai/:id/yeu-cau-bo-sung",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/to-khai/:id/yeu-cau-bo-sung]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/to-khai/:id/confirm-eligible",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /to-khai/:id/confirm-eligible",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/to-khai/:id/confirm-eligible]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/to-khai/:id/document-history",
+        "method": "GET",
+        "summary": "Truy vấn - /to-khai/:id/document-history",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/to-khai/:id/document-history]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/inspection/pending",
+        "method": "GET",
+        "summary": "Truy vấn: Kiểm hóa (M02)",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/inspection/:toKhaiId/assign",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Kiểm hóa (M02)",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/inspection/:toKhaiId/result",
+        "method": "PUT",
+        "summary": "Cập nhật toàn phần: Kiểm hóa (M02)",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "auth": "JWT Bearer + RBAC (vai trò: KIEM_HOA)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/inspection/:toKhaiId/approve",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Kiểm hóa (M02)",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/inspection/active",
+        "method": "GET",
+        "summary": "Truy vấn: Kiểm hóa (M02)",
+        "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/channel/:toKhaiId",
+        "method": "GET",
+        "summary": "Truy vấn - /channel/:toKhaiId",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/channel/:toKhaiId]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/channel/:toKhaiId/de-xuat",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /channel/:toKhaiId/de-xuat",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/channel/:toKhaiId/de-xuat]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/channel/:toKhaiId/approve-transfer",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /channel/:toKhaiId/approve-transfer",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/channel/:toKhaiId/approve-transfer]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/channel/:toKhaiId/history",
+        "method": "GET",
+        "summary": "Truy vấn - /channel/:toKhaiId/history",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/channel/:toKhaiId/history]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/channel/:toKhaiId/sync-status",
+        "method": "GET",
+        "summary": "Truy vấn - /channel/:toKhaiId/sync-status",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/channel/:toKhaiId/sync-status]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/tax/:toKhaiId",
+        "method": "GET",
+        "summary": "Truy vấn - /tax/:toKhaiId",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/tax/:toKhaiId]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/tax/:toKhaiId/confirm",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /tax/:toKhaiId/confirm",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/tax/:toKhaiId/confirm]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/tax/:toKhaiId/history",
+        "method": "GET",
+        "summary": "Truy vấn - /tax/:toKhaiId/history",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/tax/:toKhaiId/history]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/clearance/pending",
+        "method": "GET",
+        "summary": "Truy vấn - /clearance/pending",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/clearance/pending]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/clearance/:toKhaiId/issue",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /clearance/:toKhaiId/issue",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/clearance/:toKhaiId/issue]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/clearance/:toKhaiId/print",
+        "method": "GET",
+        "summary": "Truy vấn - /clearance/:toKhaiId/print",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/clearance/:toKhaiId/print]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/clearance/search",
+        "method": "GET",
+        "summary": "Truy vấn - /clearance/search",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/clearance/search]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/clearance/:toKhaiId/sync-status",
+        "method": "GET",
+        "summary": "Truy vấn - /clearance/:toKhaiId/sync-status",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/clearance/:toKhaiId/sync-status]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover",
+        "method": "GET",
+        "summary": "Truy vấn: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/pending-approval",
+        "method": "GET",
+        "summary": "Truy vấn: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/print",
+        "method": "GET",
+        "summary": "Truy vấn: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id",
+        "method": "GET",
+        "summary": "Truy vấn: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id",
+        "method": "PUT",
+        "summary": "Cập nhật toàn phần: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/confirm-arrival",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/confirm-goods",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/request-amend",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/request-cancel",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/handover/:id/approve",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi: Biên bản bàn giao (M06)",
+        "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO, PHAN_CONG, KIEM_HOA)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/approval-queue",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho/approval-queue",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/approval-queue]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/approval-queue/:requestId/decide",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/approval-queue/:requestId/decide",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/approval-queue/:requestId/decide]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/print-preview",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho/:id/print-preview",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/print-preview]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/results",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho/:id/results",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/results]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO, PHAN_CONG, KIEM_HOA)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO, PHAN_CONG, KIEM_HOA)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/assign",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/:id/assign",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/assign]",
+        "auth": "JWT Bearer + RBAC (vai trò: PHAN_CONG, LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/results",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/:id/results",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/results]",
+        "auth": "JWT Bearer + RBAC (vai trò: KIEM_HOA)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/requests/amend",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/:id/requests/amend",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/requests/amend]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/requests/cancel",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/:id/requests/cancel",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/requests/cancel]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/attachments",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m07/kiem-hoa-ho/:id/attachments",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/attachments]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, KIEM_HOA, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m07/kiem-hoa-ho/:id/attachments/:fileId",
+        "method": "GET",
+        "summary": "Truy vấn - /m07/kiem-hoa-ho/:id/attachments/:fileId",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m07/kiem-hoa-ho/:id/attachments/:fileId]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT, LANH_DAO, PHAN_CONG, KIEM_HOA)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/proposals/remove",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /sealing/proposals/remove",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/proposals/remove]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/proposals/new",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /sealing/proposals/new",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/proposals/new]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/pending",
+        "method": "GET",
+        "summary": "Truy vấn - /sealing/pending",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/pending]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/inspection-queue",
+        "method": "GET",
+        "summary": "Truy vấn - /sealing/inspection-queue",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/inspection-queue]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/:id/confirm",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /sealing/:id/confirm",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/:id/confirm]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/:id/inspect",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /sealing/:id/inspect",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/:id/inspect]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/sealing/:id/kvgs-ready",
+        "method": "GET",
+        "summary": "Truy vấn - /sealing/:id/kvgs-ready",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/sealing/:id/kvgs-ready]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/xac-nhan/container",
+        "method": "GET",
+        "summary": "Truy vấn - /kvgs/xac-nhan/container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/xac-nhan/container]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/xac-nhan/hang-roi",
+        "method": "GET",
+        "summary": "Truy vấn - /kvgs/xac-nhan/hang-roi",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/xac-nhan/hang-roi]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/xac-nhan/:id",
+        "method": "DELETE",
+        "summary": "Xóa - /kvgs/xac-nhan/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/xac-nhan/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/xac-nhan/container-chung/:containerId",
+        "method": "GET",
+        "summary": "Truy vấn - /kvgs/xac-nhan/container-chung/:containerId",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/xac-nhan/container-chung/:containerId]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/internal/kvgs/scans",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /internal/kvgs/scans",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/internal/kvgs/scans]",
+        "auth": "Public",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/:toKhaiId/hold",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /kvgs/:toKhaiId/hold",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/:toKhaiId/hold]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/active",
+        "method": "GET",
+        "summary": "Truy vấn - /kvgs/active",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/active]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/:lenhDungId/release",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /kvgs/:lenhDungId/release",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/:lenhDungId/release]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/kvgs/events",
+        "method": "SSE",
+        "summary": "SSE - /kvgs/events",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/kvgs/events]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/to-khai/da-huy",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/to-khai/da-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/to-khai/da-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/to-khai/:id/khoi-phuc",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/to-khai/:id/khoi-phuc",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/to-khai/:id/khoi-phuc]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/list/:ctdtType",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/ctdt/list/:ctdtType",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/list/:ctdtType]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/request-sua",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/request-sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/request-sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/ctdt/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO, HQDK, GIAM_SAT)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id/request-huy",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/:id/request-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id/request-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id/duyet-sua",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/:id/duyet-sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id/duyet-sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id/tu-choi-sua",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/:id/tu-choi-sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id/tu-choi-sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id/duyet-huy",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/:id/duyet-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id/duyet-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/ctdt/:id/tu-choi-huy",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/ctdt/:id/tu-choi-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/ctdt/:id/tu-choi-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/dia-diem",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/dia-diem",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/dia-diem]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/dia-diem/chuyen",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/dia-diem/chuyen",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/dia-diem/chuyen]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/batch-huy/het-hieu-luc",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/batch-huy/het-hieu-luc",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/batch-huy/het-hieu-luc]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/batch-huy/execute",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/batch-huy/execute",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/batch-huy/execute]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/huy-danh-sach-container",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/duyet/huy-danh-sach-container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/huy-danh-sach-container]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/huy-danh-sach-container",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/huy-danh-sach-container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/huy-danh-sach-container]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/huy-danh-sach-container/:id",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/duyet/huy-danh-sach-container/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/huy-danh-sach-container/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/huy-danh-sach-container/:id/duyet",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/huy-danh-sach-container/:id/duyet",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/huy-danh-sach-container/:id/duyet]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/huy-danh-sach-container/:id/tu-choi",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/huy-danh-sach-container/:id/tu-choi",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/huy-danh-sach-container/:id/tu-choi]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/sua-danh-sach-container",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/duyet/sua-danh-sach-container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/sua-danh-sach-container]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/sua-danh-sach-container",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/sua-danh-sach-container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/sua-danh-sach-container]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK, GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/sua-danh-sach-container/:id",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/duyet/sua-danh-sach-container/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/sua-danh-sach-container/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/sua-danh-sach-container/:id/duyet",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/sua-danh-sach-container/:id/duyet",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/sua-danh-sach-container/:id/duyet]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/duyet/sua-danh-sach-container/:id/tu-choi",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/duyet/sua-danh-sach-container/:id/tu-choi",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/duyet/sua-danh-sach-container/:id/tu-choi]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/yeu-cau-to-khai",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/huy",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/yeu-cau-to-khai/huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/sua",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/yeu-cau-to-khai/sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/:id",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/yeu-cau-to-khai/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/:id/duyet-huy",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/yeu-cau-to-khai/:id/duyet-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/:id/duyet-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/:id/tu-choi-huy",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/yeu-cau-to-khai/:id/tu-choi-huy",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/:id/tu-choi-huy]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/:id/duyet-sua",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/yeu-cau-to-khai/:id/duyet-sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/:id/duyet-sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/yeu-cau-to-khai/:id/tu-choi-sua",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/yeu-cau-to-khai/:id/tu-choi-sua",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/yeu-cau-to-khai/:id/tu-choi-sua]",
+        "auth": "JWT Bearer + RBAC (vai trò: LANH_DAO)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/container",
+        "method": "GET",
+        "summary": "Truy vấn - /m11/container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/container]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT, HQDK)",
+        "request_body": "—",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/container",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/container",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/container]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/container/bulk",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m11/container/bulk",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/container/bulk]",
+        "auth": "JWT Bearer + RBAC (vai trò: HQDK)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m11/container/:id",
+        "method": "PUT",
+        "summary": "Cập nhật toàn phần - /m11/container/:id",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m11/container/:id]",
+        "auth": "JWT Bearer + RBAC (vai trò: GIAM_SAT)",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "404 Not Found",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m13/containers",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m13/containers",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m13/containers]",
+        "auth": "JWT Bearer + RBAC",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m13/containers/lookup/emanifest",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m13/containers/lookup/emanifest",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m13/containers/lookup/emanifest]",
+        "auth": "JWT Bearer + RBAC",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m13/containers/lookup/to-khai-xk",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m13/containers/lookup/to-khai-xk",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m13/containers/lookup/to-khai-xk]",
+        "auth": "JWT Bearer + RBAC",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      },
+      {
+        "path": "/api/m13/containers/:id/result",
+        "method": "POST",
+        "summary": "Tạo mới / Thực thi - /m13/containers/:id/result",
+        "description": "[CẦN BỔ SUNG: mô tả nghiệp vụ endpoint /api/m13/containers/:id/result]",
+        "auth": "JWT Bearer + RBAC",
+        "request_body": "Cấu trúc request body theo đặc tả nghiệp vụ",
+        "response_body": "Đối tượng JSON với mã trạng thái + dữ liệu nghiệp vụ",
+        "parameters": [],
+        "error_codes": [
+          "400 Validation",
+          "401 Unauthorized",
+          "403 Forbidden",
+          "500 Internal Error"
+        ]
+      }
+    ],
+    "ui_guidelines": "Giao diện thiết kế đáp ứng (responsive) với breakpoint chuẩn (sm/md/lg). Tuân thủ design system của hệ thống với màu chính, typography Times New Roman 13pt, icon set Material. Mọi màn hình hỗ trợ tiếng Việt UTF-8 NFC.",
+    "ui_layout": "Bố cục 3 vùng chính: thanh điều hướng trái (menu phân hệ), vùng nội dung trung tâm (form/danh sách/chi tiết), thanh thông tin trên cùng (user, thông báo, quick action).",
+    "screens": [
+      {
+        "name": "1. Kiểm tra hồ sơ — Kiểm tra hồ sơ (M01) - main",
+        "description": "Màn hình thuộc Kiểm tra hồ sơ (M01). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-001-step-01-main.png",
+        "feature_id": "TQCS-20260420-001"
+      },
+      {
+        "name": "1. Kiểm tra hồ sơ — Kiểm tra hồ sơ (M01) - supplement",
+        "description": "Màn hình thuộc Kiểm tra hồ sơ (M01). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-001-step-02-supplement.png",
+        "feature_id": "TQCS-20260420-001"
+      },
+      {
+        "name": "2. Kiểm hóa — Kiểm hóa (M02) - main",
+        "description": "Màn hình thuộc Kiểm hóa (M02). Trạng thái: main. Vai trò sử dụng: HQDK, KIEM_HOA, PHAN_CONG, LANH_DAO",
+        "screenshot": "TQCS-20260420-002-step-01-main.png",
+        "feature_id": "TQCS-20260420-002"
+      },
+      {
+        "name": "2. Kiểm hóa — Kiểm hóa (M02) - in-progress",
+        "description": "Màn hình thuộc Kiểm hóa (M02). Trạng thái: main. Vai trò sử dụng: HQDK, KIEM_HOA, PHAN_CONG, LANH_DAO",
+        "screenshot": "TQCS-20260420-002-step-02-in-progress.png",
+        "feature_id": "TQCS-20260420-002"
+      },
+      {
+        "name": "3. Chuyển luồng — Phân luồng / Chuyển luồng (M03) - main",
+        "description": "Màn hình thuộc Phân luồng / Chuyển luồng (M03). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-003-step-01-main.png",
+        "feature_id": "TQCS-20260420-003"
+      },
+      {
+        "name": "3. Chuyển luồng — Phân luồng / Chuyển luồng (M03) - history",
+        "description": "Màn hình thuộc Phân luồng / Chuyển luồng (M03). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-003-step-02-history.png",
+        "feature_id": "TQCS-20260420-003"
+      },
+      {
+        "name": "4. Thuế — Thuế (M04) - main",
+        "description": "Màn hình thuộc Thuế (M04). Trạng thái: main. Vai trò sử dụng: HQDK",
+        "screenshot": "TQCS-20260420-004-step-01-main.png",
+        "feature_id": "TQCS-20260420-004"
+      },
+      {
+        "name": "4. Thuế — Thuế (M04) - history",
+        "description": "Màn hình thuộc Thuế (M04). Trạng thái: main. Vai trò sử dụng: HQDK",
+        "screenshot": "TQCS-20260420-004-step-02-history.png",
+        "feature_id": "TQCS-20260420-004"
+      },
+      {
+        "name": "5. Thông quan — Thông quan — Giấy thông quan (M05) - main",
+        "description": "Màn hình thuộc Thông quan — Giấy thông quan (M05). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-005-step-01-main.png",
+        "feature_id": "TQCS-20260420-005"
+      },
+      {
+        "name": "5. Thông quan — Thông quan — Giấy thông quan (M05) - detail",
+        "description": "Màn hình thuộc Thông quan — Giấy thông quan (M05). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-005-step-02-detail.png",
+        "feature_id": "TQCS-20260420-005"
+      },
+      {
+        "name": "6. Biên bản bàn giao — Biên bản bàn giao (M06) - main",
+        "description": "Màn hình thuộc Biên bản bàn giao (M06). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-006-step-01-main.png",
+        "feature_id": "TQCS-20260420-006"
+      },
+      {
+        "name": "6. Biên bản bàn giao — Biên bản bàn giao (M06) - proposal",
+        "description": "Màn hình thuộc Biên bản bàn giao (M06). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-006-step-02-proposal.png",
+        "feature_id": "TQCS-20260420-006"
+      },
+      {
+        "name": "7. Kiểm hóa hộ — Kiểm hóa hộ (M07) - main",
+        "description": "Màn hình thuộc Kiểm hóa hộ (M07). Trạng thái: main. Vai trò sử dụng: HQDK, PHAN_CONG, KIEM_HOA, LANH_DAO",
+        "screenshot": "TQCS-20260420-007-step-01-main.png",
+        "feature_id": "TQCS-20260420-007"
+      },
+      {
+        "name": "7. Kiểm hóa hộ — Kiểm hóa hộ (M07) - proposal",
+        "description": "Màn hình thuộc Kiểm hóa hộ (M07). Trạng thái: main. Vai trò sử dụng: HQDK, PHAN_CONG, KIEM_HOA, LANH_DAO",
+        "screenshot": "TQCS-20260420-007-step-02-proposal.png",
+        "feature_id": "TQCS-20260420-007"
+      },
+      {
+        "name": "8. Niêm phong — Niêm phong hàng hóa (M08) - propose-seal",
+        "description": "Màn hình thuộc Niêm phong hàng hóa (M08). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-008-step-01-propose-seal.png",
+        "feature_id": "TQCS-20260420-008"
+      },
+      {
+        "name": "8. Niêm phong — Niêm phong hàng hóa (M08) - confirm",
+        "description": "Màn hình thuộc Niêm phong hàng hóa (M08). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-008-step-02-confirm.png",
+        "feature_id": "TQCS-20260420-008"
+      },
+      {
+        "name": "9. Xác nhận hàng qua KVGS — Xác nhận hàng qua KVGS (M09) - kvgs-confirm",
+        "description": "Màn hình thuộc Xác nhận hàng qua KVGS (M09). Trạng thái: main. Vai trò sử dụng: HQDK, GIAM_SAT",
+        "screenshot": "TQCS-20260420-009-step-01-kvgs-confirm.png",
+        "feature_id": "TQCS-20260420-009"
+      },
+      {
+        "name": "9. Xác nhận hàng qua KVGS — Xác nhận hàng qua KVGS (M09) - lookup",
+        "description": "Màn hình thuộc Xác nhận hàng qua KVGS (M09). Trạng thái: main. Vai trò sử dụng: HQDK, GIAM_SAT",
+        "screenshot": "TQCS-20260420-009-step-02-lookup.png",
+        "feature_id": "TQCS-20260420-009"
+      },
+      {
+        "name": "10. KVGS / Lệnh dừng — KVGS / Lệnh dừng (M10) - hold-order",
+        "description": "Màn hình thuộc KVGS / Lệnh dừng (M10). Trạng thái: main. Vai trò sử dụng: GIAM_SAT, LANH_DAO, HQDK",
+        "screenshot": "TQCS-20260420-010-step-01-hold-order.png",
+        "feature_id": "TQCS-20260420-010"
+      },
+      {
+        "name": "10. KVGS / Lệnh dừng — KVGS / Lệnh dừng (M10) - monitor",
+        "description": "Màn hình thuộc KVGS / Lệnh dừng (M10). Trạng thái: main. Vai trò sử dụng: GIAM_SAT, LANH_DAO, HQDK",
+        "screenshot": "TQCS-20260420-010-step-02-monitor.png",
+        "feature_id": "TQCS-20260420-010"
+      },
+      {
+        "name": "11. Nghiệp vụ khác — Nghiệp vụ khác — CTDT & Tờ khai (M11) - hub",
+        "description": "Màn hình thuộc Nghiệp vụ khác — CTDT & Tờ khai (M11). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-011-step-01-hub.png",
+        "feature_id": "TQCS-20260420-011"
+      },
+      {
+        "name": "11. Nghiệp vụ khác — Nghiệp vụ khác — CTDT & Tờ khai (M11) - transfer-site",
+        "description": "Màn hình thuộc Nghiệp vụ khác — CTDT & Tờ khai (M11). Trạng thái: main. Vai trò sử dụng: HQDK, LANH_DAO",
+        "screenshot": "TQCS-20260420-011-step-02-transfer-site.png",
+        "feature_id": "TQCS-20260420-011"
+      },
+      {
+        "name": "13. Soi chiếu — Soi chiếu tại cảng (M13) - input",
+        "description": "Màn hình thuộc Soi chiếu tại cảng (M13). Trạng thái: main. Vai trò sử dụng: HQDK, GIAM_SAT",
+        "screenshot": "TQCS-20260420-013-step-01-input.png",
+        "feature_id": "TQCS-20260420-013"
+      },
+      {
+        "name": "13. Soi chiếu — Soi chiếu tại cảng (M13) - results",
+        "description": "Màn hình thuộc Soi chiếu tại cảng (M13). Trạng thái: main. Vai trò sử dụng: HQDK, GIAM_SAT",
+        "screenshot": "TQCS-20260420-013-step-02-results.png",
+        "feature_id": "TQCS-20260420-013"
+      }
+    ],
+    "integration_design": "Hệ thống tích hợp với 4 hệ thống bên ngoài thông qua REST API + message queue, có cơ chế retry/circuit-breaker, log toàn bộ payload (masked PII) phục vụ audit và troubleshoot.",
+    "security_design": "RBAC dựa trên vai trò + tenant isolation theo mã đơn vị Hải quan (maHq). JWT Bearer token, refresh token TTL 8h. Mã hóa kết nối TLS 1.2+, mật khẩu hashed bcrypt, PII masking ở tầng presentation, audit log mọi action ghi/sửa/xóa.",
+    "architecture_overview_diagram": "architecture_overview.png",
+    "db_erd_diagram": "db_erd.png",
+    "ui_layout_diagram": "ui_layout.png",
+    "integration_diagram": "integration_topology.png",
+    "traceability_description": "Bảng truy xuất nguồn gốc dưới đây liệt kê 12 chức năng được phân loại theo phân hệ, làm cơ sở cho việc kiểm soát phạm vi và lập kịch bản kiểm thử."
+  },
+  "test_cases": {
+    "ui": [],
+    "api": []
+  },
+  "all_features": [
+    {
+      "id": "TQCS-20260420-001",
+      "name": "Kiểm tra hồ sơ (M01)",
+      "description": "Đảm bảo tờ khai đủ hồ sơ trước khi phân luồng kiểm tra",
+      "service_name": "1. Kiểm tra hồ sơ"
+    },
+    {
+      "id": "TQCS-20260420-002",
+      "name": "Kiểm hóa (M02)",
+      "description": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+      "service_name": "2. Kiểm hóa"
+    },
+    {
+      "id": "TQCS-20260420-003",
+      "name": "Phân luồng / Chuyển luồng (M03)",
+      "description": "Phân loại rủi ro tờ khai và quyết định mức độ kiểm tra",
+      "service_name": "3. Chuyển luồng"
+    },
+    {
+      "id": "TQCS-20260420-004",
+      "name": "Thuế (M04)",
+      "description": "Đảm bảo doanh nghiệp hoàn thành nghĩa vụ thuế trước khi thông quan",
+      "service_name": "4. Thuế"
+    },
+    {
+      "id": "TQCS-20260420-005",
+      "name": "Thông quan — Giấy thông quan (M05)",
+      "description": "Chính thức cấp phép thông quan hàng hóa",
+      "service_name": "5. Thông quan"
+    },
+    {
+      "id": "TQCS-20260420-006",
+      "name": "Biên bản bàn giao (M06)",
+      "description": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+      "service_name": "6. Biên bản bàn giao"
+    },
+    {
+      "id": "TQCS-20260420-007",
+      "name": "Kiểm hóa hộ (M07)",
+      "description": "Cho phép kiểm hóa tại cảng thay mặt cảng khác theo yêu cầu",
+      "service_name": "7. Kiểm hóa hộ"
+    },
+    {
+      "id": "TQCS-20260420-008",
+      "name": "Niêm phong hàng hóa (M08)",
+      "description": "Đảm bảo an ninh hàng hóa trong quá trình bảo quản và vận chuyển",
+      "service_name": "8. Niêm phong"
+    },
+    {
+      "id": "TQCS-20260420-009",
+      "name": "Xác nhận hàng qua KVGS (M09)",
+      "description": "Kiểm soát hàng hóa đi qua cổng KVGS để đảm bảo hàng thực sự rời kho",
+      "service_name": "9. Xác nhận hàng qua KVGS"
+    },
+    {
+      "id": "TQCS-20260420-010",
+      "name": "KVGS / Lệnh dừng (M10)",
+      "description": "Cho phép dừng hàng ngay lập tức khi phát hiện bất thường tại khu vực giám sát",
+      "service_name": "10. KVGS / Lệnh dừng"
+    },
+    {
+      "id": "TQCS-20260420-011",
+      "name": "Nghiệp vụ khác — CTDT & Tờ khai (M11)",
+      "description": "Xử lý các nghiệp vụ ngoại lệ và điều chỉnh sau thông quan",
+      "service_name": "11. Nghiệp vụ khác"
+    },
+    {
+      "id": "TQCS-20260420-013",
+      "name": "Soi chiếu tại cảng (M13)",
+      "description": "Phát hiện hàng cấm/nguy hiểm qua máy soi không xâm lấn tại cổng cảng",
+      "service_name": "13. Soi chiếu"
+    }
+  ],
+  "test_sheets": {}
+}

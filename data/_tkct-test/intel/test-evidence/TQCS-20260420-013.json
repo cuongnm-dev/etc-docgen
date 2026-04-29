@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-013",
+  "feature_name": "Soi chiếu tại cảng (M13)",
+  "module": "m13",
+  "feature_catalog_fingerprint": "sha256:f5d1279dc0e6c9e51b110c97a9d32732555630d0294ee211e4f26b7db41c8cc7",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Dev JWT role HQDK, maHq VN001",
+  "steps": [
+    {
+      "step": 1,
+      "state": "input",
+      "page_url": "http://localhost:3000/m13/nhap-container",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-013-step-01-input.png"
+    },
+    {
+      "step": 2,
+      "state": "results",
+      "page_url": "http://localhost:3000/m13/ket-qua",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-013-step-02-results.png"
+    }
+  ]
+}

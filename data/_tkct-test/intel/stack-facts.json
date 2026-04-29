@@ -1,0 +1,81 @@
+{
+  "adapter": "nestjs+nextjs",
+  "confidence": "HIGH",
+  "repo_type": "mono",
+  "services": [
+    {
+      "name": "web-admin",
+      "path": "src/apps/web-admin",
+      "type": "frontend",
+      "framework": "nextjs",
+      "framework_version": "^15",
+      "language": "typescript",
+      "port": 3000,
+      "key_deps": [
+        "react@^19",
+        "tailwindcss@^3.4.17",
+        "lucide-react@latest",
+        "socket.io-client@^4",
+        "@customs/types",
+        "@customs/utils"
+      ]
+    },
+    {
+      "name": "api",
+      "path": "src/services/api",
+      "type": "backend",
+      "framework": "nestjs",
+      "framework_version": "^10",
+      "language": "typescript",
+      "port": 4000,
+      "global_prefix": "api",
+      "key_deps": [
+        "typeorm@^0.3",
+        "pg@^8",
+        "cache-manager-redis-yet@^5",
+        "@nestjs/jwt@^10",
+        "passport-jwt@^4",
+        "bcryptjs@^3.0.3",
+        "class-validator@^0.14",
+        "class-transformer@^0.5",
+        "helmet@^8",
+        "@nestjs/throttler@^6",
+        "@nestjs/schedule@^6.1.3",
+        "zod@^3.24.0"
+      ]
+    },
+    {
+      "name": "barcode-gateway",
+      "path": "src/services/barcode-gateway",
+      "type": "gateway",
+      "framework": "nestjs",
+      "framework_version": "^10",
+      "language": "typescript",
+      "port": 4001,
+      "key_deps": [
+        "socket.io@^4",
+        "@nestjs/websockets@^10",
+        "@nestjs/platform-socket.io@^10",
+        "@customs/types"
+      ]
+    }
+  ],
+  "databases": [
+    {
+      "type": "postgresql",
+      "image": "postgres:16-alpine",
+      "default_db": "customsdb",
+      "port": 5432
+    },
+    {
+      "type": "redis",
+      "image": "redis:7-alpine",
+      "port": 6379
+    }
+  ],
+  "build_tool": "turbo",
+  "package_manager": "pnpm",
+  "container": "docker-compose",
+  "linter": "biome",
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "adapter": "nestjs+nextjs",
+  "confidence": "HIGH",
+  "repo_type": "mono",
+  "workspace_path": "d:/Projects/customs-clearance-system",
+  "services": [
+    {
+      "name": "web-admin",
+      "path": "src/apps/web-admin",
+      "type": "frontend",
+      "framework": "nextjs",
+      "framework_version": "15",
+      "language": "typescript",
+      "port": 3000,
+      "key_deps": ["react@19", "tailwindcss", "lucide-react"],
+      "route_count": 0,
+      "page_count": 75
+    },
+    {
+      "name": "api",
+      "path": "src/services/api",
+      "type": "backend",
+      "framework": "nestjs",
+      "framework_version": "10",
+      "language": "typescript",
+      "port": 4000,
+      "key_deps": ["typeorm", "postgresql", "redis", "jwt", "passport"],
+      "route_count": 97,
+      "entity_count": 21,
+      "migration_count": 25
+    },
+    {
+      "name": "barcode-gateway",
+      "path": "src/services/barcode-gateway",
+      "type": "gateway",
+      "framework": "nestjs",
+      "framework_version": "10",
+      "language": "typescript",
+      "port": 4001,
+      "key_deps": ["socket.io", "@nestjs/websockets"],
+      "route_count": 1
+    }
+  ],
+  "auth": {
+    "type": "jwt",
+    "mode": "RBAC",
+    "roles": ["ADMIN", "HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+    "tenant_isolation": true,
+    "tenant_field": "maHq"
+  },
+  "databases": [
+    { "type": "postgresql", "version": "16", "orm": "typeorm" },
+    { "type": "redis", "version": "7", "usage": "cache/session" }
+  ],
+  "external_integrations": [
+    { "name": "VNACCS", "status": "mock", "direction": "inbound+outbound" },
+    { "name": "eTax", "status": "mock", "direction": "outbound" },
+    { "name": "eManifest", "status": "stub", "direction": "inbound" },
+    { "name": "KVGS-barcode", "status": "mock", "direction": "inbound", "protocol": "WebSocket" }
+  ],
+  "build_tool": "turbo",
+  "package_manager": "pnpm",
+  "container": "docker-compose",
+  "test_coverage": {
+    "total_spec_files": 5,
+    "total_test_cases": 31,
+    "modules_with_tests": ["m06-handover", "m07-proxy-inspection", "m08-sealing", "m11-nghiep-vu-khac", "m13-soi-chieu"],
+    "modules_without_tests": ["m01", "m02", "m03", "m04", "m05", "m09", "m10", "auth", "integrations"]
+  },
+  "features": {
+    "count": 12,
+    "documented_count": 8,
+    "prefix": "TQCS-20260420",
+    "modules": ["m01","m02","m03","m04","m05","m06","m07","m08","m09","m10","m11","m13"]
+  },
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

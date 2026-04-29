@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-008",
+  "feature_name": "Niêm phong hàng hóa (M08)",
+  "module": "m08",
+  "feature_catalog_fingerprint": "sha256:8f9899e87dd3d6cb866a8a91752db802166ec865fdee0b58046bb6e05e9d24c6",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Dev JWT role HQDK, maHq VN001 (/dev/token)",
+  "steps": [
+    {
+      "step": 1,
+      "state": "propose-seal",
+      "page_url": "http://localhost:3000/m08/de-xuat-moi",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-008-step-01-propose-seal.png"
+    },
+    {
+      "step": 2,
+      "state": "confirm",
+      "page_url": "http://localhost:3000/m08/xac-nhan",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-008-step-02-confirm.png"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Mm, Pt
 
-TEMPLATE = "src/etc_docgen/assets/templates/huong-dan-su-dung.docx"
+TEMPLATE = "src/etc_platform/assets/templates/huong-dan-su-dung.docx"
 
 doc = Document(TEMPLATE)
 

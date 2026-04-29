@@ -1,0 +1,236 @@
+{
+  "meta": {
+    "date": "2026-04-25",
+    "ref_app_module": "src/services/api/src/app.module.ts",
+    "stage": 2
+  },
+  "services": [
+    {
+      "id": "api",
+      "port_default": 4000,
+      "type": "nestjs",
+      "global_prefix": "api"
+    },
+    {
+      "id": "barcode-gateway",
+      "port_default": 4001,
+      "type": "nestjs"
+    },
+    {
+      "id": "web-admin",
+      "port_default": 3000,
+      "type": "next"
+    }
+  ],
+  "api": {
+    "controllers": [
+      {
+        "base": "auth",
+        "module": "auth",
+        "routes": ["POST /login"]
+      },
+      {
+        "base": "dev",
+        "module": "auth",
+        "routes": ["POST /token"]
+      },
+      {
+        "base": "health",
+        "module": "ops",
+        "routes": ["GET /"]
+      },
+      {
+        "base": "to-khai",
+        "module": "M01",
+        "routes": [
+          "GET /search",
+          "POST /:id/yeu-cau-bo-sung",
+          "POST /:id/confirm-eligible",
+          "GET /:id/document-history"
+        ]
+      },
+      {
+        "base": "inspection",
+        "module": "M02",
+        "routes": [
+          "GET /pending",
+          "POST /:toKhaiId/assign",
+          "PUT /:toKhaiId/result",
+          "POST /:toKhaiId/approve",
+          "GET /active"
+        ]
+      },
+      {
+        "base": "channel",
+        "module": "M03",
+        "routes": [
+          "GET /:toKhaiId",
+          "POST /:toKhaiId/de-xuat",
+          "POST /:toKhaiId/approve-transfer",
+          "GET /:toKhaiId/history",
+          "GET /:toKhaiId/sync-status"
+        ]
+      },
+      {
+        "base": "tax",
+        "module": "M04",
+        "routes": ["GET /:toKhaiId", "POST /:toKhaiId/confirm", "GET /:toKhaiId/history"]
+      },
+      {
+        "base": "clearance",
+        "module": "M05",
+        "routes": [
+          "GET /pending",
+          "POST /:toKhaiId/issue",
+          "GET /:toKhaiId/print",
+          "GET /search",
+          "GET /:toKhaiId/sync-status"
+        ]
+      },
+      {
+        "base": "handover",
+        "module": "M06",
+        "routes": [
+          "GET /",
+          "GET /pending-approval",
+          "GET /:id/print",
+          "GET /:id",
+          "POST /",
+          "PUT /:id",
+          "POST /:id/confirm-arrival",
+          "POST /:id/confirm-goods",
+          "POST /:id/request-amend",
+          "POST /:id/request-cancel",
+          "POST /:id/approve"
+        ]
+      },
+      {
+        "base": "m07/kiem-hoa-ho",
+        "module": "M07",
+        "routes": [
+          "GET /",
+          "GET /approval-queue",
+          "POST /approval-queue/:requestId/decide",
+          "GET /:id/print-preview",
+          "GET /:id/results",
+          "GET /:id",
+          "POST /",
+          "POST /:id/assign",
+          "POST /:id/results",
+          "POST /:id/requests/amend",
+          "POST /:id/requests/cancel",
+          "POST /:id/attachments",
+          "GET /:id/attachments/:fileId"
+        ]
+      },
+      {
+        "base": "sealing",
+        "module": "M08",
+        "routes": [
+          "POST /proposals/remove",
+          "POST /proposals/new",
+          "GET /pending",
+          "GET /inspection-queue",
+          "POST /:id/confirm",
+          "POST /:id/inspect",
+          "GET /:id/kvgs-ready"
+        ]
+      },
+      {
+        "base": "kvgs/xac-nhan",
+        "module": "M09",
+        "routes": [
+          "GET /container",
+          "GET /hang-roi",
+          "DELETE /:id",
+          "GET /container-chung/:containerId"
+        ]
+      },
+      {
+        "base": "internal/kvgs",
+        "module": "M09",
+        "guards": "InternalTokenGuard",
+        "routes": ["POST /scans"]
+      },
+      {
+        "base": "kvgs",
+        "module": "M10",
+        "routes": ["POST /:toKhaiId/hold", "GET /active", "POST /:lenhDungId/release"]
+      },
+      {
+        "base": "m11/batch-huy",
+        "module": "M11",
+        "routes": ["GET /het-hieu-luc", "POST /execute"]
+      },
+      {
+        "base": "m11/ctdt",
+        "module": "M11",
+        "routes": [
+          "GET /list/:ctdtType",
+          "POST /request-sua",
+          "GET /:id",
+          "POST /:id/request-huy",
+          "POST /:id/duyet-sua",
+          "POST /:id/tu-choi-sua",
+          "POST /:id/duyet-huy",
+          "POST /:id/tu-choi-huy"
+        ]
+      },
+      {
+        "base": "m11/dia-diem",
+        "module": "M11",
+        "routes": ["GET /", "POST /chuyen"]
+      },
+      {
+        "base": "m11/duyet/huy-danh-sach-container",
+        "module": "M11",
+        "routes": ["GET /", "POST /", "GET /:id", "POST /:id/duyet", "POST /:id/tu-choi"]
+      },
+      {
+        "base": "m11/duyet/sua-danh-sach-container",
+        "module": "M11",
+        "routes": ["GET /", "POST /", "GET /:id", "POST /:id/duyet", "POST /:id/tu-choi"]
+      },
+      {
+        "base": "m11/container",
+        "module": "M11",
+        "routes": ["GET /", "POST /", "POST /bulk", "PUT /:id"]
+      },
+      {
+        "base": "m11/to-khai",
+        "module": "M11",
+        "routes": ["GET /da-huy", "POST /:id/khoi-phuc"]
+      },
+      {
+        "base": "m11/yeu-cau-to-khai",
+        "module": "M11",
+        "routes": [
+          "POST /",
+          "GET /huy",
+          "GET /sua",
+          "GET /:id",
+          "POST /:id/duyet-huy",
+          "POST /:id/tu-choi-huy",
+          "POST /:id/duyet-sua",
+          "POST /:id/tu-choi-sua"
+        ]
+      },
+      {
+        "base": "m13/containers",
+        "module": "M13",
+        "rbac": "JWT only (tenant-scoped by maHq in service layer)",
+        "routes": [
+          "POST /",
+          "POST /lookup/emanifest",
+          "POST /lookup/to-khai-xk",
+          "POST /:id/result"
+        ]
+      }
+    ],
+    "note": "All api routes are prefixed with /api/ except as nested under global prefix in Nest"
+  },
+  "entities_aggregate": {
+    "name": "ToKhai",
+    "ref": "src/services/api/src/modules/clearance-domain/entities/to-khai.entity.ts"
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "generated_at": "2026-04-27T10:51:49.217Z",
+  "source": "test-evidence",
+  "flows": [
+    {
+      "module": "M01",
+      "name": "Kiểm tra hồ sơ (M01)",
+      "feature_id": "TQCS-20260420-001",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-001-s01",
+          "label": "Kiểm tra hồ sơ (M01) - main",
+          "fe_path": "/m01",
+          "file": "TQCS-20260420-001-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-001-s02",
+          "label": "Kiểm tra hồ sơ (M01) - supplement",
+          "fe_path": "/m01/yeu-cau-bo-sung",
+          "file": "TQCS-20260420-001-step-02-supplement.png"
+        }
+      ]
+    },
+    {
+      "module": "M02",
+      "name": "Kiểm hóa (M02)",
+      "feature_id": "TQCS-20260420-002",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-002-s01",
+          "label": "Kiểm hóa (M02) - main",
+          "fe_path": "/m02",
+          "file": "TQCS-20260420-002-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-002-s02",
+          "label": "Kiểm hóa (M02) - in-progress",
+          "fe_path": "/m02/dang-kiem",
+          "file": "TQCS-20260420-002-step-02-in-progress.png"
+        }
+      ]
+    },
+    {
+      "module": "M03",
+      "name": "Phân luồng / Chuyển luồng (M03)",
+      "feature_id": "TQCS-20260420-003",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-003-s01",
+          "label": "Phân luồng / Chuyển luồng (M03) - main",
+          "fe_path": "/m03",
+          "file": "TQCS-20260420-003-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-003-s02",
+          "label": "Phân luồng / Chuyển luồng (M03) - history",
+          "fe_path": "/m03/lich-su",
+          "file": "TQCS-20260420-003-step-02-history.png"
+        }
+      ]
+    },
+    {
+      "module": "M04",
+      "name": "Thuế (M04)",
+      "feature_id": "TQCS-20260420-004",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-004-s01",
+          "label": "Thuế (M04) - main",
+          "fe_path": "/m04",
+          "file": "TQCS-20260420-004-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-004-s02",
+          "label": "Thuế (M04) - history",
+          "fe_path": "/m04/lich-su",
+          "file": "TQCS-20260420-004-step-02-history.png"
+        }
+      ]
+    },
+    {
+      "module": "M05",
+      "name": "Thông quan — Giấy thông quan (M05)",
+      "feature_id": "TQCS-20260420-005",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-005-s01",
+          "label": "Thông quan — Giấy thông quan (M05) - main",
+          "fe_path": "/m05",
+          "file": "TQCS-20260420-005-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-005-s02",
+          "label": "Thông quan — Giấy thông quan (M05) - detail",
+          "fe_path": "/m05/DEV002",
+          "file": "TQCS-20260420-005-step-02-detail.png"
+        }
+      ]
+    },
+    {
+      "module": "M06",
+      "name": "Biên bản bàn giao (M06)",
+      "feature_id": "TQCS-20260420-006",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-006-s01",
+          "label": "Biên bản bàn giao (M06) - main",
+          "fe_path": "/m06",
+          "file": "TQCS-20260420-006-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-006-s02",
+          "label": "Biên bản bàn giao (M06) - proposal",
+          "fe_path": "/m06/de-xuat",
+          "file": "TQCS-20260420-006-step-02-proposal.png"
+        }
+      ]
+    },
+    {
+      "module": "M07",
+      "name": "Kiểm hóa hộ (M07)",
+      "feature_id": "TQCS-20260420-007",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-007-s01",
+          "label": "Kiểm hóa hộ (M07) - main",
+          "fe_path": "/m07/danh-sach",
+          "file": "TQCS-20260420-007-step-01-main.png"
+        },
+        {
+          "id": "TQCS-20260420-007-s02",
+          "label": "Kiểm hóa hộ (M07) - proposal",
+          "fe_path": "/m07/de-xuat",
+          "file": "TQCS-20260420-007-step-02-proposal.png"
+        }
+      ]
+    },
+    {
+      "module": "M08",
+      "name": "Niêm phong hàng hóa (M08)",
+      "feature_id": "TQCS-20260420-008",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-008-s01",
+          "label": "Niêm phong hàng hóa (M08) - propose-seal",
+          "fe_path": "/m08/de-xuat-moi",
+          "file": "TQCS-20260420-008-step-01-propose-seal.png"
+        },
+        {
+          "id": "TQCS-20260420-008-s02",
+          "label": "Niêm phong hàng hóa (M08) - confirm",
+          "fe_path": "/m08/xac-nhan",
+          "file": "TQCS-20260420-008-step-02-confirm.png"
+        }
+      ]
+    },
+    {
+      "module": "M09",
+      "name": "Xác nhận hàng qua KVGS (M09)",
+      "feature_id": "TQCS-20260420-009",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-009-s01",
+          "label": "Xác nhận hàng qua KVGS (M09) - kvgs-confirm",
+          "fe_path": "/m09/xac-nhan",
+          "file": "TQCS-20260420-009-step-01-kvgs-confirm.png"
+        },
+        {
+          "id": "TQCS-20260420-009-s02",
+          "label": "Xác nhận hàng qua KVGS (M09) - lookup",
+          "fe_path": "/m09/tra-cuu",
+          "file": "TQCS-20260420-009-step-02-lookup.png"
+        }
+      ]
+    },
+    {
+      "module": "M10",
+      "name": "KVGS / Lệnh dừng (M10)",
+      "feature_id": "TQCS-20260420-010",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-010-s01",
+          "label": "KVGS / Lệnh dừng (M10) - hold-order",
+          "fe_path": "/m10/lenh-dung",
+          "file": "TQCS-20260420-010-step-01-hold-order.png"
+        },
+        {
+          "id": "TQCS-20260420-010-s02",
+          "label": "KVGS / Lệnh dừng (M10) - monitor",
+          "fe_path": "/m10/giam-sat",
+          "file": "TQCS-20260420-010-step-02-monitor.png"
+        }
+      ]
+    },
+    {
+      "module": "M11",
+      "name": "Nghiệp vụ khác — CTDT & Tờ khai (M11)",
+      "feature_id": "TQCS-20260420-011",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-011-s01",
+          "label": "Nghiệp vụ khác — CTDT & Tờ khai (M11) - hub",
+          "fe_path": "/m11",
+          "file": "TQCS-20260420-011-step-01-hub.png"
+        },
+        {
+          "id": "TQCS-20260420-011-s02",
+          "label": "Nghiệp vụ khác — CTDT & Tờ khai (M11) - transfer-site",
+          "fe_path": "/m11/chuyen-dia-diem",
+          "file": "TQCS-20260420-011-step-02-transfer-site.png"
+        }
+      ]
+    },
+    {
+      "module": "M13",
+      "name": "Soi chiếu tại cảng (M13)",
+      "feature_id": "TQCS-20260420-013",
+      "screenshots": [
+        {
+          "id": "TQCS-20260420-013-s01",
+          "label": "Soi chiếu tại cảng (M13) - input",
+          "fe_path": "/m13/nhap-container",
+          "file": "TQCS-20260420-013-step-01-input.png"
+        },
+        {
+          "id": "TQCS-20260420-013-s02",
+          "label": "Soi chiếu tại cảng (M13) - results",
+          "fe_path": "/m13/ket-qua",
+          "file": "TQCS-20260420-013-step-02-results.png"
+        }
+      ]
+    }
+  ]
+}

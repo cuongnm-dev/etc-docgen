@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-005",
+  "feature_name": "Thông quan — Giấy thông quan (M05)",
+  "module": "m05",
+  "feature_catalog_fingerprint": "sha256:8923df2fc3c346784c008329aabb183f693289204233f8f53a8f85db17a12f73",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Login admin/admin",
+  "steps": [
+    {
+      "step": 1,
+      "state": "main",
+      "page_url": "http://localhost:3000/m05",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-005-step-01-main.png"
+    },
+    {
+      "step": 2,
+      "state": "detail",
+      "page_url": "http://localhost:3000/m05/DEV002",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-005-step-02-detail.png"
+    }
+  ]
+}

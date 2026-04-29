@@ -1,0 +1,90 @@
+{
+  "test_files": [
+    {
+      "file": "src/services/api/src/modules/m06-handover/services/bien-ban-ban-giao-state.service.spec.ts",
+      "module": "m06-handover",
+      "subject": "BienBanBanGiaoStateService",
+      "test_count": 17,
+      "has_skipped": false,
+      "describe_blocks": [
+        "APPROVE_INITIAL (4 tests)",
+        "CONFIRM_GOODS (4 tests)",
+        "REQUEST_AMEND (2 tests)",
+        "REQUEST_CANCEL (2 tests)",
+        "APPROVE_AMEND (3 tests)",
+        "nextState (6 tests)"
+      ],
+      "notes": "State machine transition guard + nextState mapping; covers role enforcement (LANH_DAO, GIAM_SAT, HQDK) and pending-request locking"
+    },
+    {
+      "file": "src/services/api/src/modules/m07-proxy-inspection/services/kiem-hoa-ho-state.service.spec.ts",
+      "module": "m07-proxy-inspection",
+      "subject": "KiemHoaHoStateService",
+      "test_count": 6,
+      "has_skipped": false,
+      "describe_blocks": [
+        "KiemHoaHoStateService (6 flat tests)"
+      ],
+      "notes": "Covers assign state guard, role checks (PHAN_CONG, LANH_DAO), submit result, and cancel rejection after da_co_ket_qua"
+    },
+    {
+      "file": "src/services/api/src/modules/m08-sealing/sealing.service.spec.ts",
+      "module": "m08-sealing",
+      "subject": "SealingService",
+      "test_count": 3,
+      "has_skipped": false,
+      "describe_blocks": [
+        "SealingService (3 flat tests)"
+      ],
+      "notes": "Covers GIAM_SAT role enforcement, state machine delegation, and PostgreSQL unique-constraint (23505) → ConflictException mapping"
+    },
+    {
+      "file": "src/services/api/src/modules/m11-nghiep-vu-khac/services/ctdt-zod-validator.spec.ts",
+      "module": "m11-nghiep-vu-khac",
+      "subject": "CtdtZodValidator",
+      "test_count": 2,
+      "has_skipped": false,
+      "describe_blocks": [
+        "CtdtZodValidator (2 flat tests)"
+      ],
+      "notes": "Validates strict Zod schema parsing for van_don CTDT type (AC-F008-07); rejects unknown keys"
+    },
+    {
+      "file": "src/services/api/src/modules/m13-soi-chieu/utils/iso6346.spec.ts",
+      "module": "m13-soi-chieu",
+      "subject": "validateIso6346Basic",
+      "test_count": 3,
+      "has_skipped": false,
+      "describe_blocks": [
+        "validateIso6346Basic (3 flat tests)"
+      ],
+      "notes": "ISO 6346 container number validation: length check, trim+uppercase normalization"
+    }
+  ],
+  "coverage_summary": {
+    "total_spec_files": 5,
+    "total_test_cases": 31,
+    "modules_with_tests": [
+      "m06-handover",
+      "m07-proxy-inspection",
+      "m08-sealing",
+      "m11-nghiep-vu-khac",
+      "m13-soi-chieu"
+    ],
+    "modules_without_tests": [
+      "m01-document-check",
+      "m02-inspection",
+      "m03-channel",
+      "m04-tax",
+      "m05-clearance",
+      "m09-kvgs-confirmation",
+      "m10-kvgs",
+      "auth",
+      "integrations/vnaccs",
+      "integrations/etax",
+      "integrations/emanifest"
+    ],
+    "coverage_notes": "Tests focus on state machine guards and pure utility functions. No integration tests for external adapters (VNACCS, eTax, eManifest). No tests for m01–m05 or m09–m10."
+  },
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

@@ -1,0 +1,93 @@
+{
+  "external_systems": [
+    {
+      "name": "VNACCS",
+      "type": "customs-system",
+      "direction": "inbound+outbound",
+      "protocol": "HTTP/API",
+      "status": "mock",
+      "description": "Vietnam Automated Cargo Clearance System — fetches declaration data (inbound) and pushes channel updates / clearance status (outbound)",
+      "adapter": "VNACCSMockAdapter",
+      "ports": [
+        "VNACCS_INBOUND_PORT (fetchDeclaration)",
+        "VNACCS_OUTBOUND_PORT (pushChannelUpdate, pushClearanceStatus)"
+      ],
+      "modules_using": ["m03-channel", "m05-clearance"]
+    },
+    {
+      "name": "eTax",
+      "type": "tax-system",
+      "direction": "outbound",
+      "protocol": "HTTP/API",
+      "status": "mock",
+      "description": "Tax obligation verification — queries tax payment status (da_nop / chua_nop / mien_thue) for a declaration",
+      "adapter": "ETAXMockAdapter",
+      "ports": [
+        "ETAX_PORT (queryTaxStatus)"
+      ],
+      "modules_using": ["m04-tax"]
+    },
+    {
+      "name": "eManifest",
+      "type": "manifest-system",
+      "direction": "inbound",
+      "protocol": "HTTP/API",
+      "status": "stub",
+      "description": "Electronic manifest system — container lookup by container number. Real adapter exists but not implemented (pending GAP-005 spike)",
+      "adapter": "RealEmanifestAdapter",
+      "ports": [
+        "EMANIFEST_PORT (findContainerByNumber)"
+      ],
+      "modules_using": ["m13-soi-chieu", "m11-nghiep-vu-khac"]
+    },
+    {
+      "name": "KVGS",
+      "type": "port-operations",
+      "direction": "inbound",
+      "protocol": "SSE (Server-Sent Events via RxJS Subject)",
+      "status": "mock",
+      "description": "Khu vực giám sát — port scanner integration. Streams HOLD_CREATED / HOLD_RELEASED events per customs office (maHq) via KvgsNotificationService",
+      "adapter": "KvgsNotificationService (internal pub-sub, no real external adapter found)",
+      "ports": [
+        "KvgsNotificationService.getStream(maHq)",
+        "KvgsNotificationService.emit(maHq, KvgsEvent)"
+      ],
+      "modules_using": ["m09-kvgs-confirmation", "m10-kvgs"]
+    }
+  ],
+  "internal_services": [
+    {
+      "name": "barcode-gateway",
+      "type": "websocket-gateway",
+      "protocol": "WebSocket",
+      "port": 4001,
+      "consumers": ["web-admin"],
+      "notes": "Separate NestJS service; depends on api service"
+    },
+    {
+      "name": "api",
+      "type": "rest-api",
+      "protocol": "HTTP",
+      "port": 4000,
+      "consumers": ["web-admin", "barcode-gateway"],
+      "notes": "NestJS monolith; depends on PostgreSQL (db:5432) and Redis (cache:6379)"
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "database",
+      "protocol": "TCP",
+      "port": 5432,
+      "image": "postgres:16-alpine",
+      "consumers": ["api"]
+    },
+    {
+      "name": "Redis",
+      "type": "cache",
+      "protocol": "TCP",
+      "port": 6379,
+      "image": "redis:7-alpine",
+      "consumers": ["api"]
+    }
+  ],
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

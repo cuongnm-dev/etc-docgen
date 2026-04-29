@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-011",
+  "feature_name": "Nghiệp vụ khác — CTDT & Tờ khai (M11)",
+  "module": "m11",
+  "feature_catalog_fingerprint": "sha256:b9867bc6badccc37388fa76a3c3a4df4cb5ddcdebf6906efd282626dd871e1bd",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Dev JWT role ADMIN, maHq VN001",
+  "steps": [
+    {
+      "step": 1,
+      "state": "hub",
+      "page_url": "http://localhost:3000/m11",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-011-step-01-hub.png"
+    },
+    {
+      "step": 2,
+      "state": "transfer-site",
+      "page_url": "http://localhost:3000/m11/chuyen-dia-diem",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-011-step-02-transfer-site.png"
+    }
+  ]
+}

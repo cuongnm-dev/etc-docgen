@@ -1,0 +1,10 @@
+{
+  "mode": "LARGE",
+  "modules_est": 16,
+  "pages": 0,
+  "screenshots": 500,
+  "tokens_est": 1066752,
+  "decided_at": "2026-04-20T00:00:00.000Z",
+  "note": "500 embedded screenshots triggers LARGE. However processing monolithically since text structure is clear and repetitive (CTDT patterns). Downgrading to monolithic with multi-pass.",
+  "fallback": "monolithic-sufficient-structure"
+}

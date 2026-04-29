@@ -1,14 +1,15 @@
-"""Unit tests for etc-docgen MCP server tools."""
+"""Unit tests for etc-platform MCP server tools."""
+
 from __future__ import annotations
 
 import json
-import tempfile
+import os
 from pathlib import Path
 
 import pytest
 
-
 # ─── Helpers ───────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_data_file(tmp_path):
@@ -35,8 +36,10 @@ def sample_data_file(tmp_path):
 
 # ─── schema tool ───────────────────────────────────────────────────
 
+
 def test_schema_returns_valid_json():
-    from etc_docgen.mcp_server import schema
+    from etc_platform.mcp_server import schema
+
     result = schema()
     parsed = json.loads(result)
     assert parsed.get("title") == "ContentData"
@@ -45,9 +48,11 @@ def test_schema_returns_valid_json():
 
 # ─── section_schema tool ───────────────────────────────────────────
 
+
 @pytest.mark.parametrize("doc_type", ["tkcs", "tkct", "tkkt", "hdsd", "xlsx"])
 def test_section_schema_valid_types(doc_type):
-    from etc_docgen.mcp_server import section_schema
+    from etc_platform.mcp_server import section_schema
+
     result = section_schema(doc_type)
     parsed = json.loads(result)
     assert parsed["doc_type"] == doc_type
@@ -56,7 +61,8 @@ def test_section_schema_valid_types(doc_type):
 
 
 def test_section_schema_invalid_type():
-    from etc_docgen.mcp_server import section_schema
+    from etc_platform.mcp_server import section_schema
+
     result = section_schema("nonexistent")
     parsed = json.loads(result)
     assert "error" in parsed
@@ -65,8 +71,10 @@ def test_section_schema_invalid_type():
 
 # ─── template_list tool ────────────────────────────────────────────
 
+
 def test_template_list_returns_five_templates():
-    from etc_docgen.mcp_server import template_list
+    from etc_platform.mcp_server import template_list
+
     result = template_list()
     items = json.loads(result)
     assert len(items) == 5
@@ -79,7 +87,8 @@ def test_template_list_returns_five_templates():
 
 
 def test_template_list_has_size():
-    from etc_docgen.mcp_server import template_list
+    from etc_platform.mcp_server import template_list
+
     items = json.loads(template_list())
     for item in items:
         assert item["size_kb"] > 0
@@ -87,8 +96,10 @@ def test_template_list_has_size():
 
 # ─── validate tool ─────────────────────────────────────────────────
 
+
 def test_validate_missing_file():
-    from etc_docgen.mcp_server import validate
+    from etc_platform.mcp_server import validate
+
     result = validate("/data/nonexistent/content-data.json")
     parsed = json.loads(result)
     assert parsed["valid"] is False
@@ -96,7 +107,8 @@ def test_validate_missing_file():
 
 
 def test_validate_valid_file(sample_data_file):
-    from etc_docgen.mcp_server import validate
+    from etc_platform.mcp_server import validate
+
     result = validate(str(sample_data_file))
     parsed = json.loads(result)
     # May be valid or have warnings depending on schema strictness
@@ -105,7 +117,8 @@ def test_validate_valid_file(sample_data_file):
 
 
 def test_validate_malformed_json(tmp_path):
-    from etc_docgen.mcp_server import validate
+    from etc_platform.mcp_server import validate
+
     bad = tmp_path / "bad.json"
     bad.write_text("{not valid json", encoding="utf-8")
     result = validate(str(bad))
@@ -115,22 +128,24 @@ def test_validate_malformed_json(tmp_path):
 
 # ─── merge_content tool ────────────────────────────────────────────
 
+
 @pytest.fixture(autouse=True)
 def allow_tmp_writes(tmp_path, monkeypatch):
     """Allow merge_content to write to tmp_path during tests via ETC_DOCGEN_EXTRA_ROOTS."""
-    monkeypatch.setenv("ETC_DOCGEN_EXTRA_ROOTS", str(tmp_path))
+    monkeypatch.setenv("ETC_PLATFORM_EXTRA_ROOTS", str(tmp_path))
     # Reload _ALLOWED_ROOTS after env change
-    import etc_docgen.mcp_server as mcp_mod
-    import os
+    import etc_platform.mcp_server as mcp_mod
+
     mcp_mod._ALLOWED_ROOTS = [Path("/data")]
-    if extra := os.environ.get("ETC_DOCGEN_EXTRA_ROOTS", ""):
+    if extra := os.environ.get("ETC_PLATFORM_EXTRA_ROOTS", ""):
         mcp_mod._ALLOWED_ROOTS.extend(Path(r) for r in extra.split(os.pathsep) if r)
     yield
     mcp_mod._ALLOWED_ROOTS = [Path("/data")]
 
 
 def test_merge_content_creates_new_file(tmp_path):
-    from etc_docgen.mcp_server import merge_content
+    from etc_platform.mcp_server import merge_content
+
     target = tmp_path / "new.json"
     partial = json.dumps({"project": {"display_name": "Test", "code": "TST", "client": "C"}})
     result = merge_content(str(target), partial)
@@ -142,20 +157,29 @@ def test_merge_content_creates_new_file(tmp_path):
 
 
 def test_merge_content_deep_merge(tmp_path):
-    from etc_docgen.mcp_server import merge_content
+    from etc_platform.mcp_server import merge_content
+
     target = tmp_path / "existing.json"
-    target.write_text(json.dumps({"project": {"display_name": "Old", "code": "OLD", "client": "C"}, "meta": {"version": "1.0", "today": "01/01/2026"}}))
+    target.write_text(
+        json.dumps(
+            {
+                "project": {"display_name": "Old", "code": "OLD", "client": "C"},
+                "meta": {"version": "1.0", "today": "01/01/2026"},
+            }
+        )
+    )
     result = merge_content(str(target), json.dumps({"project": {"display_name": "New"}}))
     parsed = json.loads(result)
     assert parsed["success"] is True
     written = json.loads(target.read_text())
-    assert written["project"]["display_name"] == "New"   # updated
-    assert written["project"]["code"] == "OLD"            # preserved
-    assert written["meta"]["version"] == "1.0"            # preserved
+    assert written["project"]["display_name"] == "New"  # updated
+    assert written["project"]["code"] == "OLD"  # preserved
+    assert written["meta"]["version"] == "1.0"  # preserved
 
 
 def test_merge_content_invalid_json(tmp_path):
-    from etc_docgen.mcp_server import merge_content
+    from etc_platform.mcp_server import merge_content
+
     target = tmp_path / "out.json"
     result = merge_content(str(target), "{not json}")
     parsed = json.loads(result)
@@ -164,7 +188,8 @@ def test_merge_content_invalid_json(tmp_path):
 
 
 def test_merge_content_non_object_json(tmp_path):
-    from etc_docgen.mcp_server import merge_content
+    from etc_platform.mcp_server import merge_content
+
     target = tmp_path / "out.json"
     result = merge_content(str(target), "[1, 2, 3]")
     parsed = json.loads(result)
@@ -173,9 +198,11 @@ def test_merge_content_non_object_json(tmp_path):
 
 # ─── field_map tool ────────────────────────────────────────────────
 
+
 @pytest.mark.parametrize("doc_type", ["tkcs", "tkct", "tkkt", "hdsd"])
 def test_field_map_valid_types(doc_type):
-    from etc_docgen.mcp_server import field_map
+    from etc_platform.mcp_server import field_map
+
     result = field_map(doc_type)
     parsed = json.loads(result)
     assert parsed["doc_type"] == doc_type
@@ -183,7 +210,8 @@ def test_field_map_valid_types(doc_type):
 
 
 def test_field_map_invalid_type():
-    from etc_docgen.mcp_server import field_map
+    from etc_platform.mcp_server import field_map
+
     result = field_map("bad_type")
     parsed = json.loads(result)
     # Unknown types fall through to Pandoc renderer path — check for message or error
@@ -192,6 +220,8 @@ def test_field_map_invalid_type():
 
 # ─── Version ───────────────────────────────────────────────────────
 
+
 def test_version_consistent():
-    import etc_docgen
-    assert etc_docgen.__version__ == "0.2.0"
+    import etc_platform
+
+    assert etc_platform.__version__ == "3.0.0"

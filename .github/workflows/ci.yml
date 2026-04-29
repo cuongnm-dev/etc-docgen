@@ -37,10 +37,10 @@ jobs:
         run: ruff format --check src/ tests/
 
       - name: Type check (mypy)
-        run: mypy src/etc_docgen
+        run: mypy src/etc_platform
 
       - name: Unit tests
-        run: pytest tests/unit -v --cov=etc_docgen --cov-report=term-missing --cov-fail-under=60
+        run: pytest tests/unit -v --cov=etc_platform --cov-report=term-missing --cov-fail-under=60
 
       - name: Integration tests
         run: pytest tests/integration -v -m "integration"
@@ -66,13 +66,13 @@ jobs:
 
       - name: Verify CLI entry point
         run: |
-          etc-docgen --version
-          etc-docgen --help
-          etc-docgen template list
+          etc-platform --version
+          etc-platform --help
+          etc-platform template list
 
       - name: Smoke test — export from sample data
         run: |
-          etc-docgen validate examples/minimal/content-data.json
-          etc-docgen export --config examples/minimal/etc-docgen.yaml \
+          etc-platform validate examples/minimal/content-data.json
+          etc-platform export --config examples/minimal/etc-platform.yaml \
             --data examples/minimal/content-data.json \
             --only xlsx tkkt

@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "date": "2026-04-25",
+    "excluded_from_primary_actor_labeling": ["ADMIN"],
+    "primary_business_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+    "spec_ref_m12": "src/services/api/docs/features/TQCS-20260420-012/feature-brief.md",
+    "stage": 2
+  },
+  "features": [
+    {
+      "id": "M01-F01",
+      "module": "M01",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "summary": "Tra cứu / xử lý tờ khai hồ sơ",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M01-F02",
+      "module": "M01",
+      "primary_roles": ["HQDK"],
+      "summary": "Yêu cầu bổ sung; xác nhận đủ điều kiện; lịch sử hồ sơ",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M02-F01",
+      "module": "M02",
+      "primary_roles": ["LANH_DAO", "KIEM_HOA", "HQDK"],
+      "summary": "Phân công, kết quả kiểm hóa, phê duyệt, danh sách active",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M03-F01",
+      "module": "M03",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "summary": "Đề xuất chuyển luồng, phê duyệt, lịch sử, sync",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M04-F01",
+      "module": "M04",
+      "primary_roles": ["HQDK"],
+      "summary": "Nghĩa vụ thuế: xem, xác nhận, lịch sử",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M05-F01",
+      "module": "M05",
+      "primary_roles": ["HQDK", "LANH_DAO"],
+      "summary": "Cấp GTQ, in, tìm kiếm, đồng bộ trạng thái",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M06-F01",
+      "module": "M06",
+      "primary_roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+      "summary": "BBBG tạo/sửa/xác nhận/duyệt/ in",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M07-F01",
+      "module": "M07",
+      "primary_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+      "summary": "Kiểm hóa hộ: tạo, phân công, kết quả, hàng chờ phê duyệt, đính kèm",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M08-F01",
+      "module": "M08",
+      "primary_roles": ["HQDK", "GIAM_SAT"],
+      "summary": "Đề xuất niêm phong/ gỡ, xác nhận, kiểm tra",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M09-F01",
+      "module": "M09",
+      "primary_roles": ["GIAM_SAT", "HQDK"],
+      "summary": "Xác nhận qua KVGS, hủy XN, container chung, internal scan ingress",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M10-F01",
+      "module": "M10",
+      "primary_roles": ["GIAM_SAT", "LANH_DAO", "HQDK"],
+      "summary": "Lệnh dừng / giám sát KVGS, active holds",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M11-F01",
+      "module": "M11",
+      "primary_roles": ["HQDK", "LANH_DAO", "GIAM_SAT"],
+      "summary": "CTDT, chuyển ĐDGS, yêu cầu/duyệt tờ khai, container, batch hủy hiệu lực",
+      "code_status": "implemented"
+    },
+    {
+      "id": "M12-F001",
+      "assumption": "M12 included per Gate 1; no Nest M12 module or /m12 FE in repo; behaviors from TQCS-20260420-012",
+      "module": "M12",
+      "primary_roles": ["HQDK", "GIAM_SAT"],
+      "summary": "In TK mẫu, theo dõi trạng thái, thống kê, lịch sử sửa, tra cứu CTDT (11 loại)",
+      "code_status": "not_in_repo"
+    },
+    {
+      "id": "M13-F01",
+      "module": "M13",
+      "primary_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+      "summary": "Soi chiếu container: tạo, lookup, ghi kết quả (JWT+tenant; no per-role @Roles in controller)",
+      "code_status": "implemented"
+    }
+  ],
+  "modules_index": {
+    "M12": {
+      "code_status": "assumed_planned",
+      "feature_brief_ids": "M12-F001..F013",
+      "forced_include": true
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-002",
+  "feature_name": "Kiểm hóa (M02)",
+  "module": "m02",
+  "feature_catalog_fingerprint": "sha256:07214f31950cfdd5b7f4d7e18e04b958201ca5e8f33d38c9ac179119e2ea159e",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Login admin/admin",
+  "steps": [
+    {
+      "step": 1,
+      "state": "main",
+      "page_url": "http://localhost:3000/m02",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-002-step-01-main.png"
+    },
+    {
+      "step": 2,
+      "state": "in-progress",
+      "page_url": "http://localhost:3000/m02/dang-kiem",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-002-step-02-in-progress.png"
+    }
+  ]
+}

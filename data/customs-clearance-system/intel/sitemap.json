@@ -1,0 +1,92 @@
+{
+  "base_urls": {
+    "api": "http://localhost:4000",
+    "web_admin": "http://localhost:3000"
+  },
+  "fe_auth": "Clearance area expects JWT; dev mint at /dev/token when enabled",
+  "menu_source": "src/apps/web-admin/src/lib/clearance-nav.ts",
+  "meta": {
+    "date": "2026-04-25",
+    "m12": "assumed_routes only — no m12 in GROUP_ORDER; force-included for doc cycle",
+    "m13": "all authenticated tenant users per Gate 1",
+    "role_gating": "FE menu not filtered by role; API enforces @Roles. Map role_hints to API coverage per module.",
+    "stage": 2
+  },
+  "module_role_hints": {
+    "M01": ["HQDK", "LANH_DAO"],
+    "M02": ["LANH_DAO", "KIEM_HOA", "HQDK"],
+    "M03": ["HQDK", "LANH_DAO"],
+    "M04": ["HQDK"],
+    "M05": ["HQDK", "LANH_DAO"],
+    "M06": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+    "M07": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+    "M08": ["HQDK", "GIAM_SAT"],
+    "M09": ["GIAM_SAT", "HQDK"],
+    "M10": ["GIAM_SAT", "LANH_DAO", "HQDK"],
+    "M11": ["HQDK", "LANH_DAO", "GIAM_SAT"],
+    "M12": ["HQDK", "GIAM_SAT"],
+    "M13": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"]
+  },
+  "pages": [
+    { "fe_path": "/m01", "label": "M01 — Kiểm tra hồ sơ", "module": "M01" },
+    { "fe_path": "/m01/lich-su", "label": "Lịch sử", "module": "M01" },
+    { "fe_path": "/m01/xac-nhan", "label": "Xác nhận", "module": "M01" },
+    { "fe_path": "/m01/yeu-cau-bo-sung", "label": "Yêu cầu bổ sung", "module": "M01" },
+    { "fe_path": "/m02/dang-kiem", "label": "M02 — Kiểm hóa", "module": "M02" },
+    { "fe_path": "/m03", "label": "M03 — Phân luồng", "module": "M03" },
+    { "fe_path": "/m04", "label": "M04 — Thuế", "module": "M04" },
+    { "fe_path": "/m05", "label": "M05 — Thông quan", "module": "M05" },
+    { "fe_path": "/m06", "label": "M06 — Biên bản bàn giao", "module": "M06" },
+    { "fe_path": "/m07/danh-sach", "label": "M07 — Kiểm hóa hộ", "module": "M07" },
+    { "fe_path": "/m08/de-xuat-bo", "label": "M08.1", "module": "M08" },
+    { "fe_path": "/m08/de-xuat-moi", "label": "M08.2", "module": "M08" },
+    { "fe_path": "/m08/xac-nhan", "label": "M08.3", "module": "M08" },
+    { "fe_path": "/m08/kiem-tra", "label": "M08.4", "module": "M08" },
+    { "fe_path": "/m09/xac-nhan", "label": "M09.1", "module": "M09" },
+    { "fe_path": "/m09/bang-ke-container", "label": "M09.2", "module": "M09" },
+    { "fe_path": "/m09/bang-ke-hang-roi", "label": "M09.3", "module": "M09" },
+    { "fe_path": "/m09/huy-container", "label": "M09.4", "module": "M09" },
+    { "fe_path": "/m09/huy-hang-roi", "label": "M09.5", "module": "M09" },
+    { "fe_path": "/m09/container-chung", "label": "M09.6", "module": "M09" },
+    { "fe_path": "/m09/tra-cuu", "label": "M09.7", "module": "M09" },
+    { "fe_path": "/m10/giam-sat", "label": "M10 — KVGS", "module": "M10" },
+    { "fe_path": "/m11", "label": "M11 — Hub nghiệp vụ khác", "module": "M11" },
+    { "fe_path": "/m11/chuyen-dia-diem", "label": "M11.01", "module": "M11" },
+    { "fe_path": "/m11/container/kvgs", "label": "M11.02", "module": "M11" },
+    { "fe_path": "/m11/nhap-container", "label": "M11.03", "module": "M11" },
+    { "fe_path": "/m11/duyet/yeu-cau-huy", "label": "M11.04", "module": "M11" },
+    { "fe_path": "/m11/duyet/yeu-cau-sua", "label": "M11.05", "module": "M11" },
+    { "fe_path": "/m11/khoi-phuc", "label": "M11.06", "module": "M11" },
+    { "fe_path": "/m11/huy-het-hieu-luc", "label": "M11.07", "module": "M11" },
+    { "fe_path": "/m11/ctdt/duyet-sua", "label": "M11.08", "module": "M11" },
+    { "fe_path": "/m11/ctdt/duyet-huy", "label": "M11.09", "module": "M11" },
+    { "fe_path": "/m11/yeu-cau/sua-danh-sach-container", "label": "M11.10", "module": "M11" },
+    { "fe_path": "/m11/duyet/sua-danh-sach-container", "label": "M11.11", "module": "M11" },
+    { "fe_path": "/m11/yeu-cau/huy-danh-sach-container", "label": "M11.12", "module": "M11" },
+    { "fe_path": "/m11/duyet/huy-danh-sach-container", "label": "M11.13", "module": "M11" },
+    { "fe_path": "/m13/nhap-container", "label": "M13.1", "module": "M13" },
+    { "fe_path": "/m13/ket-qua", "label": "M13.3", "module": "M13" },
+    {
+      "assumed": true,
+      "fe_path": "/m12",
+      "label": "M12 — Tra cứu & báo cáo (hub) — chưa có route code",
+      "module": "M12"
+    },
+    {
+      "assumed": true,
+      "fe_path": "/m12/tra-cuu",
+      "label": "Tra cứu tờ khai / in mẫu (spec TQCS-20260420-012)",
+      "module": "M12"
+    },
+    {
+      "assumed": true,
+      "fe_path": "/m12/bao-cao",
+      "label": "Báo cáo tổng hợp (placeholder)",
+      "module": "M12"
+    }
+  ],
+  "selector_notes": {
+    "pattern": "Prefer route pathname + visible Vietnamese labels; add data-testid in Stage 3 if capture requires it",
+    "side_nav": "button group headers in ClearanceSideNav; active link: font-semibold text-blue-700"
+  }
+}

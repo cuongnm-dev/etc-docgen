@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "note": "ADMIN bypasses all role checks. All actions require JWT (maHq tenant isolation).",
+  "matrix": [
+    {
+      "resource": "to-khai",
+      "action": "search",
+      "roles": ["ADMIN", "HQDK", "LANH_DAO"],
+      "module": "m01",
+      "endpoint": "GET /to-khai/search"
+    },
+    {
+      "resource": "to-khai",
+      "action": "yeu-cau-bo-sung",
+      "roles": ["ADMIN", "HQDK"],
+      "module": "m01",
+      "endpoint": "POST /to-khai/:id/yeu-cau-bo-sung"
+    },
+    {
+      "resource": "to-khai",
+      "action": "confirm-eligible",
+      "roles": ["ADMIN", "HQDK"],
+      "module": "m01",
+      "endpoint": "POST /to-khai/:id/confirm-eligible"
+    },
+    {
+      "resource": "to-khai",
+      "action": "document-history",
+      "roles": ["ADMIN", "HQDK"],
+      "module": "m01",
+      "endpoint": "GET /to-khai/:id/document-history"
+    },
+    {
+      "resource": "inspection",
+      "action": "list",
+      "roles": ["ADMIN", "HQDK", "KIEM_HOA", "PHAN_CONG"],
+      "module": "m02",
+      "endpoint": "GET /inspection"
+    },
+    {
+      "resource": "inspection",
+      "action": "assign",
+      "roles": ["ADMIN", "PHAN_CONG"],
+      "module": "m02",
+      "endpoint": "POST /inspection/:id/assign"
+    },
+    {
+      "resource": "inspection",
+      "action": "submit-result",
+      "roles": ["ADMIN", "KIEM_HOA"],
+      "module": "m02",
+      "endpoint": "POST /inspection/:id/result"
+    },
+    {
+      "resource": "inspection",
+      "action": "approve",
+      "roles": ["ADMIN", "PHAN_CONG", "LANH_DAO"],
+      "module": "m02",
+      "endpoint": "POST /inspection/:id/approve"
+    },
+    {
+      "resource": "channel",
+      "action": "get",
+      "roles": ["ADMIN", "HQDK"],
+      "module": "m03",
+      "endpoint": "GET /channel/:toKhaiId"
+    },
+    {
+      "resource": "channel",
+      "action": "de-xuat",
+      "roles": ["ADMIN", "HQDK"],
+      "module": "m03",
+      "endpoint": "POST /channel/:toKhaiId/de-xuat"
+    },
+    {
+      "resource": "channel",
+      "action": "approve-transfer",
+      "roles": ["ADMIN", "LANH_DAO"],
+      "module": "m03",
+      "endpoint": "POST /channel/:toKhaiId/approve-transfer"
+    },
+    {
+      "resource": "clearance",
+      "action": "pending",
+      "roles": ["ADMIN", "HQDK", "LANH_DAO"],
+      "module": "m05",
+      "endpoint": "GET /clearance/pending"
+    },
+    {
+      "resource": "clearance",
+      "action": "issue",
+      "roles": ["ADMIN", "HQDK", "LANH_DAO"],
+      "module": "m05",
+      "endpoint": "POST /clearance/:toKhaiId/issue"
+    },
+    {
+      "resource": "kvgs",
+      "action": "create-hold",
+      "roles": ["ADMIN", "GIAM_SAT", "LANH_DAO"],
+      "module": "m10",
+      "endpoint": "POST /kvgs/:toKhaiId/hold"
+    },
+    {
+      "resource": "kvgs",
+      "action": "release",
+      "roles": ["ADMIN", "LANH_DAO"],
+      "module": "m10",
+      "endpoint": "POST /kvgs/:lenhDungId/release"
+    },
+    {
+      "resource": "kvgs",
+      "action": "events-sse",
+      "roles": ["ADMIN", "GIAM_SAT", "HQDK"],
+      "module": "m10",
+      "endpoint": "GET /kvgs/events (SSE)"
+    }
+  ],
+  "extracted_at": "2026-04-25T00:00:00Z",
+  "source": "src/services/api/src/modules/*/controller.ts — @Roles() decorators"
+}

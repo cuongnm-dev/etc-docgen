@@ -1,4 +1,4 @@
-# etc-docgen
+# etc-platform
 
 **Template-first documentation generator for ETC projects.**
 
@@ -26,38 +26,38 @@ Codebase + Docker   →   intel/*.json   →   content-data.json   →   5 Offic
 
 ```bash
 # Install
-pip install etc-docgen
+pip install etc-platform
 
 # Or from source
-git clone https://github.com/etc-vn/etc-docgen
-cd etc-docgen
+git clone https://github.com/etc-vn/etc-platform
+cd etc-platform
 pip install -e ".[all]"
 
 # Bootstrap in your project
 cd my-project/
-etc-docgen init
-# → creates etc-docgen.yaml + .gitignore entries
+etc-platform init
+# → creates etc-platform.yaml + .gitignore entries
 
 # Edit config with your project info
-vim etc-docgen.yaml
+vim etc-platform.yaml
 
 # Set credentials for Playwright capture (never commit)
 export DOCGEN_USERNAME=admin@example.com
 export DOCGEN_PASSWORD=yourpass
 
 # Run full pipeline
-etc-docgen generate
+etc-platform generate
 
 # Or step-by-step
-etc-docgen research         # Phase 1: scan code → intel/*.json
-etc-docgen capture          # Phase 2: Playwright screenshots
-etc-docgen data             # Phase 3: build content-data.json
-etc-docgen export           # Phase 4: render 5 Office files
+etc-platform research         # Phase 1: scan code → intel/*.json
+etc-platform capture          # Phase 2: Playwright screenshots
+etc-platform data             # Phase 3: build content-data.json
+etc-platform export           # Phase 4: render 5 Office files
 ```
 
 ## Status
 
-**v0.1 MVP** — export phase fully working end-to-end. Research + Capture + Data phases have AI integration hooks (work via Cursor/Claude Code for now).
+**v3.0 production** — unified MCP server (port 8001), async job queue, full render pipeline.
 
 | Phase      | v0.1              | v0.2                  | v0.3             |
 | ---------- | ----------------- | --------------------- | ---------------- |
@@ -72,29 +72,29 @@ etc-docgen export           # Phase 4: render 5 Office files
 ## Commands
 
 ```bash
-etc-docgen init                           # Create etc-docgen.yaml
-etc-docgen generate                       # Full pipeline (research → export)
-etc-docgen research                       # Phase 1 only
-etc-docgen capture                        # Phase 2 only
-etc-docgen data                           # Phase 3 only
-etc-docgen export                         # Phase 4 only
-etc-docgen export --only tkcs             # Export single doc type
-etc-docgen export --only tkcs --only hdsd # Export multiple
-etc-docgen validate content-data.json     # Validate against schema
-etc-docgen validate data.json --strict    # Treat warnings as errors
-etc-docgen schema                         # Print JSON Schema to stdout
-etc-docgen schema -o schema.json          # Export JSON Schema to file
-etc-docgen template list                  # Show bundled templates
-etc-docgen template fork FILE --kind hdsd # Fork new ETC template
-etc-docgen mcp                            # MCP server (stdio)
-etc-docgen mcp -t sse -p 8000            # MCP server (SSE)
-etc-docgen mcp -t sse --host 0.0.0.0     # MCP server (SSE, all interfaces)
-etc-docgen --version                      # Show version
+etc-platform init                           # Create etc-platform.yaml
+etc-platform generate                       # Full pipeline (research → export)
+etc-platform research                       # Phase 1 only
+etc-platform capture                        # Phase 2 only
+etc-platform data                           # Phase 3 only
+etc-platform export                         # Phase 4 only
+etc-platform export --only tkcs             # Export single doc type
+etc-platform export --only tkcs --only hdsd # Export multiple
+etc-platform validate content-data.json     # Validate against schema
+etc-platform validate data.json --strict    # Treat warnings as errors
+etc-platform schema                         # Print JSON Schema to stdout
+etc-platform schema -o schema.json          # Export JSON Schema to file
+etc-platform template list                  # Show bundled templates
+etc-platform template fork FILE --kind hdsd # Fork new ETC template
+etc-platform mcp                            # MCP server (stdio)
+etc-platform mcp -t sse -p 8001            # MCP server (SSE)
+etc-platform mcp -t sse --host 0.0.0.0     # MCP server (SSE, all interfaces)
+etc-platform --version                      # Show version
 ```
 
 ## Configuration
 
-`etc-docgen.yaml` — created by `etc-docgen init`:
+`etc-platform.yaml` — created by `etc-platform init`:
 
 ```yaml
 version: "1.0"
@@ -158,10 +158,10 @@ llm:
 
 **Config resolution order** (if `--config` not specified):
 
-1. `$ETC_DOCGEN_CONFIG` env var
-2. `./etc-docgen.yaml`
-3. `./.etc-docgen.yaml`
-4. `~/.config/etc-docgen/config.yaml`
+1. `$ETC_PLATFORM_CONFIG` env var
+2. `./etc-platform.yaml`
+3. `./.etc-platform.yaml`
+4. `~/.config/etc-platform/config.yaml`
 
 ## content-data.json — the contract
 
@@ -258,7 +258,7 @@ ContentData (root)
 ### Validate
 
 ```bash
-etc-docgen validate content-data.json
+etc-platform validate content-data.json
 # ✓ Valid
 # Services: 3, Features: 12, Test cases: 45
 # ⚠ Features without test cases: F-011, F-012
@@ -267,7 +267,7 @@ etc-docgen validate content-data.json
 ### Export JSON Schema
 
 ```bash
-etc-docgen schema -o schema.json
+etc-platform schema -o schema.json
 # → Full Pydantic-generated JSON Schema for IDE autocompletion
 ```
 
@@ -360,15 +360,15 @@ Maps to `test_cases.ui[]` + `test_cases.api[]` in content-data.json.
 
 ## MCP Server
 
-AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Protocol](https://modelcontextprotocol.io/).
+AI agents trong IDE gọi trực tiếp etc-platform tools qua [Model Context Protocol](https://modelcontextprotocol.io/).
 
 ### Transports
 
 | Transport         | Use case                                    | Command                                        |
 | ----------------- | ------------------------------------------- | ---------------------------------------------- |
-| `stdio` (default) | Local IDE (VS Code, Cursor, Claude Desktop) | `etc-docgen mcp`                               |
-| `sse`             | Docker / remote server                      | `etc-docgen mcp -t sse --host 0.0.0.0 -p 8000` |
-| `streamable-http` | Newer MCP clients                           | `etc-docgen mcp -t streamable-http`            |
+| `stdio` (default) | Local IDE (VS Code, Cursor, Claude Desktop) | `etc-platform mcp`                               |
+| `sse`             | Docker / remote server                      | `etc-platform mcp -t sse --host 0.0.0.0 -p 8001` |
+| `streamable-http` | Newer MCP clients                           | `etc-platform mcp -t streamable-http`            |
 
 ### IDE Configuration
 
@@ -378,8 +378,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 {
   "mcp": {
     "servers": {
-      "etc-docgen": {
-        "command": "etc-docgen-mcp",
+      "etc-platform": {
+        "command": "etc-platform-mcp",
         "type": "stdio",
       },
     },
@@ -393,8 +393,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 {
   "mcp": {
     "servers": {
-      "etc-docgen": {
-        "url": "http://your-server:8000/sse",
+      "etc-platform": {
+        "url": "http://your-server:8001/sse",
         "type": "sse",
       },
     },
@@ -407,8 +407,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 ```jsonc
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
     },
   },
 }
@@ -419,8 +419,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 ```jsonc
 {
   "mcpServers": {
-    "etc-docgen": {
-      "url": "http://your-server:8000/sse",
+    "etc-platform": {
+      "url": "http://your-server:8001/sse",
     },
   },
 }
@@ -431,8 +431,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 ```jsonc
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
     },
   },
 }
@@ -443,8 +443,8 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 ```jsonc
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
     },
   },
 }
@@ -454,19 +454,19 @@ AI agents trong IDE gọi trực tiếp etc-docgen tools qua [Model Context Prot
 
 ```bash
 # Build image
-docker build -t etc-docgen-mcp .
+docker build -t etc-platform-mcp .
 
 # Run with port mapping
-docker run -p 8000:8000 etc-docgen-mcp
+docker run -p 8001:8000 etc-platform-mcp
 
 # With volume mount for project data (validate/export use file paths)
-docker run -p 8000:8000 -v /path/to/project:/data etc-docgen-mcp
+docker run -p 8001:8000 -v /path/to/project:/data etc-platform-mcp
 
 # Docker Compose
-docker compose -f docker-compose.mcp.yaml up -d
+docker compose up -d
 ```
 
-SSE endpoint: `http://localhost:8000/sse`
+SSE endpoint: `http://localhost:8001/sse`
 
 ### MCP Tools (8)
 
@@ -485,16 +485,16 @@ SSE endpoint: `http://localhost:8000/sse`
 
 ## AI Agent Integration
 
-etc-docgen integrates with Claude Code and Cursor IDE via skills and agents.
+etc-platform integrates with Claude Code and Cursor IDE via skills and agents.
 
 ### Render routing
 
 ```
-doc_type ∈ {tkcs, tkct, tkkt, hdsd, xlsx}  → etc-docgen (content-data.json → docxtpl/openpyxl)
+doc_type ∈ {tkcs, tkct, tkkt, hdsd, xlsx}  → etc-platform (content-data.json → docxtpl/openpyxl)
 doc_type ∈ {du-toan, hsmt, hsdt, nckt, ...} → Pandoc (Markdown → docx)
 ```
 
-### Agent workflow (etc-docgen doc types)
+### Agent workflow (etc-platform doc types)
 
 ```
 doc-orchestrator
@@ -520,7 +520,7 @@ doc-orchestrator
 | Agent                | Role                                                     | Output           |
 | -------------------- | -------------------------------------------------------- | ---------------- |
 | **doc-orchestrator** | Điều phối pipeline, wave planning, merge + validate      | State management |
-| **doc-writer**       | Viết nội dung (JSON for etc-docgen, Markdown for Pandoc) | Section content  |
+| **doc-writer**       | Viết nội dung (JSON for etc-platform, Markdown for Pandoc) | Section content  |
 | **doc-reviewer**     | Rà soát chất lượng, pháp lý, nhất quán                   | Findings YAML    |
 | **doc-diagram**      | Tạo sơ đồ (Mermaid/Figma)                                | PNG/SVG diagrams |
 
@@ -528,8 +528,8 @@ doc-orchestrator
 
 | Skill                      | Purpose                                                          |
 | -------------------------- | ---------------------------------------------------------------- |
-| **new-document-workspace** | Scaffold workspace + route etc-docgen vs Pandoc                  |
-| **new-strategic-document** | Đề án CĐS pipeline (Pandoc) — downstream projects use etc-docgen |
+| **new-document-workspace** | Scaffold workspace + route etc-platform vs Pandoc                  |
+| **new-strategic-document** | Đề án CĐS pipeline (Pandoc) — downstream projects use etc-platform |
 | **resume-document**        | Tiếp tục pipeline dang dở                                        |
 | **generate-docs**          | Code-to-docs: codebase → content-data.json → 5 Office files      |
 
@@ -540,7 +540,7 @@ See `integrations/claude-code/` for detailed integration docs.
 ### Bundled templates
 
 ```bash
-etc-docgen template list
+etc-platform template list
 # huong-dan-su-dung.docx    42 KB
 # test-case.xlsx             38 KB
 # thiet-ke-chi-tiet.docx    45 KB
@@ -554,7 +554,7 @@ When ETC releases a new template version:
 
 ```bash
 # Fork adds Jinja2 tags to template while preserving styles
-etc-docgen template fork ~/Downloads/BM.QT.04.05-v3.docx --kind hdsd
+etc-platform template fork ~/Downloads/BM.QT.04.05-v3.docx --kind hdsd
 # → Saved to bundled templates directory
 
 # Supported kinds: hdsd, tkkt, tkcs, tkct
@@ -562,7 +562,7 @@ etc-docgen template fork ~/Downloads/BM.QT.04.05-v3.docx --kind hdsd
 
 ### Custom template override
 
-In `etc-docgen.yaml`:
+In `etc-platform.yaml`:
 
 ```yaml
 templates:
@@ -611,15 +611,15 @@ ETC templates (BM.QT.04.04, BM.QT.04.05) preserved pixel-perfect. NĐ 45/2026 st
 ## Project structure
 
 ```
-etc-docgen/
+etc-platform/
 ├── pyproject.toml              # Hatchling build, dependencies
-├── Dockerfile                  # MCP server Docker image (SSE)
-├── docker-compose.mcp.yaml     # Compose for SSE deployment
-├── src/etc_docgen/
+├── Dockerfile                  # Unified server Docker image (HTTP + MCP)
+├── docker-compose.yaml         # Compose for local + team deployment
+├── src/etc_platform/
 │   ├── __init__.py             # Version
-│   ├── __main__.py             # python -m etc_docgen
+│   ├── __main__.py             # python -m etc_platform
 │   ├── cli.py                  # Typer CLI (init, generate, export, validate, mcp, ...)
-│   ├── config.py               # Pydantic config model (etc-docgen.yaml)
+│   ├── config.py               # Pydantic config model (etc-platform.yaml)
 │   ├── paths.py                # Asset path resolution
 │   ├── mcp_server.py           # MCP server (stdio/sse/streamable-http, 8 tools)
 │   ├── engines/
@@ -634,7 +634,7 @@ etc-docgen/
 │   │   └── validation.py       # Schema + advisory validation
 │   ├── integrations/
 │   │   ├── __init__.py
-│   │   └── field_maps.py       # Routing (etc-docgen vs Pandoc) + field mapping
+│   │   └── field_maps.py       # Routing (etc-platform vs Pandoc) + field mapping
 │   ├── research/               # Codebase analysis (v0.2+)
 │   ├── sharding/               # Enterprise-scale support (v0.2+)
 │   ├── assets/
@@ -662,10 +662,10 @@ etc-docgen/
 ## Requirements
 
 - Python ≥ 3.11
-- **Export only**: `pip install etc-docgen` (no extra dependencies)
-- **Playwright capture**: `pip install "etc-docgen[capture]"` + `playwright install chromium`
-- **SSE/Docker MCP server**: `pip install "etc-docgen[serve]"` (adds uvicorn)
-- **All features**: `pip install "etc-docgen[all]"`
+- **Export only**: `pip install etc-platform` (no extra dependencies)
+- **Playwright capture**: `pip install "etc-platform[capture]"` + `playwright install chromium`
+- **SSE/Docker MCP server**: `pip install "etc-platform[serve]"` (adds uvicorn)
+- **All features**: `pip install "etc-platform[all]"`
 
 ## License
 
@@ -673,6 +673,6 @@ Proprietary — Công ty CP Hệ thống Công nghệ ETC.
 
 ## Links
 
-- **Issues**: https://github.com/etc-vn/etc-docgen/issues
-- **Docs**: https://etc-vn.github.io/etc-docgen/
+- **Issues**: https://github.com/etc-vn/etc-platform/issues
+- **Docs**: https://etc-vn.github.io/etc-platform/
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)

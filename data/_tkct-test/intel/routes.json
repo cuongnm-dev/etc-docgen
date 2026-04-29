@@ -1,0 +1,957 @@
+{
+  "services": {
+    "api": {
+      "base_url": "http://localhost:3001",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/auth/login",
+          "controller": "AuthController",
+          "handler": "login",
+          "module": "auth",
+          "roles": [],
+          "auth_required": false
+        },
+        {
+          "method": "GET",
+          "path": "/to-khai/search",
+          "controller": "DocumentCheckController",
+          "handler": "search",
+          "module": "m01-document-check",
+          "roles": ["HQDK", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/to-khai/:id/yeu-cau-bo-sung",
+          "controller": "DocumentCheckController",
+          "handler": "createYcbs",
+          "module": "m01-document-check",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/to-khai/:id/confirm-eligible",
+          "controller": "DocumentCheckController",
+          "handler": "confirmEligible",
+          "module": "m01-document-check",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/to-khai/:id/document-history",
+          "controller": "DocumentCheckController",
+          "handler": "documentHistory",
+          "module": "m01-document-check",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/inspection/pending",
+          "controller": "InspectionController",
+          "handler": "getPending",
+          "module": "m02-inspection",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/inspection/:toKhaiId/assign",
+          "controller": "InspectionController",
+          "handler": "assign",
+          "module": "m02-inspection",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "PUT",
+          "path": "/inspection/:toKhaiId/result",
+          "controller": "InspectionController",
+          "handler": "submitResult",
+          "module": "m02-inspection",
+          "roles": ["KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/inspection/:toKhaiId/approve",
+          "controller": "InspectionController",
+          "handler": "approve",
+          "module": "m02-inspection",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/inspection/active",
+          "controller": "InspectionController",
+          "handler": "getActive",
+          "module": "m02-inspection",
+          "roles": ["HQDK", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/channel/:toKhaiId",
+          "controller": "ChannelController",
+          "handler": "getChannel",
+          "module": "m03-channel",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/channel/:toKhaiId/de-xuat",
+          "controller": "ChannelController",
+          "handler": "createDeXuat",
+          "module": "m03-channel",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/channel/:toKhaiId/approve-transfer",
+          "controller": "ChannelController",
+          "handler": "approveTransfer",
+          "module": "m03-channel",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/channel/:toKhaiId/history",
+          "controller": "ChannelController",
+          "handler": "getHistory",
+          "module": "m03-channel",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/channel/:toKhaiId/sync-status",
+          "controller": "ChannelController",
+          "handler": "getSyncStatus",
+          "module": "m03-channel",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/tax/:toKhaiId",
+          "controller": "TaxController",
+          "handler": "queryTax",
+          "module": "m04-tax",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/tax/:toKhaiId/confirm",
+          "controller": "TaxController",
+          "handler": "confirmTax",
+          "module": "m04-tax",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/tax/:toKhaiId/history",
+          "controller": "TaxController",
+          "handler": "getHistory",
+          "module": "m04-tax",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/clearance/pending",
+          "controller": "ClearanceController",
+          "handler": "getPending",
+          "module": "m05-clearance",
+          "roles": ["HQDK", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/clearance/:toKhaiId/issue",
+          "controller": "ClearanceController",
+          "handler": "issue",
+          "module": "m05-clearance",
+          "roles": ["HQDK", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/clearance/:toKhaiId/print",
+          "controller": "ClearanceController",
+          "handler": "print",
+          "module": "m05-clearance",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/clearance/search",
+          "controller": "ClearanceController",
+          "handler": "search",
+          "module": "m05-clearance",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/clearance/:toKhaiId/sync-status",
+          "controller": "ClearanceController",
+          "handler": "syncStatus",
+          "module": "m05-clearance",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/handover",
+          "controller": "HandoverController",
+          "handler": "search",
+          "module": "m06-handover",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/handover/pending-approval",
+          "controller": "HandoverController",
+          "handler": "pendingApprovals",
+          "module": "m06-handover",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/handover/:id/print",
+          "controller": "HandoverController",
+          "handler": "printPayload",
+          "module": "m06-handover",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/handover/:id",
+          "controller": "HandoverController",
+          "handler": "findOne",
+          "module": "m06-handover",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover",
+          "controller": "HandoverController",
+          "handler": "create",
+          "module": "m06-handover",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "PUT",
+          "path": "/handover/:id",
+          "controller": "HandoverController",
+          "handler": "update",
+          "module": "m06-handover",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover/:id/confirm-arrival",
+          "controller": "HandoverController",
+          "handler": "confirmArrival",
+          "module": "m06-handover",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover/:id/confirm-goods",
+          "controller": "HandoverController",
+          "handler": "confirmGoods",
+          "module": "m06-handover",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover/:id/request-amend",
+          "controller": "HandoverController",
+          "handler": "requestAmend",
+          "module": "m06-handover",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover/:id/request-cancel",
+          "controller": "HandoverController",
+          "handler": "requestCancel",
+          "module": "m06-handover",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/handover/:id/approve",
+          "controller": "HandoverController",
+          "handler": "approvalDecision",
+          "module": "m06-handover",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho",
+          "controller": "KiemHoaHoController",
+          "handler": "search",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO", "PHAN_CONG", "KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho/approval-queue",
+          "controller": "KiemHoaHoController",
+          "handler": "approvalQueue",
+          "module": "m07-proxy-inspection",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/approval-queue/:requestId/decide",
+          "controller": "KiemHoaHoController",
+          "handler": "decide",
+          "module": "m07-proxy-inspection",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho/:id/print-preview",
+          "controller": "KiemHoaHoController",
+          "handler": "printPreview",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho/:id/results",
+          "controller": "KiemHoaHoController",
+          "handler": "listResults",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO", "PHAN_CONG", "KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho/:id",
+          "controller": "KiemHoaHoController",
+          "handler": "findOne",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO", "PHAN_CONG", "KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho",
+          "controller": "KiemHoaHoController",
+          "handler": "create",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/:id/assign",
+          "controller": "KiemHoaHoController",
+          "handler": "assign",
+          "module": "m07-proxy-inspection",
+          "roles": ["PHAN_CONG", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/:id/results",
+          "controller": "KiemHoaHoController",
+          "handler": "submitResult",
+          "module": "m07-proxy-inspection",
+          "roles": ["KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/:id/requests/amend",
+          "controller": "KiemHoaHoController",
+          "handler": "requestAmend",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/:id/requests/cancel",
+          "controller": "KiemHoaHoController",
+          "handler": "requestCancel",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m07/kiem-hoa-ho/:id/attachments",
+          "controller": "KiemHoaHoController",
+          "handler": "registerAttachment",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "KIEM_HOA", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m07/kiem-hoa-ho/:id/attachments/:fileId",
+          "controller": "KiemHoaHoController",
+          "handler": "getAttachment",
+          "module": "m07-proxy-inspection",
+          "roles": ["HQDK", "GIAM_SAT", "LANH_DAO", "PHAN_CONG", "KIEM_HOA"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/sealing/proposals/remove",
+          "controller": "SealingController",
+          "handler": "proposeRemoveSeal",
+          "module": "m08-sealing",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/sealing/proposals/new",
+          "controller": "SealingController",
+          "handler": "proposeSeal",
+          "module": "m08-sealing",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/sealing/pending",
+          "controller": "SealingController",
+          "handler": "listPending",
+          "module": "m08-sealing",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/sealing/inspection-queue",
+          "controller": "SealingController",
+          "handler": "listInspectionQueue",
+          "module": "m08-sealing",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/sealing/:id/confirm",
+          "controller": "SealingController",
+          "handler": "confirmProposal",
+          "module": "m08-sealing",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/sealing/:id/inspect",
+          "controller": "SealingController",
+          "handler": "confirmInspection",
+          "module": "m08-sealing",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/sealing/:id/kvgs-ready",
+          "controller": "SealingController",
+          "handler": "isReadyForKvgs",
+          "module": "m08-sealing",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/kvgs/xac-nhan/container",
+          "controller": "KvgsXacNhanController",
+          "handler": "searchContainer",
+          "module": "m09-kvgs-confirmation",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/kvgs/xac-nhan/hang-roi",
+          "controller": "KvgsXacNhanController",
+          "handler": "searchHangRoi",
+          "module": "m09-kvgs-confirmation",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/kvgs/xac-nhan/:id",
+          "controller": "KvgsXacNhanController",
+          "handler": "cancel",
+          "module": "m09-kvgs-confirmation",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/kvgs/xac-nhan/container-chung/:containerId",
+          "controller": "KvgsXacNhanController",
+          "handler": "listPendingForSharedContainer",
+          "module": "m09-kvgs-confirmation",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/internal/kvgs/scans",
+          "controller": "InternalKvgsController",
+          "handler": "processScan",
+          "module": "m09-kvgs-confirmation",
+          "roles": [],
+          "auth_required": false,
+          "notes": "Internal token guard (not JWT/Roles guard)"
+        },
+        {
+          "method": "POST",
+          "path": "/kvgs/:toKhaiId/hold",
+          "controller": "KvgsController",
+          "handler": "createHold",
+          "module": "m10-kvgs",
+          "roles": ["GIAM_SAT", "LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/kvgs/active",
+          "controller": "KvgsController",
+          "handler": "getActive",
+          "module": "m10-kvgs",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/kvgs/:lenhDungId/release",
+          "controller": "KvgsController",
+          "handler": "release",
+          "module": "m10-kvgs",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "SSE",
+          "path": "/kvgs/events",
+          "controller": "KvgsController",
+          "handler": "kvgsEvents",
+          "module": "m10-kvgs",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/to-khai/da-huy",
+          "controller": "M11ToKhaiController",
+          "handler": "listDaHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/to-khai/:id/khoi-phuc",
+          "controller": "M11ToKhaiController",
+          "handler": "khoiPhuc",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/ctdt/list/:ctdtType",
+          "controller": "CtdtController",
+          "handler": "listByType",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/request-sua",
+          "controller": "CtdtController",
+          "handler": "requestSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/ctdt/:id",
+          "controller": "CtdtController",
+          "handler": "getOne",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO", "HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/:id/request-huy",
+          "controller": "CtdtController",
+          "handler": "requestHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/:id/duyet-sua",
+          "controller": "CtdtController",
+          "handler": "duyetSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/:id/tu-choi-sua",
+          "controller": "CtdtController",
+          "handler": "tuChoiSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/:id/duyet-huy",
+          "controller": "CtdtController",
+          "handler": "duyetHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/ctdt/:id/tu-choi-huy",
+          "controller": "CtdtController",
+          "handler": "tuChoiHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/dia-diem",
+          "controller": "DiaDiemController",
+          "handler": "list",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/dia-diem/chuyen",
+          "controller": "DiaDiemController",
+          "handler": "chuyen",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/batch-huy/het-hieu-luc",
+          "controller": "BatchHuyController",
+          "handler": "list",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/batch-huy/execute",
+          "controller": "BatchHuyController",
+          "handler": "execute",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/duyet/huy-danh-sach-container",
+          "controller": "HuyDanhSachContainerController",
+          "handler": "list",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/huy-danh-sach-container",
+          "controller": "HuyDanhSachContainerController",
+          "handler": "create",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/duyet/huy-danh-sach-container/:id",
+          "controller": "HuyDanhSachContainerController",
+          "handler": "getOne",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/huy-danh-sach-container/:id/duyet",
+          "controller": "HuyDanhSachContainerController",
+          "handler": "duyet",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/huy-danh-sach-container/:id/tu-choi",
+          "controller": "HuyDanhSachContainerController",
+          "handler": "tuChoi",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/duyet/sua-danh-sach-container",
+          "controller": "SuaDanhSachContainerController",
+          "handler": "list",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/sua-danh-sach-container",
+          "controller": "SuaDanhSachContainerController",
+          "handler": "create",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK", "GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/duyet/sua-danh-sach-container/:id",
+          "controller": "SuaDanhSachContainerController",
+          "handler": "getOne",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/sua-danh-sach-container/:id/duyet",
+          "controller": "SuaDanhSachContainerController",
+          "handler": "duyet",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/duyet/sua-danh-sach-container/:id/tu-choi",
+          "controller": "SuaDanhSachContainerController",
+          "handler": "tuChoi",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/yeu-cau-to-khai",
+          "controller": "YeuCauToKhaiController",
+          "handler": "create",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/yeu-cau-to-khai/huy",
+          "controller": "YeuCauToKhaiController",
+          "handler": "listHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/yeu-cau-to-khai/sua",
+          "controller": "YeuCauToKhaiController",
+          "handler": "listSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/yeu-cau-to-khai/:id",
+          "controller": "YeuCauToKhaiController",
+          "handler": "getOne",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/yeu-cau-to-khai/:id/duyet-huy",
+          "controller": "YeuCauToKhaiController",
+          "handler": "duyetHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/yeu-cau-to-khai/:id/tu-choi-huy",
+          "controller": "YeuCauToKhaiController",
+          "handler": "tuChoiHuy",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/yeu-cau-to-khai/:id/duyet-sua",
+          "controller": "YeuCauToKhaiController",
+          "handler": "duyetSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/yeu-cau-to-khai/:id/tu-choi-sua",
+          "controller": "YeuCauToKhaiController",
+          "handler": "tuChoiSua",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["LANH_DAO"],
+          "auth_required": true
+        },
+        {
+          "method": "GET",
+          "path": "/m11/container",
+          "controller": "M11ContainerController",
+          "handler": "list",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["GIAM_SAT", "HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/container",
+          "controller": "M11ContainerController",
+          "handler": "create",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m11/container/bulk",
+          "controller": "M11ContainerController",
+          "handler": "bulk",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["HQDK"],
+          "auth_required": true
+        },
+        {
+          "method": "PUT",
+          "path": "/m11/container/:id",
+          "controller": "M11ContainerController",
+          "handler": "update",
+          "module": "m11-nghiep-vu-khac",
+          "roles": ["GIAM_SAT"],
+          "auth_required": true
+        },
+        {
+          "method": "POST",
+          "path": "/m13/containers",
+          "controller": "M13SoiChieuController",
+          "handler": "createContainer",
+          "module": "m13-soi-chieu",
+          "roles": [],
+          "auth_required": true,
+          "notes": "JwtAuthGuard only — no RolesGuard"
+        },
+        {
+          "method": "POST",
+          "path": "/m13/containers/lookup/emanifest",
+          "controller": "M13SoiChieuController",
+          "handler": "lookupEmanifest",
+          "module": "m13-soi-chieu",
+          "roles": [],
+          "auth_required": true,
+          "notes": "JwtAuthGuard only — no RolesGuard"
+        },
+        {
+          "method": "POST",
+          "path": "/m13/containers/lookup/to-khai-xk",
+          "controller": "M13SoiChieuController",
+          "handler": "lookupToKhaiXk",
+          "module": "m13-soi-chieu",
+          "roles": [],
+          "auth_required": true,
+          "notes": "JwtAuthGuard only — no RolesGuard"
+        },
+        {
+          "method": "POST",
+          "path": "/m13/containers/:id/result",
+          "controller": "M13SoiChieuController",
+          "handler": "recordResult",
+          "module": "m13-soi-chieu",
+          "roles": [],
+          "auth_required": true,
+          "notes": "JwtAuthGuard only — no RolesGuard"
+        }
+      ]
+    },
+    "barcode-gateway": {
+      "base_url": "http://localhost:3002",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/internal/barcode/simulate",
+          "controller": "BarcodeSimulateController",
+          "handler": "simulate",
+          "module": "barcode",
+          "roles": [],
+          "auth_required": false,
+          "notes": "Non-production only — throws NotFoundException in production"
+        }
+      ]
+    }
+  },
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

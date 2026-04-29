@@ -1,0 +1,254 @@
+{
+  "validated-at": "2026-04-20T00:00:00Z",
+  "mode": "LARGE",
+  "source-hash": "doc-brief.md-1765-lines",
+  "summary": {
+    "HIGH": 5,
+    "MEDIUM": 8,
+    "LOW": 3,
+    "pass": false,
+    "blocking-issues": 5
+  },
+  "issues": [
+    {
+      "id": "ISSUE-001",
+      "severity": "HIGH",
+      "type": "undocumented-modules",
+      "location": "doc-brief.md#section-4",
+      "detail": "6 of 16 modules (M01, M02, M03, M04, M05, M10) have ZERO functional description. These form 37.5% of the system scope. Sections 4.8-4.13 are placeholder [CAN BO SUNG] entries only.",
+      "suggested-fix": "User must provide original functional specification document or interview subject matter expert to capture features, rules, and entities for these 6 modules before proceeding to design/dev."
+    },
+    {
+      "id": "ISSUE-002",
+      "severity": "HIGH",
+      "type": "integration-protocol-missing",
+      "location": "doc-brief.md#section-8",
+      "detail": "3 critical integration points have unknown protocols: (1) VNACCS/VCIS declaration data flow (REST/MQ/file?), (2) Emanifest/Emaiest container lookup (?), (3) Barcode scanner hardware (?). Confidence: Low.",
+      "suggested-fix": "SA must clarify with customs authority: What are the actual API/protocol specs for each integration? Block architecture phase until these are confirmed."
+    },
+    {
+      "id": "ISSUE-003",
+      "severity": "HIGH",
+      "type": "auth-model-undefined",
+      "location": "doc-brief.md#section-11-ambiguities",
+      "detail": "User authentication and authorization mechanism not described. Is it LDAP/SSO/local? How is Ma HQ-based role isolation enforced? Security architecture cannot be finalized without this.",
+      "suggested-fix": "Contact PO/security team: Confirm auth model (GAP-004). Does system integrate with existing government SSO or use local auth?"
+    },
+    {
+      "id": "ISSUE-004",
+      "severity": "HIGH",
+      "type": "entity-collision-detected",
+      "location": "doc-brief.md#section-6",
+      "detail": "11 CTDT entity types (GiayPhep, HoaDon, ChungTuXuatXu, VanDon, etc.) in Section 6 share identical CRUD+approval workflow (M11-F008, M11-F009, M12-F008-F013) but are defined as separate entities instead of a polymorphic type. This creates 66+ redundant screens and 11x implementation cost.",
+      "suggested-fix": "SA: consolidate 11 CTDT types into single polymorphic CTDT entity with type=enum field. Create 1 generic CRUD spec + 1 approval workflow spec. Type-specific field appendices only."
+    },
+    {
+      "id": "ISSUE-005",
+      "severity": "HIGH",
+      "type": "composite-feature-lumping",
+      "location": "doc-brief.md#section-4, modules M11, M12",
+      "detail": "M11-F008 'Duyet sua CTDT (11 document types)' and M11-F009 'Duyet huy CTDT (11 document types)' are composite features lumping 11 separate business operations into one feature card. Similarly M12-F008 through M12-F013 each represent 11 variants. Total: 66 feature-equivalents falsely counted as 13 features.",
+      "suggested-fix": "Recount features: 82 declared - (11+11+11+11+11+11+11) actual = 8 composite placeholders. Actual distinct feature count is ~50. Update metrics. Consider splitting composite features into separate feature cards or use configurable metadata approach."
+    },
+    {
+      "id": "ISSUE-006",
+      "severity": "MEDIUM",
+      "type": "weak-implication-detected",
+      "location": "doc-brief.md#section-3, actors",
+      "detail": "Actor 'He thong VNACCS/VCIS' source is 'implied: So TN field pattern, Emanifest reference' — pattern matching without explicit confirmation. Not a quote from document.",
+      "suggested-fix": "Verify: Is VNACCS/VCIS explicitly mentioned in source document? If yes, add quote. If no, mark as 'assumed system actor'."
+    },
+    {
+      "id": "ISSUE-007",
+      "severity": "MEDIUM",
+      "type": "missing-field-type-inference",
+      "location": "doc-brief.md#section-6",
+      "detail": "Entity fields: 25 fields lack DB type constraints. Examples: BienBanBanGiao.dia_diem_vc_di = VARCHAR(200) assumed but no length spec in document. ToKhai.so_to_khai = VARCHAR(12) — where does 12 char limit come from? Need explicit validation.",
+      "suggested-fix": "Verify field constraints via OCR: grep doc-brief for '0/12' character counter reference (found in BR-INTEL-038). For other fields, check raw OCR or contact domain expert."
+    },
+    {
+      "id": "ISSUE-008",
+      "severity": "MEDIUM",
+      "type": "test-data-hints-missing",
+      "location": "docs/intel/",
+      "detail": "No test-data-hints.md file found. Without happy/edge/negative test data samples for each entity, QA will struggle with test case generation.",
+      "suggested-fix": "Create docs/intel/test-data-hints.md with: (1) happy path sample per entity, (2) edge case examples (boundary values, special chars in Vietnamese names), (3) negative cases (invalid barcode, missing Ma HQ)."
+    },
+    {
+      "id": "ISSUE-009",
+      "severity": "MEDIUM",
+      "type": "rule-to-feature-mapping-incomplete",
+      "location": "doc-brief.md#section-5",
+      "detail": "BR-INTEL-036 'All search screens require Ma HQ' and BR-INTEL-037 'Barcode scanning available' both claim to apply to 'ALL' features but only 38 rules listed for 82 features. Cross-cutting rules are under-captured.",
+      "suggested-fix": "Extract NFR signals from Section 9 as cross-cutting rules: Pagination (20/trang), UTF-8 encoding, timezone (UTC+7), tab-based detail views. Add to rule section with 'scope: cross-cutting'."
+    },
+    {
+      "id": "ISSUE-010",
+      "severity": "MEDIUM",
+      "type": "scope-not-explicit",
+      "location": "doc-brief.md#section-4, most modules",
+      "detail": "Module 'Out of scope' fields present but feature-level 'In scope / Out of scope' are sometimes implicit (e.g., M06-F002 'Out of scope: none' without explaining edge cases like goods arriving partway).",
+      "suggested-fix": "For each feature, add explicit 'out-of-scope' bullet (allow 'none' but be explicit about it). E.g., M06-F002: 'Out of scope: goods arriving in multiple shipments (not covered by this feature)'."
+    },
+    {
+      "id": "ISSUE-011",
+      "severity": "MEDIUM",
+      "type": "feature-granularity-drift",
+      "location": "doc-brief.md#section-4",
+      "detail": "Feature action count varies wildly: M09-F001 (1 action: barcode scan → auto-confirm) vs M12-F002 (10+ actions: search, filter, view detail, expand tabs, view charts). No maximum action threshold enforced.",
+      "suggested-fix": "Define granularity ceiling: if feature has >8 distinct user actions, split it. M12-F002 should be 'Search+list' + 'View detail' + 'View charts' as 3 separate features."
+    },
+    {
+      "id": "ISSUE-012",
+      "severity": "MEDIUM",
+      "type": "missing-dod-definition",
+      "location": "doc-brief.md#section-13",
+      "detail": "Section 13.6 DoD checklist has only 8 items (all ACs, isolation, workflow, pagination, barcode, print, Vietnamese, audit). Missing: performance SLA, concurrency, error handling, accessibility, offline capability.",
+      "suggested-fix": "Expand DoD with: [ ] API response time <2s for search, [ ] Handle 1000 concurrent users, [ ] Graceful barcode timeout, [ ] WCAG 2.1 AA accessibility, [ ] Error messages in Vietnamese."
+    },
+    {
+      "id": "ISSUE-013",
+      "severity": "LOW",
+      "type": "priority-distribution-check",
+      "location": "doc-brief.md#section-4",
+      "detail": "P0 count: 9/82 = 11%, P1 count: ~50 = 61%, P2 count: 21 = 26%. Distribution is reasonable.",
+      "suggested-fix": "No fix needed — priority distribution follows common pattern (10-15% critical, 50-60% high, 25-35% medium)."
+    },
+    {
+      "id": "ISSUE-014",
+      "severity": "LOW",
+      "type": "missing-insights-subsections",
+      "location": "doc-brief.md#section-13",
+      "detail": "Section 13.7-13.8 not present. Template expects: 13.7 (Risk/Dependency Matrix), 13.8 (Rollout Strategy). These are implicit in 13.1-13.6 but not explicitly called.",
+      "suggested-fix": "Optional: Add 13.7 and 13.8 if needed by SDLC agents. Currently 13.1-13.6 sufficient for BA/SA/Tech-lead/Dev/QA/Reviewer."
+    },
+    {
+      "id": "ISSUE-015",
+      "severity": "LOW",
+      "type": "screenshot-count-unverified",
+      "location": "doc-brief.md#frontmatter-metrics",
+      "detail": "Metrics claim 'screens: 500' but raw-extract.md says '500 images found, 8 OCR sampled'. Not verified that all 500 are distinct screens vs duplicates/thumbnails.",
+      "suggested-fix": "Sampling bias note: only ~8 of 500 images were OCRd. Actual distinct screen count unknown. Recommend re-count after visual dedup."
+    }
+  ],
+  "metrics": {
+    "modules": 16,
+    "features-declared": 82,
+    "features-actual": 50,
+    "rules": 38,
+    "entities": 15,
+    "screens-sampled": 8,
+    "screens-claimed": 500,
+    "integrations": 3,
+    "relationships": 16,
+    "feature-per-module-ratio": 5.125,
+    "rule-per-feature-ratio": 0.46,
+    "source-traceability-rate": 0.78,
+    "composite-features-count": 7,
+    "sdlc-readiness": {
+      "rules-with-feature-ref": 0.97,
+      "features-with-priority": 1.0,
+      "relationships-with-cardinality": 1.0,
+      "features-with-explicit-scope": 0.85
+    },
+    "opus-enrichment": {
+      "fields-with-type-inferred": 0.65,
+      "test-data-hints-present": false,
+      "dod-checklist-complete": 0.67,
+      "insights-subsections-populated": 6
+    }
+  },
+  "validation-layers": {
+    "layer-1-traceability": {
+      "status": "PASS",
+      "explicit-sources": 91,
+      "implied-sources": 26,
+      "hallucinated-detected": 0,
+      "notes": "Strong source attribution. 91 explicit quotes found. Implied sources generally well-reasoned but should verify actor VNACCS/VCIS."
+    },
+    "layer-2-semantic-consistency": {
+      "status": "FAIL",
+      "actor-aliases": 2,
+      "entity-collisions": 1,
+      "granularity-drift": 1,
+      "duplicate-rules": 0,
+      "critical-issues": [
+        "ISSUE-004: CTDT polymorphism not recognized - 11 entities should be 1",
+        "ISSUE-006: Actor VNACCS/VCIS source weak (implied from field pattern)"
+      ]
+    },
+    "layer-3-structural-completeness": {
+      "status": "PASS",
+      "yaml-frontmatter": "valid",
+      "sections-count": 13,
+      "expected-sections": 13,
+      "end-sentinel": "present",
+      "issues": []
+    },
+    "layer-4-completeness-thresholds": {
+      "status": "FAIL",
+      "features-vs-modules": "5.1 per module (threshold 4.0+) PASS",
+      "rules-vs-features": "0.46 per feature (threshold 2.0+) FAIL",
+      "screens-coverage": "8 OCRd of 500 claimed (1.6% - sampling bias)",
+      "critical-issues": [
+        "ISSUE-005: Composite features inflate count; actual ~50 not 82",
+        "ISSUE-009: Cross-cutting rules (pagination, encoding) not captured as rules"
+      ]
+    },
+    "layer-5-composite-lumping": {
+      "status": "FAIL",
+      "composites-found": 7,
+      "total-lumped-operations": 66,
+      "impact": "HIGH",
+      "examples": [
+        "M11-F008, M11-F009: each contains 11 approval workflows",
+        "M12-F008 through M12-F013: 6 CRUD features times 11 CTDT types"
+      ]
+    },
+    "layer-6-sdlc-readiness": {
+      "status": "FAIL",
+      "g1-rules-with-feature-ref": "0.97 PASS",
+      "g2-features-with-priority": "1.0 PASS",
+      "g3-relationships-with-cardinality": "1.0 PASS",
+      "g4-features-with-explicit-scope": "0.85 WARN",
+      "blocking-gaps": [
+        "ISSUE-001: 6 modules undocumented (37.5% of system)",
+        "ISSUE-002: 3 integrations undefined",
+        "ISSUE-003: Auth model missing"
+      ]
+    },
+    "layer-7-opus-enrichment": {
+      "status": "PARTIAL",
+      "ft1-fields-with-type": "0.65 (10/15 entities fully typed)",
+      "ft2-test-data-hints": "MISSING",
+      "ft3-dod-checklist": "0.67 (8/12 standard items)",
+      "ft4-insights": "6/8 subsections present"
+    }
+  },
+  "risk-assessment": {
+    "overall-risk": "HIGH",
+    "blocker-count": 5,
+    "must-resolve-before-design": [
+      "ISSUE-001: Obtain M01-M05, M10 functional specs",
+      "ISSUE-002: Confirm integration protocols",
+      "ISSUE-003: Finalize auth model",
+      "ISSUE-004: Consolidate CTDT entities (architectural decision)",
+      "ISSUE-005: Recount and redefine feature granularity"
+    ]
+  },
+  "recommendations": {
+    "gate-a-status": "BLOCK",
+    "reason": "5 HIGH-severity issues prevent design phase from proceeding. Missing 37.5% of module specs, undefined integrations, and composite feature lumping require resolution.",
+    "immediate-actions": [
+      "Contact PO for M01-M05 and M10 functional descriptions",
+      "Schedule SA review of integration protocols",
+      "Escalate auth model decision to security team",
+      "Architecture decision: CTDT polymorphic entity design (~2 hours, saves 30% effort)",
+      "Recount features: collapse 82 to ~50 actual distinct features"
+    ]
+  },
+  "confidence": {
+    "overall": "MEDIUM",
+    "reasoning": "Document well-structured and heavily sourced (91 explicit quotes) but contains major architectural gaps: 37.5% of modules undocumented, 3 undefined integrations, significant feature lumping. Strong reverse-engineering from UI screenshots (reliable for feature list, risky for business logic)."
+  }
+}

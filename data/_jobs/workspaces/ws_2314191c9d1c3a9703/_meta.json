@@ -1,0 +1,160 @@
+{
+  "workspace_id": "ws_2314191c9d1c3a9703",
+  "sha256": "2314191c9d1c3a9703d842c40879a182d21bce1b1188175c95d315f2c5bfc449",
+  "parts": [
+    {
+      "path": "content-data.json",
+      "size_bytes": 442925,
+      "sha256": "95b490b13b10d2dc567207b219d713eecbdf14fe5cd6decd550feb85f3c52d6d",
+      "content_type": "application/json"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-001-step-01-main.png",
+      "size_bytes": 54862,
+      "sha256": "6114f10ea1579cdbe99423682dabef570d09f4976bedc7fa2c3bc480d3dd6e0b",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-001-step-02-supplement.png",
+      "size_bytes": 56941,
+      "sha256": "3c05e1cca33339fb361f54a1f356640565c9ae60acf639ff35d4978490a21b84",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-002-step-01-main.png",
+      "size_bytes": 49707,
+      "sha256": "39bad1bb06fcc060da4289c58aa881ec011870c1915a3ab7d36fd3f1708c86f3",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-002-step-02-in-progress.png",
+      "size_bytes": 55420,
+      "sha256": "fa92db2da807ddadc06900bf37020664e35819b48aa37fc30c951eb9975abdbe",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-003-step-01-main.png",
+      "size_bytes": 50027,
+      "sha256": "ddd137e96c47ae6b8b953ceb40933539ca17e04bc371848156be1032e2e62266",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-003-step-02-history.png",
+      "size_bytes": 50943,
+      "sha256": "24ba811108b19282b1c27d2b115b189905db0ef1d5b07ff23e518abb74d031bf",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-004-step-01-main.png",
+      "size_bytes": 48660,
+      "sha256": "01cdcd00e3eb9bf92ddda6aad4909f9d255055f7f1bc7ed417e9ad504eeb5ce0",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-004-step-02-history.png",
+      "size_bytes": 50202,
+      "sha256": "3b105d641026a3f62414be8e118d1613812e907d025d324b550d38b038396f3f",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-005-step-01-main.png",
+      "size_bytes": 56497,
+      "sha256": "a74c45e2aa003c224a7aaeb176ad2b95b4046425cc552e873c097729035c4812",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-005-step-02-detail.png",
+      "size_bytes": 53597,
+      "sha256": "b17de26564d571b053541aa8c78e72e7e49d7c78e1d5cd00c3e5c56b48973b82",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-006-step-01-main.png",
+      "size_bytes": 70485,
+      "sha256": "b0f00d830ed8b41a4796b466d9076879b60462bdae9acd70da354ee39c0a2646",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-006-step-02-proposal.png",
+      "size_bytes": 64605,
+      "sha256": "1e85ff2d99ac2319d78689074ca18a673fba0292a86221cbbf8f6055cea31759",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-007-step-01-main.png",
+      "size_bytes": 60414,
+      "sha256": "8053cddff0f0974d630bf287ba2ad00e6ac9709e3aad60ca52401729f4a76e2f",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-007-step-02-proposal.png",
+      "size_bytes": 53177,
+      "sha256": "4953b6d7563cd35d472628f491bf1fed176ca2532c726703ee10645eb5cc325f",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-008-step-01-propose-seal.png",
+      "size_bytes": 63804,
+      "sha256": "e138f3098ff96bd52e5c4f6ba3eadab9a707ca6db1fc6f26600cc8a813396410",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-008-step-02-confirm.png",
+      "size_bytes": 64477,
+      "sha256": "66edddc6e8622ac1e76f8bccd8d685b65e92171891427b006b5e3b47fa4b7b16",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-009-step-01-kvgs-confirm.png",
+      "size_bytes": 76526,
+      "sha256": "e5bd15f1982798460c2d191a1711990cfacea90a5d5d6792c00236a22adbdcec",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-009-step-02-lookup.png",
+      "size_bytes": 75546,
+      "sha256": "98319d6ff556759c3a2f885bde6dbafdb0cdbb091852a15ab05b613fd9088dff",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-010-step-01-hold-order.png",
+      "size_bytes": 52341,
+      "sha256": "f8398a0b6d3630f40d65c96760b2bf1a5394dc3c1932c3effb78bed880e6898a",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-010-step-02-monitor.png",
+      "size_bytes": 57224,
+      "sha256": "b7875e6cc47fb3ab2e206958ab5c002ed563e9333495853c4bf22205c4e9224e",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-011-step-01-hub.png",
+      "size_bytes": 113798,
+      "sha256": "4e2adbbf622a9780830720b52faa05ada1bf0a0662aa2cbc34aa3ecca5f27763",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-011-step-02-transfer-site.png",
+      "size_bytes": 80016,
+      "sha256": "8834d3437a9ef8630148ee87306cd637f738c64a9b6aa548ad4fe41954b8517b",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-013-step-01-input.png",
+      "size_bytes": 65891,
+      "sha256": "d7e8b748e959d0824639fec897b052aed025ee150bba8749c9e0f0a9eebf39f2",
+      "content_type": "image/png"
+    },
+    {
+      "path": "screenshots/TQCS-20260420-013-step-02-results.png",
+      "size_bytes": 60621,
+      "sha256": "535c27238249bb4dab49545985ec79b7217d422d88981090cc8e78ce79f6fb8d",
+      "content_type": "image/png"
+    }
+  ],
+  "total_size": 1928706,
+  "created_at": "2026-04-27T17:15:17.854530Z",
+  "expires_at": "2026-04-28T17:15:17.854530Z",
+  "label": "customs-e2e-test"
+}

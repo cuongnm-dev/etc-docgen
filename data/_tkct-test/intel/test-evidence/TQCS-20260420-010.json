@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-010",
+  "feature_name": "KVGS / Lệnh dừng (M10)",
+  "module": "m10",
+  "feature_catalog_fingerprint": "sha256:4f998d4eb0a7ccc33e30829d2f88f492e51feeb8998ddfaaa9849d9196e6558a",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Dev JWT role GIAM_SAT, maHq VN001",
+  "steps": [
+    {
+      "step": 1,
+      "state": "hold-order",
+      "page_url": "http://localhost:3000/m10/lenh-dung",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-010-step-01-hold-order.png"
+    },
+    {
+      "step": 2,
+      "state": "monitor",
+      "page_url": "http://localhost:3000/m10/giam-sat",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-010-step-02-monitor.png"
+    }
+  ]
+}

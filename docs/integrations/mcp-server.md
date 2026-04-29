@@ -1,6 +1,6 @@
 # MCP Server Integration
 
-etc-docgen exposes its documentation tools via the **Model Context Protocol (MCP)**, allowing any MCP-compatible AI agent (VS Code Copilot, Cursor, Claude Desktop, Windsurf, etc.) to call tools directly without subprocess CLI parsing.
+etc-platform exposes its documentation tools via the **Model Context Protocol (MCP)**, allowing any MCP-compatible AI agent (VS Code Copilot, Cursor, Claude Desktop, Windsurf, etc.) to call tools directly without subprocess CLI parsing.
 
 ## Tools
 
@@ -20,12 +20,12 @@ etc-docgen exposes its documentation tools via the **Model Context Protocol (MCP
 
 ## Setup
 
-### 1. Install etc-docgen
+### 1. Install etc-platform
 
 ```bash
-pip install etc-docgen
+pip install etc-platform
 # or from source
-pip install -e /path/to/etc-docgen
+pip install -e /path/to/etc-platform
 ```
 
 ### 2. Configure your IDE
@@ -41,22 +41,22 @@ Add to `.vscode/mcp.json` in your project (or User settings):
 ```json
 {
   "servers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
       "type": "stdio"
     }
   }
 }
 ```
 
-Or if `etc-docgen-mcp` is not on PATH:
+Or if `etc-platform-mcp` is not on PATH:
 
 ```json
 {
   "servers": {
-    "etc-docgen": {
+    "etc-platform": {
       "command": "python",
-      "args": ["-m", "etc_docgen.mcp_server"],
+      "args": ["-m", "etc_platform.mcp_server"],
       "type": "stdio"
     }
   }
@@ -72,8 +72,8 @@ Add to `.cursor/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
       "type": "stdio"
     }
   }
@@ -85,9 +85,9 @@ Or with explicit Python path:
 ```json
 {
   "mcpServers": {
-    "etc-docgen": {
+    "etc-platform": {
       "command": "python",
-      "args": ["-m", "etc_docgen.mcp_server"],
+      "args": ["-m", "etc_platform.mcp_server"],
       "type": "stdio"
     }
   }
@@ -106,8 +106,8 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
       "type": "stdio"
     }
   }
@@ -123,8 +123,8 @@ Add to `.mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
       "type": "stdio"
     }
   }
@@ -134,7 +134,7 @@ Add to `.mcp.json` in your project root:
 Or via Claude Code CLI:
 
 ```bash
-claude mcp add etc-docgen etc-docgen-mcp
+claude mcp add etc-platform etc-platform-mcp
 ```
 
 ---
@@ -146,8 +146,8 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "etc-docgen": {
-      "command": "etc-docgen-mcp",
+    "etc-platform": {
+      "command": "etc-platform-mcp",
       "type": "stdio"
     }
   }
@@ -175,8 +175,8 @@ You can also start the MCP server manually:
 
 ```bash
 # Via CLI command
-etc-docgen mcp
+etc-platform mcp
 
 # Via Python module
-python -m etc_docgen.mcp_server
+python -m etc_platform.mcp_server
 ```

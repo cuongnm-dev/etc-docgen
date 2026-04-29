@@ -1,0 +1,339 @@
+{
+  "schema_version": "1.0",
+  "project": "customs-clearance-system",
+  "domain": "Thông quan hải quan",
+  "feature_prefix": "TQCS",
+  "features": [
+    {
+      "id": "TQCS-20260420-001",
+      "name": "Kiểm tra hồ sơ (M01)",
+      "module": "m01",
+      "api_module": "m01-document-check",
+      "status": "done",
+      "description": "Tiếp nhận và kiểm tra hồ sơ tờ khai hải quan. Cán bộ HQDK tìm kiếm tờ khai theo số, yêu cầu bổ sung hồ sơ còn thiếu, xác nhận đủ điều kiện để chuyển sang phân luồng.",
+      "business_intent": "Đảm bảo tờ khai đủ hồ sơ trước khi phân luồng kiểm tra",
+      "flow_summary": "HQDK tìm tờ khai → kiểm tra hồ sơ → yêu cầu bổ sung (nếu thiếu) → xác nhận đủ điều kiện → chuyển sang M03",
+      "acceptance_criteria": [
+        "HQDK tìm được tờ khai theo số",
+        "Tạo được yêu cầu bổ sung hồ sơ",
+        "Xác nhận tờ khai đủ điều kiện",
+        "Xem lịch sử hồ sơ"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [
+        "GET /to-khai/search",
+        "POST /to-khai/:id/yeu-cau-bo-sung",
+        "POST /to-khai/:id/confirm-eligible",
+        "GET /to-khai/:id/document-history"
+      ],
+      "fe_routes": ["/m01", "/m01/xac-nhan", "/m01/yeu-cau-bo-sung", "/m01/lich-su"],
+      "entities": ["ToKhai", "YeuCauBoSung"],
+      "completeness_score": 0.80,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-002",
+      "name": "Kiểm hóa (M02)",
+      "module": "m02",
+      "api_module": "m02-inspection",
+      "status": "done",
+      "description": "Kiểm tra thực tế hàng hóa. Cán bộ phân công chỉ định cán bộ kiểm hóa, cán bộ kiểm hóa thực hiện và nhập kết quả, lãnh đạo phê duyệt.",
+      "business_intent": "Kiểm tra thực tế hàng hóa đảm bảo khai báo đúng",
+      "flow_summary": "PHAN_CONG phân công → KIEM_HOA kiểm tra → nhập kết quả → LANH_DAO phê duyệt → in phiếu",
+      "acceptance_criteria": [
+        "Phân công cán bộ kiểm hóa",
+        "Nhập kết quả kiểm hóa",
+        "Phê duyệt kết quả",
+        "In phiếu kiểm hóa"
+      ],
+      "roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO"],
+      "routes": [
+        "GET /inspection",
+        "POST /inspection/:id/assign",
+        "POST /inspection/:id/result",
+        "POST /inspection/:id/approve"
+      ],
+      "fe_routes": ["/m02", "/m02/dang-kiem", "/m02/:toKhaiId/ket-qua", "/m02/:toKhaiId/phe-duyet", "/m02/:toKhaiId/in"],
+      "entities": ["KiemHoa", "KetQuaKiemHoa"],
+      "completeness_score": 0.75,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-003",
+      "name": "Phân luồng / Chuyển luồng (M03)",
+      "module": "m03",
+      "api_module": "m03-channel",
+      "status": "done",
+      "description": "Xác định luồng thông quan (Luồng Xanh/Vàng/Đỏ) và chuyển luồng khi cần. HQDK đề xuất, lãnh đạo phê duyệt, đồng bộ với VNACCS.",
+      "business_intent": "Phân loại rủi ro tờ khai và quyết định mức độ kiểm tra",
+      "flow_summary": "HQDK xem kết quả phân luồng → đề xuất chuyển luồng → LANH_DAO phê duyệt → đồng bộ VNACCS",
+      "acceptance_criteria": [
+        "Xem trạng thái phân luồng hiện tại",
+        "Đề xuất chuyển luồng",
+        "Lãnh đạo phê duyệt chuyển luồng",
+        "Theo dõi trạng thái đồng bộ VNACCS"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [
+        "GET /channel/:toKhaiId",
+        "POST /channel/:toKhaiId/de-xuat",
+        "POST /channel/:toKhaiId/approve-transfer",
+        "GET /channel/:toKhaiId/history",
+        "GET /channel/:toKhaiId/sync-status"
+      ],
+      "fe_routes": ["/m03", "/m03/:toKhaiId", "/m03/:toKhaiId/de-xuat", "/m03/:toKhaiId/phe-duyet", "/m03/lich-su"],
+      "entities": ["PhanLuong", "DeXuatChuyenLuong", "VnaccsOutbox"],
+      "completeness_score": 0.78,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-004",
+      "name": "Thuế (M04)",
+      "module": "m04",
+      "api_module": "m04-tax",
+      "status": "done",
+      "description": "Kiểm tra và xác nhận nghĩa vụ thuế. Tích hợp eTax để tra cứu tình trạng nộp thuế của doanh nghiệp.",
+      "business_intent": "Đảm bảo doanh nghiệp hoàn thành nghĩa vụ thuế trước khi thông quan",
+      "flow_summary": "HQDK xem danh sách tờ khai chờ xác nhận thuế → kiểm tra eTax → xác nhận hoàn thành nghĩa vụ",
+      "acceptance_criteria": [
+        "Xem tờ khai chờ xác nhận thuế",
+        "Tra cứu trạng thái thuế eTax",
+        "Xác nhận hoàn thành nghĩa vụ thuế"
+      ],
+      "roles": ["HQDK"],
+      "routes": [
+        "GET /tax/pending",
+        "POST /tax/:toKhaiId/confirm"
+      ],
+      "fe_routes": ["/m04", "/m04/:toKhaiId/xac-nhan", "/m04/lich-su"],
+      "entities": ["NghiaVuThue"],
+      "completeness_score": 0.72,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-005",
+      "name": "Thông quan — Giấy thông quan (M05)",
+      "module": "m05",
+      "api_module": "m05-clearance",
+      "status": "done",
+      "description": "Cấp giấy thông quan cho tờ khai đã hoàn thành tất cả điều kiện. Tích hợp VNACCS để cập nhật trạng thái.",
+      "business_intent": "Chính thức cấp phép thông quan hàng hóa",
+      "flow_summary": "HQDK/LANH_DAO xem tờ khai pending → kiểm tra điều kiện prerequisites → cấp giấy thông quan → in giấy → đồng bộ VNACCS",
+      "acceptance_criteria": [
+        "Xem danh sách tờ khai đủ điều kiện thông quan",
+        "Cấp giấy thông quan",
+        "In giấy thông quan",
+        "Tìm kiếm tờ khai đã thông quan"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [
+        "GET /clearance/pending",
+        "POST /clearance/:toKhaiId/issue",
+        "GET /clearance/:toKhaiId/print",
+        "GET /clearance/search",
+        "GET /clearance/:toKhaiId/sync-status"
+      ],
+      "fe_routes": ["/m05", "/m05/:toKhaiId", "/m05/:toKhaiId/in"],
+      "entities": ["GiayThongQuan"],
+      "completeness_score": 0.82,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-006",
+      "name": "Biên bản bàn giao (M06)",
+      "module": "m06",
+      "api_module": "m06-handover",
+      "status": "done",
+      "description": "Quản lý biên bản bàn giao hàng hóa từ hải quan sang đơn vị bảo quản. Bao gồm vòng đời đầy đủ: tạo → xác nhận đến → xác nhận hàng → yêu cầu sửa/hủy → phê duyệt.",
+      "business_intent": "Đảm bảo bàn giao hàng hóa có đầy đủ chứng từ pháp lý",
+      "flow_summary": "HQDK tạo BB → lãnh đạo phê duyệt → xác nhận đến → xác nhận hàng → in biên bản",
+      "acceptance_criteria": [
+        "Tạo biên bản bàn giao",
+        "Lãnh đạo phê duyệt",
+        "Xác nhận đến kho",
+        "Xác nhận hàng hóa",
+        "Yêu cầu sửa/hủy",
+        "In biên bản"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [
+        "POST /handover",
+        "GET /handover",
+        "GET /handover/:id",
+        "POST /handover/:id/approve",
+        "POST /handover/:id/confirm-arrival",
+        "POST /handover/:id/confirm-goods",
+        "POST /handover/:id/request-amend",
+        "POST /handover/:id/request-cancel"
+      ],
+      "fe_routes": ["/m06", "/m06/de-xuat", "/m06/phe-duyet", "/m06/:bbbgId/xac-nhan-den", "/m06/:bbbgId/xac-nhan-hang", "/m06/:bbbgId/in"],
+      "entities": ["BienBanBanGiao"],
+      "completeness_score": 0.90,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-006/_state.md"
+    },
+    {
+      "id": "TQCS-20260420-007",
+      "name": "Kiểm hóa hộ (M07)",
+      "module": "m07",
+      "api_module": "m07-proxy-inspection",
+      "status": "done",
+      "description": "Kiểm hóa theo ủy quyền từ cảng khác. Quản lý đơn kiểm hóa hộ với approval flow đầy đủ, kết quả kiểm hóa, đính kèm tệp.",
+      "business_intent": "Cho phép kiểm hóa tại cảng thay mặt cảng khác theo yêu cầu",
+      "flow_summary": "HQDK tạo đơn → PHAN_CONG phân công → KIEM_HOA thực hiện → nhập kết quả → LANH_DAO phê duyệt → in",
+      "acceptance_criteria": [
+        "Tạo đơn kiểm hóa hộ",
+        "Phân công cán bộ",
+        "Nhập kết quả",
+        "Đính kèm tệp chứng từ",
+        "Phê duyệt kết quả",
+        "Yêu cầu sửa/hủy",
+        "In kết quả"
+      ],
+      "roles": ["HQDK", "PHAN_CONG", "KIEM_HOA", "LANH_DAO"],
+      "routes": [
+        "POST /kiem-hoa-ho",
+        "GET /kiem-hoa-ho",
+        "GET /kiem-hoa-ho/:id",
+        "POST /kiem-hoa-ho/:id/assign",
+        "POST /kiem-hoa-ho/:id/ket-qua",
+        "POST /kiem-hoa-ho/:id/approve",
+        "POST /kiem-hoa-ho/:id/amend",
+        "POST /kiem-hoa-ho/:id/cancel"
+      ],
+      "fe_routes": ["/m07/danh-sach", "/m07/de-xuat", "/m07/phe-duyet", "/m07/:kiemHoaHoId/phan-cong", "/m07/:kiemHoaHoId/ket-qua", "/m07/:kiemHoaHoId/sua", "/m07/:kiemHoaHoId/huy", "/m07/:kiemHoaHoId/in"],
+      "entities": ["KiemHoaHo", "KetQuaKiemHoaHo", "ApprovalRequest", "M07Attachment"],
+      "completeness_score": 0.88,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-007/_state.md"
+    },
+    {
+      "id": "TQCS-20260420-008",
+      "name": "Niêm phong hàng hóa (M08)",
+      "module": "m08",
+      "api_module": "m08-sealing",
+      "status": "done",
+      "description": "Quản lý niêm phong container/hàng hóa. Đề xuất niêm phong mới, đề xuất bỏ niêm phong, xác nhận và kiểm tra trạng thái niêm phong.",
+      "business_intent": "Đảm bảo an ninh hàng hóa trong quá trình bảo quản và vận chuyển",
+      "flow_summary": "HQDK đề xuất niêm phong/bỏ → LANH_DAO xác nhận → HQDK kiểm tra trạng thái",
+      "acceptance_criteria": [
+        "Đề xuất niêm phong mới",
+        "Đề xuất bỏ niêm phong",
+        "Xác nhận đề xuất",
+        "Kiểm tra trạng thái niêm phong"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [],
+      "fe_routes": ["/m08/de-xuat-bo", "/m08/de-xuat-moi", "/m08/xac-nhan", "/m08/kiem-tra"],
+      "entities": ["NiemPhong", "Container"],
+      "completeness_score": 0.82,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-008/_state.md"
+    },
+    {
+      "id": "TQCS-20260420-009",
+      "name": "Xác nhận hàng qua KVGS (M09)",
+      "module": "m09",
+      "api_module": "m09-kvgs-confirmation",
+      "status": "done",
+      "description": "Xác nhận hàng hóa đã qua khu vực giám sát (KVGS). Quản lý container, hàng rời, bảng kê và hủy xác nhận.",
+      "business_intent": "Kiểm soát hàng hóa đi qua cổng KVGS để đảm bảo hàng thực sự rời kho",
+      "flow_summary": "KVGS quét barcode → barcode-gateway nhận → api xác nhận → HQDK xem bảng kê → hủy nếu cần",
+      "acceptance_criteria": [
+        "Xác nhận xác nhận qua KVGS",
+        "Xem bảng kê container",
+        "Xem bảng kê hàng rời",
+        "Hủy xác nhận container",
+        "Hủy xác nhận hàng rời",
+        "Tra cứu dữ liệu KVGS"
+      ],
+      "roles": ["HQDK", "GIAM_SAT"],
+      "routes": [],
+      "fe_routes": ["/m09/xac-nhan", "/m09/bang-ke-container", "/m09/bang-ke-hang-roi", "/m09/huy-container", "/m09/huy-hang-roi", "/m09/container-chung", "/m09/tra-cuu"],
+      "entities": ["KvgsXacNhan", "ContainerToKhai", "HangRoi"],
+      "completeness_score": 0.80,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-009/_state.md"
+    },
+    {
+      "id": "TQCS-20260420-010",
+      "name": "KVGS / Lệnh dừng (M10)",
+      "module": "m10",
+      "api_module": "m10-kvgs",
+      "status": "done",
+      "description": "Quản lý lệnh dừng hàng tại KVGS. Giám sát viên ra lệnh dừng, lãnh đạo giải phóng. SSE stream cho cập nhật real-time.",
+      "business_intent": "Cho phép dừng hàng ngay lập tức khi phát hiện bất thường tại khu vực giám sát",
+      "flow_summary": "GIAM_SAT/LANH_DAO tạo lệnh dừng → HQDK xem active holds → LANH_DAO giải phóng → SSE notify",
+      "acceptance_criteria": [
+        "Tạo lệnh dừng hàng",
+        "Xem danh sách lệnh dừng active",
+        "Giải phóng lệnh dừng",
+        "Nhận thông báo real-time qua SSE"
+      ],
+      "roles": ["GIAM_SAT", "LANH_DAO", "HQDK"],
+      "routes": [
+        "POST /kvgs/:toKhaiId/hold",
+        "GET /kvgs/active",
+        "POST /kvgs/:lenhDungId/release",
+        "GET /kvgs/events (SSE)"
+      ],
+      "fe_routes": ["/m10/giam-sat", "/m10/lenh-dung", "/m10/:lenhDungId/giai-phong"],
+      "entities": ["LenhDung"],
+      "completeness_score": 0.80,
+      "existing_state_path": null
+    },
+    {
+      "id": "TQCS-20260420-011",
+      "name": "Nghiệp vụ khác — CTDT & Tờ khai (M11)",
+      "module": "m11",
+      "api_module": "m11-nghiep-vu-khac",
+      "status": "done",
+      "description": "Hub nghiệp vụ tổng hợp: chuyển địa điểm giám sát, quản lý container KVGS, nhập container bulk, hủy/sửa tờ khai, phục hồi tờ khai, quản lý CTDT.",
+      "business_intent": "Xử lý các nghiệp vụ ngoại lệ và điều chỉnh sau thông quan",
+      "flow_summary": "Nhiều sub-flow: chuyển ĐDGS / hủy sửa tờ khai (có approval) / CTDT sửa hủy (có approval) / container bulk",
+      "acceptance_criteria": [
+        "Chuyển địa điểm giám sát",
+        "Nhập container KVGS",
+        "Nhập container bulk",
+        "Yêu cầu hủy/sửa tờ khai",
+        "Duyệt hủy/sửa tờ khai",
+        "Khôi phục tờ khai",
+        "Hủy hết hiệu lực",
+        "Duyệt sửa/hủy CTDT",
+        "Yêu cầu sửa/hủy danh sách container",
+        "Duyệt sửa/hủy danh sách container"
+      ],
+      "roles": ["HQDK", "LANH_DAO"],
+      "routes": [],
+      "fe_routes": ["/m11", "/m11/chuyen-dia-diem", "/m11/container/kvgs", "/m11/nhap-container", "/m11/duyet/yeu-cau-huy", "/m11/duyet/yeu-cau-sua", "/m11/khoi-phuc", "/m11/huy-het-hieu-luc", "/m11/ctdt/duyet-sua", "/m11/ctdt/duyet-huy"],
+      "entities": ["Ctdt", "YeuCauToKhai", "ContainerListYeuCau", "DiaDiemGiamSat"],
+      "completeness_score": 0.78,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-011/_state.md"
+    },
+    {
+      "id": "TQCS-20260420-013",
+      "name": "Soi chiếu tại cảng (M13)",
+      "module": "m13",
+      "api_module": "m13-soi-chieu",
+      "status": "done",
+      "description": "Quản lý soi chiếu container tại cảng. Nhập container cần soi chiếu, tra cứu eManifest, nhập kết quả soi chiếu.",
+      "business_intent": "Phát hiện hàng cấm/nguy hiểm qua máy soi không xâm lấn tại cổng cảng",
+      "flow_summary": "HQDK nhập container → tra cứu eManifest → thực hiện soi → nhập kết quả → xem lịch sử",
+      "acceptance_criteria": [
+        "Nhập container cần soi chiếu",
+        "Tra cứu thông tin eManifest",
+        "Nhập kết quả soi chiếu",
+        "Xem danh sách kết quả"
+      ],
+      "roles": ["HQDK", "GIAM_SAT"],
+      "routes": [
+        "POST /m13/container",
+        "GET /m13/lookup-emanifest",
+        "POST /m13/result",
+        "GET /m13/results"
+      ],
+      "fe_routes": ["/m13/nhap-container", "/m13/ket-qua", "/m13/ket-qua/:id"],
+      "entities": ["ContainerSoiChieu", "KetQuaSoiChieu"],
+      "completeness_score": 0.78,
+      "existing_state_path": "src/services/api/docs/features/TQCS-20260420-013/_state.md"
+    }
+  ],
+  "extracted_at": "2026-04-25T00:00:00Z",
+  "source": "src/apps/web-admin/src/lib/clearance-nav.ts + api controllers + existing _state.md files"
+}

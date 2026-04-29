@@ -1,0 +1,60 @@
+# etc-platform — unified HTTP job API + MCP server.
+#
+# Usage:
+#   docker compose up -d
+#   → HTTP API: http://localhost:8000
+#   → MCP:      http://localhost:8000/mcp  (streamable-http)
+#               http://localhost:8000/sse  (SSE, legacy)
+#
+# The data volume holds:
+#   /data/<project-slug>/...   — your project content (legacy path-based tools)
+#   /data/_jobs/uploads/<id>   — temporary content_data uploads (TTL 30m)
+#   /data/_jobs/jobs/<id>      — render outputs awaiting download (TTL 1h)
+#
+# All TTLs are configurable via env vars below.
+
+services:
+  etc-platform:
+    build: .
+    image: etc-platform:latest
+    container_name: etc-platform
+    ports:
+      # 8001 = unified platform port (post-merge with former etc-platform :8001)
+      # 8000 = back-compat alias during migration; remove after Claude skill update.
+      - "8001:8000"
+      - "8000:8000"
+    volumes:
+      # Project data + job storage on a persistent host volume.
+      - ./data:/data
+      # DEV: bind-mount src/ so code/template/schema edits apply on container restart
+      # (no rebuild needed for synthesizer / engine / template builder edits)
+      - ./src/etc_platform:/app/src/etc_platform:ro
+    environment:
+      PYTHONUNBUFFERED: "1"
+      LOG_LEVEL: "INFO"
+
+      # ─── Job pipeline ───
+      ETC_PLATFORM_JOBS_ROOT: "/data/_jobs"
+      ETC_PLATFORM_UPLOAD_TTL_S: "1800"      # 30 minutes
+      ETC_PLATFORM_JOB_TTL_S: "3600"         # 1 hour
+      ETC_PLATFORM_MAX_UPLOAD_BYTES: "10485760"  # 10 MB
+
+      # ─── Runner ───
+      ETC_PLATFORM_RUNNER_WORKERS: "2"
+      ETC_PLATFORM_RUNNER_QUEUE_MAX: "100"
+      ETC_PLATFORM_RUNNER_TIMEOUT_S: "300"
+
+      # ─── Auth (optional) — set to enable API-key gating on all routes.
+      # ETC_PLATFORM_API_KEY: "change-me"
+
+      # ─── CORS (optional) — comma-separated origins.
+      # ETC_PLATFORM_CORS_ORIGINS: "http://localhost:3000"
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

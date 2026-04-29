@@ -1,0 +1,68 @@
+{
+  "api_global_prefix": "api",
+  "auth": {
+    "dev_token": {
+      "enabled_env": "ENABLE_DEV_TOKEN",
+      "path": "POST /api/dev/token"
+    },
+    "jwt_claims_required": ["maHq", "role", "sub"],
+    "login_path": "POST /api/auth/login",
+    "m13_rbac": "JwtAuthGuard only; no @Roles on class M13SoiChieuController",
+    "roles_excluded_from_primary_business_set": ["ADMIN"],
+    "roles_guard": "RolesGuard on controllers using @Roles; ADMIN bypasses allow-list",
+    "tenant_claim": "maHq"
+  },
+  "barcode_gateway": {
+    "port_default": 4001,
+    "routes": ["GET /health", "POST /internal/barcode/simulate"]
+  },
+  "datastores": {
+    "postgres": "from DATABASE_URL",
+    "redis": "cache (compose)"
+  },
+  "fe": {
+    "base_path_group": "/(clearance)",
+    "menu": "static clearanceNavItems + clearanceNavGroups; no per-role filter in FE",
+    "port_default": 3000,
+    "selectors": "no data-testid observed in web-admin clearance tree; use route + text"
+  },
+  "integrations_http": "VNACCSModule and ETAXModule are Nest modules; no @Controller in integrations folder",
+  "internal": {
+    "kvgs_scans": "POST /api/internal/kvgs/scans (InternalTokenGuard)"
+  },
+  "meta": {
+    "date": "2026-04-25",
+    "repo": "customs-clearance-system",
+    "scope_modules": "M01–M13",
+    "stage": 2
+  },
+  "modules_code_presence": {
+    "M01": "implemented",
+    "M02": "implemented",
+    "M03": "implemented",
+    "M04": "implemented",
+    "M05": "implemented",
+    "M06": "implemented",
+    "M07": "implemented",
+    "M08": "implemented",
+    "M09": "implemented",
+    "M10": "implemented",
+    "M11": "implemented",
+    "M12": "not_in_app_module_or_clearance_routes",
+    "M13": "implemented"
+  },
+  "monorepo": {
+    "package_manager": "pnpm@9.15.9",
+    "root_tooling": ["turbo", "typescript", "@biomejs/biome"]
+  },
+  "nest_api": {
+    "framework": "@nestjs/common ^10",
+    "main_ref": "src/services/api/src/main.ts",
+    "orm": "typeorm ^0.3"
+  },
+  "primary_business_roles": ["HQDK", "KIEM_HOA", "PHAN_CONG", "LANH_DAO", "GIAM_SAT"],
+  "web_admin": {
+    "framework": "next ^15, react ^19, tailwindcss ^3.4",
+    "nav_ref": "src/apps/web-admin/src/lib/clearance-nav.ts"
+  }
+}

@@ -3,7 +3,7 @@
 
 from docx import Document
 
-doc = Document("src/etc_docgen/assets/templates/huong-dan-su-dung.docx")
+doc = Document("src/etc_platform/assets/templates/huong-dan-su-dung.docx")
 for i, sec in enumerate(doc.sections):
     top = sec.top_margin
     bot = sec.bottom_margin

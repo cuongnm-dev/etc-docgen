@@ -9,7 +9,7 @@ from pathlib import Path
 from docx import Document
 
 ROOT = Path(__file__).resolve().parent.parent
-TMPL_DIR = ROOT / "src" / "etc_docgen" / "assets" / "templates"
+TMPL_DIR = ROOT / "src" / "etc_platform" / "assets" / "templates"
 
 
 def add_tkkt_fields(doc_path: Path):
@@ -95,8 +95,8 @@ def add_tkcs_fields(doc_path: Path):
 if __name__ == "__main__":
     add_tkkt_fields(TMPL_DIR / "thiet-ke-kien-truc.docx")
     add_tkcs_fields(TMPL_DIR / "thiet-ke-co-so.docx")
-    # Also overlay copy at src/etc_docgen/templates/
-    overlay = ROOT / "src" / "etc_docgen" / "templates" / "thiet-ke-kien-truc.docx"
+    # Also overlay copy at src/etc_platform/templates/
+    overlay = ROOT / "src" / "etc_platform" / "templates" / "thiet-ke-kien-truc.docx"
     if overlay.exists():
         add_tkkt_fields(overlay)
     print("DONE.")

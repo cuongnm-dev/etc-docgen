@@ -5,7 +5,7 @@ from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-TEMPLATE = "src/etc_docgen/assets/templates/huong-dan-su-dung.docx"
+TEMPLATE = "src/etc_platform/assets/templates/huong-dan-su-dung.docx"
 
 doc = Document(TEMPLATE)
 sec = doc.sections[0]

@@ -1,0 +1,91 @@
+{
+  "auth_type": "jwt",
+  "auth_mode": "RBAC",
+  "jwt_source": "Authorization: Bearer <token>",
+  "jwt_secret_env": "JWT_SECRET",
+  "ignore_expiration": false,
+  "roles": [
+    {
+      "name": "ADMIN",
+      "value": "ADMIN",
+      "note": "Full access — bypasses all @Roles() checks in RolesGuard"
+    },
+    {
+      "name": "HQDK",
+      "value": "HQDK",
+      "note": "Hải quan đăng ký / khai báo"
+    },
+    {
+      "name": "KIEM_HOA",
+      "value": "KIEM_HOA",
+      "note": "Kiểm hóa viên"
+    },
+    {
+      "name": "PHAN_CONG",
+      "value": "PHAN_CONG",
+      "note": "Phân công kiểm hóa"
+    },
+    {
+      "name": "LANH_DAO",
+      "value": "LANH_DAO",
+      "note": "Lãnh đạo đơn vị"
+    },
+    {
+      "name": "GIAM_SAT",
+      "value": "GIAM_SAT",
+      "note": "Giám sát"
+    }
+  ],
+  "guards": [
+    {
+      "name": "JwtAuthGuard",
+      "file": "src/services/api/src/common/auth/jwt-auth.guard.ts",
+      "strategy": "passport-jwt",
+      "purpose": "Validates JWT token from Authorization header; populates req.user with JwtUser"
+    },
+    {
+      "name": "RolesGuard",
+      "file": "src/services/api/src/common/auth/roles.guard.ts",
+      "purpose": "Checks req.user.role against @Roles() metadata; ADMIN bypasses all role checks; throws ForbiddenException on mismatch",
+      "decorator": "@Roles(...Role[])",
+      "metadata_key": "roles"
+    }
+  ],
+  "tenant_isolation": true,
+  "tenant_field": "maHq",
+  "tenant_isolation_detail": "TenantRepository base class enforces WHERE ma_hq = :maHq on every query (BR-INTEL-037); all feature repositories extend TenantRepository",
+  "token_fields": [
+    {
+      "field": "sub",
+      "mapped_to": "userId",
+      "type": "string",
+      "required": true
+    },
+    {
+      "field": "maHq",
+      "mapped_to": "maHq",
+      "type": "string",
+      "required": true,
+      "note": "Missing maHq throws UnauthorizedException"
+    },
+    {
+      "field": "role",
+      "mapped_to": "role",
+      "type": "Role enum",
+      "required": true
+    },
+    {
+      "field": "hoTen",
+      "mapped_to": "hoTen",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "user_entity": {
+    "table": "app_user",
+    "fields": ["id", "username", "passwordHash", "maHq", "role", "hoTen", "isActive", "createdAt"],
+    "index": ["maHq"],
+    "password_hash": "bcryptjs"
+  },
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

@@ -1,13 +1,13 @@
 ---
 name: generate-docs
-description: Thin wrapper around etc-docgen CLI. Orchestrate pipeline từ codebase → ETC docs (TKKT, TKCS, Test Case, HDSD). Cursor 3 leverage — @Codebase, Playwright MCP, Design Mode, Composer diff review. Pipeline chạy qua `etc-docgen` command trong integrated terminal.
+description: Thin wrapper around etc-platform CLI. Orchestrate pipeline từ codebase → ETC docs (TKKT, TKCS, Test Case, HDSD). Cursor 3 leverage — @Codebase, Playwright MCP, Design Mode, Composer diff review. Pipeline chạy qua `etc-platform` command trong integrated terminal.
 ---
 
-# Generate Documentation (Cursor 3 — wrapper cho etc-docgen CLI)
+# Generate Documentation (Cursor 3 — wrapper cho etc-platform CLI)
 
-Skill này là **thin wrapper** gọi `etc-docgen` CLI. Logic chính nằm trong Python package, không nhúng vào skill.
+Skill này là **thin wrapper** gọi `etc-platform` CLI. Logic chính nằm trong Python package, không nhúng vào skill.
 
-**Prerequisites**: `pip install etc-docgen` (hoặc `pip install -e D:/Projects/etc-docgen`).
+**Prerequisites**: `pip install etc-platform` (hoặc `pip install -e D:/Projects/etc-platform`).
 
 ---
 
@@ -16,12 +16,12 @@ Skill này là **thin wrapper** gọi `etc-docgen` CLI. Logic chính nằm trong
 ### Step 0 — Verify install + config
 
 ```bash
-etc-docgen --version
-# Nếu chưa có etc-docgen.yaml:
-etc-docgen init
+etc-platform --version
+# Nếu chưa có etc-platform.yaml:
+etc-platform init
 ```
 
-Agent guide user edit `etc-docgen.yaml` — dùng `@-mentions` để inject context từ repo:
+Agent guide user edit `etc-platform.yaml` — dùng `@-mentions` để inject context từ repo:
 - `@docker-compose.yml` để detect services
 - `@package.json` / `@pyproject.toml` cho project info
 - `@README.md` cho project description
@@ -56,7 +56,7 @@ Extended thinking cho FLOW phase (grouping controllers → features).
 
 Output: `docs/generated/intel/{stack,arch,flow,frontend}-report.json`
 
-**v0.2+**: `etc-docgen research` native — skip AI role này.
+**v0.2+**: `etc-platform research` native — skip AI role này.
 
 ### Step 3 — Phase 2: Capture (Playwright MCP)
 
@@ -70,8 +70,8 @@ mcp__playwright__browser_take_screenshot(filename=...)
 
 Cho auth, chạy qua terminal:
 ```bash
-python -c "from etc_docgen.capture.auth import cmd_login; ..."
-# hoặc v0.2+ sẽ có: etc-docgen capture
+python -c "from etc_platform.capture.auth import cmd_login; ..."
+# hoặc v0.2+ sẽ có: etc-platform capture
 ```
 
 **💡 YOLO mode**: cho dự án ≥ 20 features, user bật YOLO mode để agent chạy autonomous qua hàng trăm MCP calls.
@@ -93,13 +93,13 @@ Sinh `content-data.json` theo schema. **Composer hiển thị diff** → user ap
 
 Validate:
 ```bash
-etc-docgen validate docs/generated/content-data.json
+etc-platform validate docs/generated/content-data.json
 ```
 
 ### Step 6 — Phase 4: Export (CLI subprocess)
 
 ```bash
-etc-docgen export --data docs/generated/content-data.json
+etc-platform export --data docs/generated/content-data.json
 ```
 
 Chạy ~15 giây, sinh 4 file Office. Cursor integrated terminal hiển thị progress inline.
@@ -123,17 +123,17 @@ Lần chạy kế tiếp, agent đọc MEMORIES pre-fill config.
 ## Commands quick reference
 
 ```bash
-etc-docgen --version
-etc-docgen --help
-etc-docgen init                  # Tạo etc-docgen.yaml
-etc-docgen generate              # Full pipeline
-etc-docgen research              # Phase 1 (v0.2+)
-etc-docgen capture               # Phase 2 (v0.2+)
-etc-docgen data                  # Phase 3 (v0.2+)
-etc-docgen export                # Phase 4 ✅ working v0.1
-etc-docgen validate FILE         # Validate content-data.json
-etc-docgen template list
-etc-docgen template fork FILE --kind hdsd
+etc-platform --version
+etc-platform --help
+etc-platform init                  # Tạo etc-platform.yaml
+etc-platform generate              # Full pipeline
+etc-platform research              # Phase 1 (v0.2+)
+etc-platform capture               # Phase 2 (v0.2+)
+etc-platform data                  # Phase 3 (v0.2+)
+etc-platform export                # Phase 4 ✅ working v0.1
+etc-platform validate FILE         # Validate content-data.json
+etc-platform template list
+etc-platform template fork FILE --kind hdsd
 ```
 
 ---
@@ -156,6 +156,6 @@ etc-docgen template fork FILE --kind hdsd
 |---|---|
 | Docs complete | Open `docs/generated/output/` trong Word/Excel |
 | Code thay đổi | Chạy lại `/generate-docs` — MEMORIES pre-fill |
-| ETC ra template v2 | `etc-docgen template fork new-template.docx --kind hdsd` |
+| ETC ra template v2 | `etc-platform template fork new-template.docx --kind hdsd` |
 | Scale >500 features | Wait for v0.2 sharding support |
-| CI/CD auto-regen | GitHub Actions example ở `etc-docgen/examples/incremental-ci/` |
+| CI/CD auto-regen | GitHub Actions example ở `etc-platform/examples/incremental-ci/` |

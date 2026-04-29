@@ -1,0 +1,75 @@
+{
+  "datastores": [
+    {
+      "id": "postgres",
+      "image": "postgres:16-alpine",
+      "ref": "docker-compose.yml"
+    },
+    {
+      "id": "redis",
+      "image": "redis:7-alpine",
+      "ref": "docker-compose.yml"
+    }
+  ],
+  "discovery_path": "B-code-first",
+  "integrations": {
+    "api_modules": ["ETAXModule", "VNACCSModule"],
+    "ref": "src/services/api/src/app.module.ts"
+  },
+  "internal_http": [
+    {
+      "guard": "InternalTokenGuard",
+      "path": "POST /api/internal/kvgs/scans",
+      "ref": "src/services/api/src/modules/m09-kvgs-confirmation/internal-kvgs.controller.ts"
+    }
+  ],
+  "package_manager": "pnpm@9.15.9",
+  "repo": "customs-clearance-system",
+  "root_tooling": {
+    "biome": "devDependency latest",
+    "turbo": "devDependency latest",
+    "typescript": "^5",
+    "ref": "package.json"
+  },
+  "services": [
+    {
+      "id": "api",
+      "framework": "nestjs",
+      "global_prefix": "api",
+      "path": "src/services/api",
+      "port_default": 4000,
+      "runtime": "node",
+      "stack": "@nestjs/common ^10, typeorm ^0.3, passport-jwt ^4",
+      "ref": "src/services/api/package.json, src/services/api/src/main.ts"
+    },
+    {
+      "id": "barcode-gateway",
+      "framework": "nestjs",
+      "global_prefix": null,
+      "path": "src/services/barcode-gateway",
+      "port_default": 4001,
+      "realtime": "socket.io via @nestjs/platform-socket.io ^10",
+      "ref": "src/services/barcode-gateway/package.json, src/services/barcode-gateway/src/main.ts"
+    },
+    {
+      "id": "web-admin",
+      "framework": "next",
+      "path": "src/apps/web-admin",
+      "port_default": 3000,
+      "stack": "next ^15, react ^19, tailwindcss ^3.4",
+      "ref": "src/apps/web-admin/package.json"
+    }
+  ],
+  "shared_packages": [
+    {
+      "name": "@customs/types",
+      "path": "src/shared/types"
+    },
+    {
+      "name": "@customs/utils",
+      "path": "src/shared/utils"
+    }
+  ],
+  "workspaces_glob": ["src/apps/*", "src/services/*", "src/shared/*", "packages/*"],
+  "workspaces_ref": "pnpm-workspace.yaml"
+}

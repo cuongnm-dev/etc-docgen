@@ -1,0 +1,151 @@
+{
+  "_generated_by": "briefings/generate_business_context_stub.py",
+  "_instructions": "Fill all [CẦN BỔ SUNG] markers with project-specific values. module_lexicon + external_integrations affect briefings (tropes); current_system + investment + stakeholders are required by TKCS Section 3 (≥10 numeric values, ≥7 legal refs).",
+  "domain": "[CẦN BỔ SUNG] (e.g. 'customs-clearance' / 'doc-management' / 'tax-admin')",
+  "organization": {
+    "name": "[CẦN BỔ SUNG]",
+    "name_full": "[CẦN BỔ SUNG]",
+    "type": "[CẦN BỔ SUNG] (e.g. 'Cơ quan trung ương' / 'Sở chuyên ngành')",
+    "level": "[CẦN BỔ SUNG] (central / provincial / district)",
+    "address": "[CẦN BỔ SUNG]",
+    "investor_role": "Chủ đầu tư"
+  },
+  "current_system": {
+    "name": "[CẦN BỔ SUNG] (current system being replaced/upgraded)",
+    "deployment_year": "[CẦN BỔ SUNG]",
+    "vendor": "[CẦN BỔ SUNG]",
+    "current_version": "[CẦN BỔ SUNG]",
+    "user_count_internal": "[CẦN BỔ SUNG]",
+    "user_count_external": "[CẦN BỔ SUNG]",
+    "transaction_volume_monthly": "[CẦN BỔ SUNG]",
+    "transaction_volume_peak_daily": "[CẦN BỔ SUNG]",
+    "uptime_percent": "[CẦN BỔ SUNG]",
+    "avg_response_time_ms": "[CẦN BỔ SUNG]",
+    "error_rate_percent": "[CẦN BỔ SUNG]",
+    "eol_dates": {
+      "hardware": "[CẦN BỔ SUNG]",
+      "database_version": "[CẦN BỔ SUNG]",
+      "os": "[CẦN BỔ SUNG]"
+    },
+    "pain_points": [
+      "[CẦN BỔ SUNG] (specific metric — e.g. 'Hệ thống quá tải mùa cao điểm, downtime trung bình N giờ/quý')",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]"
+    ]
+  },
+  "compliance_requirements": {
+    "data_classification": "[CẦN BỔ SUNG] (e.g. 'PII công dân + tài chính doanh nghiệp')",
+    "applicable_regulations": [
+      "[CẦN BỔ SUNG] (e.g. 'Luật ... số .../QH...')",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]"
+    ],
+    "security_level_attt": {
+      "level": "[CẦN BỔ SUNG] (cấp độ N theo NĐ 85/2016 Đ7)",
+      "rationale_5_criteria": {
+        "phạm_vi_ảnh_hưởng": "[CẦN BỔ SUNG]",
+        "quy_mô_dữ_liệu": "[CẦN BỔ SUNG]",
+        "mức_độ_nhạy_cảm": "[CẦN BỔ SUNG]",
+        "mức_độ_công_khai": "[CẦN BỔ SUNG]",
+        "hậu_quả_sự_cố": "[CẦN BỔ SUNG]"
+      }
+    }
+  },
+  "investment": {
+    "investment_type": "[CẦN BỔ SUNG] (e.g. 'Đầu tư xây dựng mới')",
+    "funding_source": "[CẦN BỔ SUNG] (e.g. 'Ngân sách Nhà nước Trung ương')",
+    "project_duration_months": "[CẦN BỔ SUNG]",
+    "start_year": "[CẦN BỔ SUNG]",
+    "end_year": "[CẦN BỔ SUNG]",
+    "total_investment_billion_vnd": "[CẦN BỔ SUNG]",
+    "operating_cost_yearly_billion_vnd": "[CẦN BỔ SUNG]",
+    "warranty_months": "[CẦN BỔ SUNG]",
+    "decision_authority": "[CẦN BỔ SUNG]",
+    "approval_decision": "[CẦN BỔ SUNG]"
+  },
+  "stakeholders": {
+    "investor": "[CẦN BỔ SUNG]",
+    "operator": "[CẦN BỔ SUNG]",
+    "primary_users": [
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]"
+    ],
+    "project_management_form": "[CẦN BỔ SUNG]",
+    "pm_method": "[CẦN BỔ SUNG]"
+  },
+  "timeline": {
+    "milestones": [
+      "[CẦN BỔ SUNG] (M1 — phê duyệt chủ trương: tháng/năm)",
+      "[CẦN BỔ SUNG] (M2 — phê duyệt TKCS)",
+      "[CẦN BỔ SUNG] (M3 — đấu thầu)",
+      "[CẦN BỔ SUNG] (M4 — pilot)",
+      "[CẦN BỔ SUNG] (M5 — diện rộng)",
+      "[CẦN BỔ SUNG] (M6 — nghiệm thu)"
+    ]
+  },
+  "objectives": {
+    "primary_goals": [
+      "[CẦN BỔ SUNG] (e.g. 'Hiện đại hóa nền tảng theo CT 34/CT-TTg')",
+      "[CẦN BỔ SUNG]",
+      "[CẦN BỔ SUNG]"
+    ],
+    "kpi_targets": {
+      "uptime_target": "[CẦN BỔ SUNG]",
+      "response_time_target_ms": "[CẦN BỔ SUNG]",
+      "concurrent_users_target": "[CẦN BỔ SUNG]",
+      "throughput_target_tps": "[CẦN BỔ SUNG]"
+    }
+  },
+  "module_lexicon": {
+    "auth": "Xác thực",
+    "m01": "1. Kiểm tra hồ sơ",
+    "m02": "2. Kiểm hóa",
+    "m03": "3. Chuyển luồng",
+    "m04": "4. Thuế",
+    "m05": "5. Thông quan",
+    "m06": "6. Biên bản bàn giao",
+    "m07": "7. Kiểm hóa hộ",
+    "m08": "8. Niêm phong",
+    "m09": "9. Xác nhận hàng qua KVGS",
+    "m10": "10. KVGS / Lệnh dừng",
+    "m11": "11. Nghiệp vụ khác",
+    "m13": "13. Soi chiếu"
+  },
+  "role_display_lexicon": {
+    "ADMIN": "Quản trị viên",
+    "HQDK": "Cán bộ Hải quan đăng ký",
+    "KIEM_HOA": "Cán bộ kiểm hóa",
+    "PHAN_CONG": "Cán bộ phân công kiểm hóa",
+    "LANH_DAO": "Lãnh đạo hải quan",
+    "GIAM_SAT": "Giám sát KVGS"
+  },
+  "external_integrations": [
+    {
+      "name": "VNACCS",
+      "purpose": "[CẦN BỔ SUNG]",
+      "integration_type": "[CẦN BỔ SUNG]"
+    },
+    {
+      "name": "eTax",
+      "purpose": "[CẦN BỔ SUNG]",
+      "integration_type": "[CẦN BỔ SUNG]"
+    },
+    {
+      "name": "eManifest",
+      "purpose": "[CẦN BỔ SUNG]",
+      "integration_type": "[CẦN BỔ SUNG]"
+    },
+    {
+      "name": "KVGS",
+      "purpose": "[CẦN BỔ SUNG]",
+      "integration_type": "[CẦN BỔ SUNG]"
+    }
+  ],
+  "system_name": "[CẦN BỔ SUNG]",
+  "system_description": "[CẦN BỔ SUNG]"
+}

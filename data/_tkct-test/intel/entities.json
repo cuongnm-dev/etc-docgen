@@ -1,0 +1,474 @@
+{
+  "entities": [
+    {
+      "name": "ToKhai",
+      "table": "to_khai",
+      "module": "clearance-domain",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "soToKhai", "type": "varchar(12)"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "loaiHinh", "type": "enum", "enum": ["NK", "XK"]},
+        {"name": "trangThai", "type": "enum", "enum": ["tiep_nhan", "cho_phan_luong", "thong_quan", "da_huy"]},
+        {"name": "ngayDangKy", "type": "date"},
+        {"name": "version", "type": "integer", "version_column": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"},
+        {"name": "createdBy", "type": "varchar", "nullable": true}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["soToKhai", "maHq"], "unique": true},
+        {"fields": ["maHq"]},
+        {"fields": ["maHq", "trangThai"]}
+      ]
+    },
+    {
+      "name": "YeuCauBoSung",
+      "table": "yeu_cau_bo_sung",
+      "module": "m01-document-check",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "noiDung", "type": "text"},
+        {"name": "hanNop", "type": "date"},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_xu_ly", "da_giai_quyet"], "default": "cho_xu_ly"},
+        {"name": "createdBy", "type": "varchar"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq"]}
+      ]
+    },
+    {
+      "name": "KiemHoa",
+      "table": "kiem_hoa",
+      "module": "m02-inspection",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "canBoKiemHoa", "type": "varchar"},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_kiem", "dang_kiem", "hoan_thanh", "da_xac_nhan", "tu_choi"]},
+        {"name": "ketQua", "type": "enum", "enum": ["chua_kiem", "dat", "khong_dat"], "default": "chua_kiem"},
+        {"name": "ghiChu", "type": "text", "nullable": true},
+        {"name": "dinhKem", "type": "jsonb", "nullable": true},
+        {"name": "ngayKiemHoa", "type": "date", "nullable": true},
+        {"name": "assignedBy", "type": "varchar"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq", "trangThai"]}
+      ]
+    },
+    {
+      "name": "PhanLuong",
+      "table": "phan_luong",
+      "module": "m03-channel",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "luong", "type": "enum", "enum": ["xanh", "vang", "do"]},
+        {"name": "nguon", "type": "enum", "enum": ["vnaccs", "manual_upgrade"]},
+        {"name": "lyDo", "type": "text", "nullable": true},
+        {"name": "trangThai", "type": "enum", "enum": ["hieu_luc", "da_chuyen"], "default": "hieu_luc"},
+        {"name": "ngayPhanLuong", "type": "date"},
+        {"name": "approvedBy", "type": "varchar", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq", "trangThai"]}
+      ]
+    },
+    {
+      "name": "DeXuatChuyenLuong",
+      "table": "de_xuat_chuyen_luong",
+      "module": "m03-channel",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "luongHienTai", "type": "enum", "enum": ["xanh", "vang", "do"]},
+        {"name": "luongDeXuat", "type": "enum", "enum": ["xanh", "vang", "do"]},
+        {"name": "lyDo", "type": "text"},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_phe_duyet", "da_duyet", "tu_choi"], "default": "cho_phe_duyet"},
+        {"name": "createdBy", "type": "varchar"},
+        {"name": "reviewedBy", "type": "varchar", "nullable": true},
+        {"name": "yKienReview", "type": "varchar", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "NghiaVuThue",
+      "table": "nghia_vu_thue",
+      "module": "m04-tax",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "tongTienThue", "type": "decimal(18,2)"},
+        {"name": "daNop", "type": "decimal(18,2)"},
+        {"name": "trangThai", "type": "enum", "enum": ["chua_nop", "da_nop", "mien_thue"]},
+        {"name": "ngayNop", "type": "date", "nullable": true},
+        {"name": "confirmedBy", "type": "varchar", "nullable": true},
+        {"name": "confirmedAt", "type": "timestamptz", "nullable": true},
+        {"name": "queriedAt", "type": "timestamptz"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq"]}
+      ]
+    },
+    {
+      "name": "GiayThongQuan",
+      "table": "giay_thong_quan",
+      "module": "m05-clearance",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "soQuyetDinh", "type": "varchar"},
+        {"name": "ngayCap", "type": "date"},
+        {"name": "canBoKy", "type": "varchar"},
+        {"name": "version", "type": "integer", "version_column": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"], "unique": true}
+      ]
+    },
+    {
+      "name": "BienBanBanGiao",
+      "table": "bien_ban_ban_giao",
+      "module": "m06-handover",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "soToKhai", "type": "varchar(12)"},
+        {"name": "ngayTao", "type": "timestamptz", "auto": "create"},
+        {"name": "maHqNoiDi", "type": "varchar(10)"},
+        {"name": "diaDiemVcDi", "type": "varchar(200)"},
+        {"name": "maHqNoiDen", "type": "varchar(10)"},
+        {"name": "diaDiemVcDen", "type": "varchar(200)"},
+        {"name": "canBoDeXuat", "type": "varchar(100)"},
+        {"name": "ngayDeXuat", "type": "date"},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_phe_duyet", "da_phe_duyet", "tu_choi", "da_cap_nhat", "da_xac_nhan"], "default": "cho_phe_duyet"},
+        {"name": "toKhaiId", "type": "integer", "nullable": true},
+        {"name": "lyDoSuaHuy", "type": "text", "nullable": true},
+        {"name": "loaiYeuCau", "type": "enum", "enum": ["sua", "huy"], "nullable": true},
+        {"name": "yKienPheDuyet", "type": "text", "nullable": true},
+        {"name": "createdBy", "type": "varchar(100)"},
+        {"name": "updatedBy", "type": "varchar(100)", "nullable": true},
+        {"name": "updatedAt", "type": "timestamptz", "nullable": true}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["maHq", "soToKhai"]},
+        {"fields": ["trangThai"]},
+        {"fields": ["ngayDeXuat"]},
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "KiemHoaHo",
+      "table": "kiem_hoa_ho",
+      "module": "m07-proxy-inspection",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "soToKhai", "type": "varchar(12)"},
+        {"name": "toKhaiId", "type": "integer", "nullable": true},
+        {"name": "canBoDeXuat", "type": "varchar(100)"},
+        {"name": "ngayDeXuat", "type": "date"},
+        {"name": "canBoPhanCong", "type": "varchar(100)", "nullable": true},
+        {"name": "ngayPhanCong", "type": "date", "nullable": true},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_phan_cong", "da_phan_cong", "dang_kiem_hoa", "da_co_ket_qua", "da_huy"], "default": "cho_phan_cong"},
+        {"name": "lyDoSuaHuy", "type": "text", "nullable": true},
+        {"name": "yKienPheDuyet", "type": "text", "nullable": true},
+        {"name": "createdBy", "type": "varchar(100)"},
+        {"name": "updatedBy", "type": "varchar(100)", "nullable": true},
+        {"name": "updatedAt", "type": "timestamptz", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["maHq", "soToKhai"]},
+        {"fields": ["trangThai"]},
+        {"fields": ["ngayDeXuat"]},
+        {"fields": ["canBoPhanCong"]},
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "KetQuaKiemHoaHo",
+      "table": "ket_qua_kiem_hoa",
+      "module": "m07-proxy-inspection",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "kiemHoaHoId", "type": "integer"},
+        {"name": "ketQua", "type": "text"},
+        {"name": "ghiChu", "type": "text", "nullable": true},
+        {"name": "ngayNhap", "type": "timestamptz", "auto": "create", "column_name": "ngay_nhap"},
+        {"name": "createdBy", "type": "varchar(100)"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["kiemHoaHoId"]}
+      ]
+    },
+    {
+      "name": "ApprovalRequest",
+      "table": "approval_request",
+      "module": "m07-proxy-inspection",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "entityType", "type": "enum", "enum": ["bien_ban_ban_giao", "kiem_hoa_ho"]},
+        {"name": "entityId", "type": "integer"},
+        {"name": "requestType", "type": "enum", "enum": ["amend", "cancel"]},
+        {"name": "lyDo", "type": "text"},
+        {"name": "trangThai", "type": "enum", "enum": ["pending", "approved", "rejected"], "default": "pending"},
+        {"name": "yKienPheDuyet", "type": "text", "nullable": true},
+        {"name": "lyDoTuChoi", "type": "text", "nullable": true},
+        {"name": "createdBy", "type": "varchar(100)"},
+        {"name": "decidedBy", "type": "varchar(100)", "nullable": true},
+        {"name": "decidedAt", "type": "timestamptz", "nullable": true},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["maHq", "trangThai"]}
+      ]
+    },
+    {
+      "name": "NiemPhong",
+      "table": "niem_phong",
+      "module": "m08-sealing",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "loaiHang", "type": "varchar(20)", "enum": ["hang_roi", "hang_container"]},
+        {"name": "soSeal", "type": "varchar(50)", "nullable": true},
+        {"name": "trangThai", "type": "enum", "enum": ["de_xuat", "xac_nhan_niem_phong", "xac_nhan_bo_niem_phong", "da_kiem_tra", "tu_choi"], "default": "de_xuat"},
+        {"name": "lyDoBo", "type": "text", "nullable": true, "column_name": "ly_do_bo_niem_phong"},
+        {"name": "canBoDeXuat", "type": "varchar(100)"},
+        {"name": "canBoXacNhan", "type": "varchar(100)", "nullable": true},
+        {"name": "thoiGianXacNhan", "type": "timestamptz", "nullable": true},
+        {"name": "canBoKiemTra", "type": "varchar(100)", "nullable": true},
+        {"name": "thoiGianKiemTra", "type": "timestamptz", "nullable": true},
+        {"name": "ghiChu", "type": "text", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["maHq", "trangThai"]},
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "Container",
+      "table": "container",
+      "module": "m08-sealing",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "soContainer", "type": "varchar(20)", "unique": true},
+        {"name": "soSeal", "type": "varchar(50)", "nullable": true},
+        {"name": "soVanDon", "type": "varchar(30)", "nullable": true},
+        {"name": "toKhaiId", "type": "integer", "nullable": true},
+        {"name": "trangThaiKvgs", "type": "enum", "enum": ["chua_qua", "da_qua", "da_huy"], "default": "chua_qua", "column_name": "trang_thai_kvgs"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "KvgsXacNhan",
+      "table": "kvgs_xac_nhan",
+      "module": "m09-kvgs-confirmation",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "loai", "type": "enum", "enum": ["container", "hang_roi"]},
+        {"name": "refId", "type": "bigint"},
+        {"name": "trangThai", "type": "enum", "enum": ["xac_nhan_thanh_cong", "da_huy"], "default": "xac_nhan_thanh_cong"},
+        {"name": "thoiGian", "type": "timestamptz", "default": "now()"},
+        {"name": "canBoXacNhan", "type": "varchar(100)"},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "lyDoHuy", "type": "text", "nullable": true},
+        {"name": "thoiGianHuy", "type": "timestamptz", "nullable": true},
+        {"name": "updatedBy", "type": "varchar(100)", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["loai", "refId", "trangThai"]},
+        {"fields": ["maHq"]},
+        {"fields": ["thoiGian"]}
+      ]
+    },
+    {
+      "name": "ContainerToKhai",
+      "table": "container_to_khai",
+      "module": "m09-kvgs-confirmation",
+      "fields": [
+        {"name": "containerId", "type": "bigint", "primary": true},
+        {"name": "toKhaiId", "type": "bigint", "primary": true},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "createdBy", "type": "varchar(100)"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["containerId"]},
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq"]}
+      ]
+    },
+    {
+      "name": "HangRoi",
+      "table": "hang_roi",
+      "module": "m09-kvgs-confirmation",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "maVach", "type": "varchar(50)", "unique": true},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(10)"},
+        {"name": "thongTin", "type": "jsonb", "nullable": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq"]}
+      ]
+    },
+    {
+      "name": "LenhDung",
+      "table": "lenh_dung",
+      "module": "m10-kvgs",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "integer"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "lyDoDung", "type": "text"},
+        {"name": "canBoRaLenh", "type": "varchar"},
+        {"name": "ngayDung", "type": "date"},
+        {"name": "ngayGiaiPhong", "type": "date", "nullable": true},
+        {"name": "canBoGiaiPhong", "type": "varchar", "nullable": true},
+        {"name": "yKienGiaiPhong", "type": "varchar", "nullable": true},
+        {"name": "trangThai", "type": "enum", "enum": ["dang_dung", "da_giai_phong"], "default": "dang_dung"},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["toKhaiId"]},
+        {"fields": ["maHq", "trangThai"]}
+      ]
+    },
+    {
+      "name": "Ctdt",
+      "table": "ctdt",
+      "module": "m11-nghiep-vu-khac",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "toKhaiId", "type": "bigint", "column_name": "to_khai_id"},
+        {"name": "ctdtType", "type": "enum", "enum": ["giay_phep", "giay_phep_trich", "van_ban_chap_thuan", "co", "bang_ke", "hop_dong", "to_khai_tri_gia", "danh_muc_may_moc", "chung_tu_thue", "van_don", "hoa_don"], "column_name": "ctdt_type"},
+        {"name": "metadata", "type": "jsonb", "column_name": "metadata"},
+        {"name": "trangThai", "type": "enum", "enum": ["hoat_dong", "cho_duyet_sua", "da_duyet_sua", "tu_choi_sua", "cho_duyet_huy", "da_huy", "tu_choi_huy"], "default": "hoat_dong", "column_name": "trang_thai"},
+        {"name": "maHq", "type": "varchar(5)", "column_name": "ma_hq"},
+        {"name": "version", "type": "integer", "version_column": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create", "column_name": "created_at"},
+        {"name": "updatedAt", "type": "timestamptz", "auto": "update", "column_name": "updated_at"}
+      ],
+      "relations": [
+        {"type": "ManyToOne", "target": "ToKhai", "field": "toKhai", "join_column": "to_khai_id", "on_delete": "CASCADE"}
+      ],
+      "indexes": [
+        {"fields": ["maHq", "ctdtType", "trangThai"]},
+        {"fields": ["toKhaiId"]}
+      ]
+    },
+    {
+      "name": "ContainerSoiChieu",
+      "table": "container_soi_chieu",
+      "module": "m13-soi-chieu",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "soContainer", "type": "varchar(20)", "column_name": "so_container"},
+        {"name": "nguonNhap", "type": "enum", "enum": ["thu_cong", "emanifest", "to_khai_xk"], "column_name": "nguon_nhap"},
+        {"name": "ngayNhap", "type": "timestamptz", "default": "now()", "column_name": "ngay_nhap"},
+        {"name": "maHq", "type": "varchar(10)", "column_name": "ma_hq"},
+        {"name": "canBoNhap", "type": "varchar(100)", "column_name": "can_bo_nhap"},
+        {"name": "trangThai", "type": "enum", "enum": ["cho_soi_chieu", "da_soi_chieu"], "default": "cho_soi_chieu", "column_name": "trang_thai"},
+        {"name": "version", "type": "integer", "version_column": true},
+        {"name": "deletedAt", "type": "timestamptz", "nullable": true, "soft_delete": true, "column_name": "deleted_at"}
+      ],
+      "relations": [
+        {"type": "OneToOne", "target": "KetQuaSoiChieu", "field": "ketQua", "inverse": "container"}
+      ],
+      "indexes": []
+    },
+    {
+      "name": "KetQuaSoiChieu",
+      "table": "ket_qua_soi_chieu",
+      "module": "m13-soi-chieu",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "ketQua", "type": "enum", "enum": ["dat", "khong_dat", "nghi_van"], "column_name": "ket_qua"},
+        {"name": "ghiChu", "type": "text", "nullable": true, "column_name": "ghi_chu"},
+        {"name": "ngayNhap", "type": "timestamptz", "default": "now()", "column_name": "ngay_nhap"},
+        {"name": "canBoSoiChieu", "type": "varchar(100)", "column_name": "can_bo_soi_chieu"},
+        {"name": "version", "type": "integer", "version_column": true}
+      ],
+      "relations": [
+        {"type": "OneToOne", "target": "ContainerSoiChieu", "field": "container", "join_column": "container_soi_chieu_id", "inverse": "ketQua"}
+      ],
+      "indexes": []
+    },
+    {
+      "name": "AppUser",
+      "table": "app_user",
+      "module": "auth",
+      "fields": [
+        {"name": "id", "type": "integer", "primary": true, "generated": "increment"},
+        {"name": "username", "type": "varchar(50)", "unique": true},
+        {"name": "passwordHash", "type": "varchar"},
+        {"name": "maHq", "type": "varchar(5)"},
+        {"name": "role", "type": "varchar(30)"},
+        {"name": "hoTen", "type": "varchar(200)", "default": ""},
+        {"name": "isActive", "type": "boolean", "default": true},
+        {"name": "createdAt", "type": "timestamptz", "auto": "create"}
+      ],
+      "relations": [],
+      "indexes": [
+        {"fields": ["maHq"]}
+      ]
+    }
+  ],
+  "extracted_at": "2026-04-25T00:00:00Z"
+}

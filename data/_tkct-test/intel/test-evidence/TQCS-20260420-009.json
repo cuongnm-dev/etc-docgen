@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-009",
+  "feature_name": "Xác nhận hàng qua KVGS (M09)",
+  "module": "m09",
+  "feature_catalog_fingerprint": "sha256:6cb6dad76ea385df38900c489f275586249efde84ad2a74fc54dfdcb93a820da",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Dev JWT role GIAM_SAT, maHq VN001",
+  "steps": [
+    {
+      "step": 1,
+      "state": "kvgs-confirm",
+      "page_url": "http://localhost:3000/m09/xac-nhan",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-009-step-01-kvgs-confirm.png"
+    },
+    {
+      "step": 2,
+      "state": "lookup",
+      "page_url": "http://localhost:3000/m09/tra-cuu",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-009-step-02-lookup.png"
+    }
+  ]
+}

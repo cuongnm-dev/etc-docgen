@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "feature_id": "TQCS-20260420-007",
+  "feature_name": "Kiểm hóa hộ (M07)",
+  "module": "m07",
+  "feature_catalog_fingerprint": "sha256:0adcdfa72e40afa1b64139c9d1f2216396f4276e8eebc7a0a70ac99a3e07a95f",
+  "feature_catalog_extracted_at": "2026-04-25T00:00:00Z",
+  "captured_at": "2026-04-27T10:51:02.657Z",
+  "base_url": "http://localhost:3000",
+  "api_base_url": "http://localhost:4000",
+  "capture": {
+    "tool": "cursor-ide-browser",
+    "profile": {
+      "viewport": "default",
+      "wait_seconds_settle": 0.35
+    }
+  },
+  "auth": "Login admin/admin",
+  "steps": [
+    {
+      "step": 1,
+      "state": "main",
+      "page_url": "http://localhost:3000/m07/danh-sach",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-007-step-01-main.png"
+    },
+    {
+      "step": 2,
+      "state": "proposal",
+      "page_url": "http://localhost:3000/m07/de-xuat",
+      "screenshot_rel": "docs/intel/screenshots/TQCS-20260420-007-step-02-proposal.png"
+    }
+  ]
+}

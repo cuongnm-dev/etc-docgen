@@ -1,0 +1,217 @@
+{
+  "version": "2.1",
+  "meta": {
+    "captured_at": "2026-04-25T04:51:00.000Z",
+    "stage": "3a-capture",
+    "base_url": "http://localhost:3010",
+    "screenshot_dir_relative": "docs/intel/screenshots",
+    "session": {
+      "auth_method": "dev_token_mint_ui",
+      "login_fe_path": "/dev/token",
+      "api_dependency": "POST /api/dev/token via Next rewrite (ENABLE_DEV_TOKEN=true)",
+      "role": "HQDK",
+      "ma_hq": "VN001",
+      "dynamic_route_ids": {
+        "to_khai_id": 9,
+        "so_to_khai_seed": "DEV001",
+        "bbbg_id": 1,
+        "kiem_hoa_ho_id": 1,
+        "lenh_dung_id": 1,
+        "container_list_yeu_cau_id": 3,
+        "m13_ket_qua_container_id": 1
+      },
+      "viewport_css_px": { "width": 1440, "height": 900 },
+      "tooling": "Cursor Playwright MCP server plugin-playwright-playwright (browser_run_code)",
+      "environment_notes": [
+        "Stack: docker compose; web-admin published on host port 3010 in this capture (not default 3000).",
+        "Seed data: MA_HQ VN001, tờ khai DEV001–DEV004 (bigint ids 9–12 for DEV001–DEV004 in this DB)."
+      ]
+    },
+    "counts": {
+      "png_files_written": 78,
+      "flows_with_assets": 12,
+      "flows_placeholder_only": 1
+    }
+  },
+  "flows": [
+    {
+      "flow_id": "FL-M01",
+      "module": "M01",
+      "name": "Kiểm tra hồ sơ tờ khai",
+      "screenshots": [
+        { "id": "M01-01", "label": "Hub — tra cứu tờ khai", "fe_path": "/m01", "file": "docs/intel/screenshots/m01-hub.png" },
+        { "id": "M01-02", "label": "Lịch sử chứng từ", "fe_path": "/m01/lich-su", "file": "docs/intel/screenshots/m01-lich-su.png" },
+        { "id": "M01-03", "label": "Xác nhận đủ điều kiện", "fe_path": "/m01/xac-nhan", "file": "docs/intel/screenshots/m01-xac-nhan.png" },
+        { "id": "M01-04", "label": "Yêu cầu bổ sung", "fe_path": "/m01/yeu-cau-bo-sung", "file": "docs/intel/screenshots/m01-yeu-cau-bo-sung.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M02",
+      "module": "M02",
+      "name": "Kiểm hóa tờ khai",
+      "screenshots": [
+        { "id": "M02-01", "label": "Hub", "fe_path": "/m02", "file": "docs/intel/screenshots/m02-hub.png" },
+        { "id": "M02-02", "label": "Đăng kiểm / tồn đọng", "fe_path": "/m02/dang-kiem", "file": "docs/intel/screenshots/m02-dang-kiem.png" },
+        { "id": "M02-03", "label": "In (tờ khai seed id=9)", "fe_path": "/m02/9/in", "file": "docs/intel/screenshots/m02-tk9-in.png" },
+        { "id": "M02-04", "label": "Kết quả kiểm hóa", "fe_path": "/m02/9/ket-qua", "file": "docs/intel/screenshots/m02-tk9-ket-qua.png" },
+        { "id": "M02-05", "label": "Phê duyệt kết quả", "fe_path": "/m02/9/phe-duyet", "file": "docs/intel/screenshots/m02-tk9-phe-duyet.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M03",
+      "module": "M03",
+      "name": "Chuyển luồng / phân luồng",
+      "screenshots": [
+        { "id": "M03-01", "label": "Hub", "fe_path": "/m03", "file": "docs/intel/screenshots/m03-hub.png" },
+        { "id": "M03-02", "label": "Lịch sử", "fe_path": "/m03/lich-su", "file": "docs/intel/screenshots/m03-lich-su.png" },
+        { "id": "M03-03", "label": "Chi tiết tờ khai", "fe_path": "/m03/9", "file": "docs/intel/screenshots/m03-tk9.png" },
+        { "id": "M03-04", "label": "Đề xuất chuyển luồng", "fe_path": "/m03/9/de-xuat", "file": "docs/intel/screenshots/m03-tk9-de-xuat.png" },
+        { "id": "M03-05", "label": "Phê duyệt chuyển luồng", "fe_path": "/m03/9/phe-duyet", "file": "docs/intel/screenshots/m03-tk9-phe-duyet.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M04",
+      "module": "M04",
+      "name": "Nghĩa vụ thuế",
+      "screenshots": [
+        { "id": "M04-01", "label": "Hub", "fe_path": "/m04", "file": "docs/intel/screenshots/m04-hub.png" },
+        { "id": "M04-02", "label": "Lịch sử thuế", "fe_path": "/m04/lich-su", "file": "docs/intel/screenshots/m04-lich-su.png" },
+        { "id": "M04-03", "label": "Xác nhận nghĩa vụ (tờ khai 9)", "fe_path": "/m04/9/xac-nhan", "file": "docs/intel/screenshots/m04-tk9-xac-nhan.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M05",
+      "module": "M05",
+      "name": "Thông quan / cấp G",
+      "screenshots": [
+        { "id": "M05-01", "label": "Hub — chờ cấp G", "fe_path": "/m05", "file": "docs/intel/screenshots/m05-hub.png" },
+        { "id": "M05-02", "label": "Chi tiết tờ khai", "fe_path": "/m05/9", "file": "docs/intel/screenshots/m05-tk9.png" },
+        { "id": "M05-03", "label": "In G", "fe_path": "/m05/9/in", "file": "docs/intel/screenshots/m05-tk9-in.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M06",
+      "module": "M06",
+      "name": "Biên bản bàn giao",
+      "screenshots": [
+        { "id": "M06-01", "label": "Hub", "fe_path": "/m06", "file": "docs/intel/screenshots/m06-hub.png" },
+        { "id": "M06-02", "label": "Đề xuất BBBG", "fe_path": "/m06/de-xuat", "file": "docs/intel/screenshots/m06-de-xuat.png" },
+        { "id": "M06-03", "label": "Phê duyệt", "fe_path": "/m06/phe-duyet", "file": "docs/intel/screenshots/m06-phe-duyet.png" },
+        { "id": "M06-04", "label": "Cập nhật (bbbg id=1, có thể không có dữ liệu seed)", "fe_path": "/m06/1/cap-nhat", "file": "docs/intel/screenshots/m06-bbbg1-cap-nhat.png" },
+        { "id": "M06-05", "label": "In", "fe_path": "/m06/1/in", "file": "docs/intel/screenshots/m06-bbbg1-in.png" },
+        { "id": "M06-06", "label": "Xác nhận đến nơi", "fe_path": "/m06/1/xac-nhan-den", "file": "docs/intel/screenshots/m06-bbbg1-xac-nhan-den.png" },
+        { "id": "M06-07", "label": "Xác nhận hàng", "fe_path": "/m06/1/xac-nhan-hang", "file": "docs/intel/screenshots/m06-bbbg1-xac-nhan-hang.png" },
+        { "id": "M06-08", "label": "Yêu cầu hủy", "fe_path": "/m06/1/yeu-cau-huy", "file": "docs/intel/screenshots/m06-bbbg1-yeu-cau-huy.png" },
+        { "id": "M06-09", "label": "Yêu cầu sửa", "fe_path": "/m06/1/yeu-cau-sua", "file": "docs/intel/screenshots/m06-bbbg1-yeu-cau-sua.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M07",
+      "module": "M07",
+      "name": "Kiểm hóa hộ",
+      "screenshots": [
+        { "id": "M07-01", "label": "Hub", "fe_path": "/m07", "file": "docs/intel/screenshots/m07-hub.png" },
+        { "id": "M07-02", "label": "Danh sách", "fe_path": "/m07/danh-sach", "file": "docs/intel/screenshots/m07-danh-sach.png" },
+        { "id": "M07-03", "label": "Đề xuất", "fe_path": "/m07/de-xuat", "file": "docs/intel/screenshots/m07-de-xuat.png" },
+        { "id": "M07-04", "label": "Phê duyệt", "fe_path": "/m07/phe-duyet", "file": "docs/intel/screenshots/m07-phe-duyet.png" },
+        { "id": "M07-05", "label": "Hủy phiên (id=1)", "fe_path": "/m07/1/huy", "file": "docs/intel/screenshots/m07-khh1-huy.png" },
+        { "id": "M07-06", "label": "In (id=1)", "fe_path": "/m07/1/in", "file": "docs/intel/screenshots/m07-khh1-in.png" },
+        { "id": "M07-07", "label": "Kết quả (id=1)", "fe_path": "/m07/1/ket-qua", "file": "docs/intel/screenshots/m07-khh1-ket-qua.png" },
+        { "id": "M07-08", "label": "Phân công (id=1)", "fe_path": "/m07/1/phan-cong", "file": "docs/intel/screenshots/m07-khh1-phan-cong.png" },
+        { "id": "M07-09", "label": "Sửa (id=1)", "fe_path": "/m07/1/sua", "file": "docs/intel/screenshots/m07-khh1-sua.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M08",
+      "module": "M08",
+      "name": "Niêm phong",
+      "screenshots": [
+        { "id": "M08-01", "label": "Đề xuất bỏ niêm phong", "fe_path": "/m08/de-xuat-bo", "file": "docs/intel/screenshots/m08-de-xuat-bo.png" },
+        { "id": "M08-02", "label": "Đề xuất niêm phong mới", "fe_path": "/m08/de-xuat-moi", "file": "docs/intel/screenshots/m08-de-xuat-moi.png" },
+        { "id": "M08-03", "label": "Kiểm tra", "fe_path": "/m08/kiem-tra", "file": "docs/intel/screenshots/m08-kiem-tra.png" },
+        { "id": "M08-04", "label": "Xác nhận", "fe_path": "/m08/xac-nhan", "file": "docs/intel/screenshots/m08-xac-nhan.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M09",
+      "module": "M09",
+      "name": "Xác nhận qua KVGS",
+      "screenshots": [
+        { "id": "M09-01", "label": "Xác nhận hàng qua trạm", "fe_path": "/m09/xac-nhan", "file": "docs/intel/screenshots/m09-xac-nhan.png" },
+        { "id": "M09-02", "label": "Bảng kê container", "fe_path": "/m09/bang-ke-container", "file": "docs/intel/screenshots/m09-bang-ke-container.png" },
+        { "id": "M09-03", "label": "Bảng kê hàng rời", "fe_path": "/m09/bang-ke-hang-roi", "file": "docs/intel/screenshots/m09-bang-ke-hang-roi.png" },
+        { "id": "M09-04", "label": "Container chung", "fe_path": "/m09/container-chung", "file": "docs/intel/screenshots/m09-container-chung.png" },
+        { "id": "M09-05", "label": "Hủy container", "fe_path": "/m09/huy-container", "file": "docs/intel/screenshots/m09-huy-container.png" },
+        { "id": "M09-06", "label": "Hủy hàng rời", "fe_path": "/m09/huy-hang-roi", "file": "docs/intel/screenshots/m09-huy-hang-roi.png" },
+        { "id": "M09-07", "label": "Tra cứu", "fe_path": "/m09/tra-cuu", "file": "docs/intel/screenshots/m09-tra-cuu.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M10",
+      "module": "M10",
+      "name": "KVGS / lệnh dừng",
+      "screenshots": [
+        { "id": "M10-01", "label": "Giám sát KVGS", "fe_path": "/m10/giam-sat", "file": "docs/intel/screenshots/m10-giam-sat.png" },
+        { "id": "M10-02", "label": "Danh sách lệnh dừng", "fe_path": "/m10/lenh-dung", "file": "docs/intel/screenshots/m10-lenh-dung.png" },
+        { "id": "M10-03", "label": "Giải phóng lệnh (id=1)", "fe_path": "/m10/1/giai-phong", "file": "docs/intel/screenshots/m10-ld1-giai-phong.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M11",
+      "module": "M11",
+      "name": "Nghiệp vụ khác (CTDD, tờ khai, container)",
+      "screenshots": [
+        { "id": "M11-01", "label": "Hub", "fe_path": "/m11", "file": "docs/intel/screenshots/m11-hub.png" },
+        { "id": "M11-02", "label": "Chuyển địa điểm (form hub)", "fe_path": "/m11/chuyen-dia-diem", "file": "docs/intel/screenshots/m11-chuyen-dia-diem.png" },
+        { "id": "M11-03", "label": "Container KVGS", "fe_path": "/m11/container/kvgs", "file": "docs/intel/screenshots/m11-container-kvgs.png" },
+        { "id": "M11-04", "label": "Nhập container (hub)", "fe_path": "/m11/nhap-container", "file": "docs/intel/screenshots/m11-nhap-container.png" },
+        { "id": "M11-05", "label": "Yêu cầu sửa DS container", "fe_path": "/m11/yeu-cau/sua-danh-sach-container", "file": "docs/intel/screenshots/m11-yeu-cau-sua-ds.png" },
+        { "id": "M11-06", "label": "Yêu cầu hủy DS container", "fe_path": "/m11/yeu-cau/huy-danh-sach-container", "file": "docs/intel/screenshots/m11-yeu-cau-huy-ds.png" },
+        { "id": "M11-07", "label": "Duyệt — yêu cầu hủy (danh sách)", "fe_path": "/m11/duyet/yeu-cau-huy", "file": "docs/intel/screenshots/m11-duyet-yeu-cau-huy.png" },
+        { "id": "M11-08", "label": "Duyệt — yêu cầu sửa (danh sách)", "fe_path": "/m11/duyet/yeu-cau-sua", "file": "docs/intel/screenshots/m11-duyet-yeu-cau-sua.png" },
+        { "id": "M11-09", "label": "Duyệt sửa DS container (danh sách)", "fe_path": "/m11/duyet/sua-danh-sach-container", "file": "docs/intel/screenshots/m11-duyet-sua-ds.png" },
+        { "id": "M11-10", "label": "Duyệt hủy DS container (danh sách)", "fe_path": "/m11/duyet/huy-danh-sach-container", "file": "docs/intel/screenshots/m11-duyet-huy-ds.png" },
+        { "id": "M11-11", "label": "Duyệt sửa DS — chi tiết yêu cầu 3", "fe_path": "/m11/duyet/sua-danh-sach-container/3", "file": "docs/intel/screenshots/m11-duyet-sua-ds-3.png" },
+        { "id": "M11-12", "label": "Duyệt hủy DS — chi tiết yêu cầu 3", "fe_path": "/m11/duyet/huy-danh-sach-container/3", "file": "docs/intel/screenshots/m11-duyet-huy-ds-3.png" },
+        { "id": "M11-13", "label": "Duyệt yêu cầu sửa — id 3", "fe_path": "/m11/duyet/yeu-cau-sua/3", "file": "docs/intel/screenshots/m11-duyet-yeu-cau-sua-3.png" },
+        { "id": "M11-14", "label": "Duyệt yêu cầu hủy — id 3", "fe_path": "/m11/duyet/yeu-cau-huy/3", "file": "docs/intel/screenshots/m11-duyet-yeu-cau-huy-3.png" },
+        { "id": "M11-15", "label": "Hủy hết hiệu lực", "fe_path": "/m11/huy-het-hieu-luc", "file": "docs/intel/screenshots/m11-huy-het-hieu-luc.png" },
+        { "id": "M11-16", "label": "Khôi phục (hub)", "fe_path": "/m11/khoi-phuc", "file": "docs/intel/screenshots/m11-khoi-phuc.png" },
+        { "id": "M11-17", "label": "CTDT duyệt sửa", "fe_path": "/m11/ctdt/duyet-sua", "file": "docs/intel/screenshots/m11-ctdt-duyet-sua.png" },
+        { "id": "M11-18", "label": "CTDT duyệt hủy", "fe_path": "/m11/ctdt/duyet-huy", "file": "docs/intel/screenshots/m11-ctdt-duyet-huy.png" },
+        { "id": "M11-19", "label": "Chuyển ĐDGS (tờ khai 9)", "fe_path": "/m11/9/chuyen-dia-diem", "file": "docs/intel/screenshots/m11-tk9-chuyen-dia-diem.png" },
+        { "id": "M11-20", "label": "Khôi phục tờ khai (id 9)", "fe_path": "/m11/9/khoi-phuc", "file": "docs/intel/screenshots/m11-tk9-khoi-phuc.png" },
+        { "id": "M11-21", "label": "Nhập container (tờ khai 9)", "fe_path": "/m11/9/nhap-container", "file": "docs/intel/screenshots/m11-tk9-nhap-container.png" }
+      ]
+    },
+    {
+      "flow_id": "FL-M12",
+      "module": "M12",
+      "name": "Tra cứu & báo cáo (chỉ đọc)",
+      "status": "not_implemented_in_codebase",
+      "screenshots": [],
+      "placeholder": {
+        "reason": "Không có route/page trong repo; nghiệp vụ giữ chỗ theo flow-report (TQCS-20260420-012). Không tạo ảnh giả.",
+        "intel_paths_only": ["/m12", "/m12/tra-cuu", "/m12/bao-cao"]
+      }
+    },
+    {
+      "flow_id": "FL-M13",
+      "module": "M13",
+      "name": "Soi chiếu container tại cảng",
+      "screenshots": [
+        { "id": "M13-01", "label": "Hub M13", "fe_path": "/m13", "file": "docs/intel/screenshots/m13-hub.png" },
+        { "id": "M13-02", "label": "Nhập container cần soi chiếu", "fe_path": "/m13/nhap-container", "file": "docs/intel/screenshots/m13-nhap-container.png" },
+        { "id": "M13-03", "label": "Hub nhập kết quả", "fe_path": "/m13/ket-qua", "file": "docs/intel/screenshots/m13-ket-qua-hub.png" },
+        { "id": "M13-04", "label": "Form kết quả (container id=1 — có thể not found nếu chưa seed)", "fe_path": "/m13/ket-qua/1", "file": "docs/intel/screenshots/m13-ket-qua-1.png" }
+      ]
+    }
+  ],
+  "extras": [
+    {
+      "note": "Clearance landing / root hub (không thuộc một FL cố định trong flow-report)",
+      "fe_path": "/",
+      "file": "docs/intel/screenshots/root-hub.png"
+    }
+  ]
+}
