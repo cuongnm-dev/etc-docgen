@@ -17,7 +17,7 @@ param(
   [switch] $BumpTeam,
   [switch] $Yes,
   [string] $Namespace = 'o0mrblack0o',
-  [string] $TeamRepo  = 'D:\Projects\team-ai-config'
+  [string] $TeamRepo  = (Resolve-Path (Join-Path $PSScriptRoot '..\team-ai-config')).Path
 )
 
 $ErrorActionPreference = 'Stop'
