@@ -129,8 +129,16 @@ def _resolve_diagram(
     diagrams_dir: Path | None,
     report: RenderReport,
     width: Mm = Mm(165),
+    max_height: Mm = Mm(220),
 ) -> InlineImage | None:
-    """Resolve a diagram filename to InlineImage, or None if missing."""
+    """Resolve a diagram filename to InlineImage with aspect-aware sizing.
+
+    Default: fit to page width (165mm A4 with 30mm/15mm margins).
+    Constraint: if fitting to width produces height > 220mm (over A4 text area)
+    OR if image is portrait → fit to height instead.
+    Constraint: if aspect ratio > 3:1 (banner-style: network LTR, Gantt) → reduce
+    width so height ≥ 30mm (avoid pancake-strip look that obscures content).
+    """
     if not filename or not diagrams_dir or not diagrams_dir.exists():
         return None
     candidates = [diagrams_dir / filename]
@@ -138,9 +146,38 @@ def _resolve_diagram(
     for ext in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
         candidates.append(diagrams_dir / (stem + ext))
     resolved = next((c for c in candidates if c.exists()), None)
-    if resolved:
-        return InlineImage(tpl, str(resolved), width=width)
-    return None
+    if not resolved:
+        return None
+
+    # Inspect intrinsic dimensions to compute aspect-aware sizing.
+    try:
+        from PIL import Image  # python-docx already pulls Pillow
+        with Image.open(resolved) as im:
+            iw, ih = im.size
+    except Exception:
+        iw = ih = 0
+
+    if iw > 0 and ih > 0:
+        # mm per pixel at 96 DPI baseline
+        target_w_mm = float(width)  # Mm objects support float()
+        target_h_mm = target_w_mm * ih / iw
+        max_h_mm = float(max_height)
+
+        # Banner / strip detection — aspect > 3 means height shrinks below ~30mm
+        # at 165mm width; reduce width so height ≥ 35mm (legible boxes).
+        if iw / ih > 3.0:
+            min_height_mm = 35.0
+            new_w_mm = min_height_mm * iw / ih
+            # Cap to page width so we don't expand beyond margins
+            new_w_mm = min(new_w_mm, target_w_mm)
+            return InlineImage(tpl, str(resolved), width=Mm(new_w_mm))
+
+        # Portrait or tall image — fit to max_height instead of width
+        if target_h_mm > max_h_mm:
+            new_w_mm = max_h_mm * iw / ih
+            return InlineImage(tpl, str(resolved), width=Mm(new_w_mm))
+
+    return InlineImage(tpl, str(resolved), width=width)
 
 
 def build_diagram_context(
@@ -339,20 +376,42 @@ def _post_process_docx(docx_path: Path) -> tuple[int, list[str]]:
                 set_raw,
             )
 
+    # ── 2.5. Convert floating anchor images → inline ──
+    # Diagram InlineImages occasionally get wrapped in <wp:anchor> (floating)
+    # instead of <wp:inline>, causing Word to overlay caption text or shrink the
+    # image to a thin strip. Force-inline so images flow naturally with text.
+    anchor_to_inline_pat = re.compile(
+        rb"<wp:anchor\b[^>]*>(.*?)</wp:anchor>",
+        re.DOTALL,
+    )
+    drop_pat = re.compile(
+        rb"<wp:(simplePos|positionH|positionV|wrapNone|wrapSquare|wrapTopAndBottom|wrapTight|wrapThrough|wrapPolygon)\b[^>]*(?:/>|>.*?</wp:\1>)",
+        re.DOTALL,
+    )
+
+    def _anchor_to_inline(m: re.Match) -> bytes:
+        body = drop_pat.sub(b"", m.group(1))
+        return b"<wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">" + body + b"</wp:inline>"
+
+    if doc_raw and b"<wp:anchor" in doc_raw:
+        doc_raw_fixed = anchor_to_inline_pat.sub(_anchor_to_inline, doc_raw)
+    else:
+        doc_raw_fixed = doc_raw
+
     # ── 3. Mark fldChar dirty + collect residual Jinja markers in document.xml ──
-    new_doc_raw = doc_raw
+    new_doc_raw = doc_raw_fixed
     residuals: list[str] = []
-    if doc_raw:
-        doc_text = doc_raw.decode("utf-8")
+    if doc_raw_fixed:
+        doc_text = doc_raw_fixed.decode("utf-8")
         for marker in ("{{", "}}", "{%", "%}"):
             if marker in doc_text:
                 residuals.append(marker)
-        if b'w:fldCharType="begin"' in doc_raw:
+        if b'w:fldCharType="begin"' in doc_raw_fixed:
             # Add w:dirty="true" to every <w:fldChar ... w:fldCharType="begin" ...> element
             new_doc_raw = re.sub(
                 rb'(<w:fldChar\b[^>]*?w:fldCharType="begin"[^>]*?)(/?>)',
                 rb'\1 w:dirty="true"\2',
-                doc_raw,
+                doc_raw_fixed,
             )
             # Collapse accidental duplicates if attribute was already present
             new_doc_raw = re.sub(
