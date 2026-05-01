@@ -97,7 +97,7 @@ UnsupportedMediaType = UnsupportedMediaTypeError
 # Length of base32-encoded random IDs (~25 bits per char → 100 bits @ 20 chars).
 _ID_LENGTH = 20
 
-VALID_TARGETS: frozenset[str] = frozenset({"xlsx", "hdsd", "tkkt", "tkcs", "tkct"})
+VALID_TARGETS: frozenset[str] = frozenset({"xlsx", "hdsd", "tkkt", "tkcs", "tkct", "nckt"})
 
 
 def new_id(prefix: str = "") -> str:
