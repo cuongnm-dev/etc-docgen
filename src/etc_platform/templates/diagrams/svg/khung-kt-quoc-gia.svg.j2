@@ -1,0 +1,179 @@
+{#-
+  khung-kt-quoc-gia.svg.j2 — Khung KT dữ liệu quốc gia (multi-zone TW/ĐP + center bus)
+
+  Style: 2 cột (Trung ương | Địa phương) + center NDOP/LGSP bus
+         + actor strip phía trên + network footer phía dưới.
+  Dùng cho: Đề án CĐS quốc gia, NCKT §3 (phù hợp KTCPĐT), TKKT §1 ngữ cảnh tổng thể.
+
+  Schema (data dict):
+    title:       str — "Hình X.Y: ..."
+    subtitle:    str (optional)
+    actors:      list of {label: str, color: str (optional, default '#DEEBF7')}
+                 — strip phía trên (cán bộ, người dân, doanh nghiệp, tổ chức)
+    central:     {name: str, color: str (default '#FFE699'), border: str (default '#BF9000')}
+                 — bus trung tâm (NDOP/LGSP/CSDLQG)
+    tw_zones:    list of {name, color, border, items: [str]}  — vùng Trung ương (cột trái)
+    dp_zones:    list of {name, color, border, items: [str]}  — vùng Địa phương (cột phải)
+    footer:      str — network bus phía dưới
+-#}
+{%- set subtitle  = subtitle  | default('', true) -%}
+{%- set actors    = actors    | default([], true) -%}
+{%- set tw_zones  = tw_zones  | default([], true) -%}
+{%- set dp_zones  = dp_zones  | default([], true) -%}
+{%- set footer    = footer    | default('', true) -%}
+{%- set W           = 1400 -%}
+{%- set MARGIN      = 30 -%}
+{%- set TITLE_H     = 60 -%}
+{%- set SUBTITLE_H  = 26 if subtitle else 0 -%}
+{%- set ACTOR_H     = 80 if actors else 0 -%}
+{%- set FOOTER_H    = 50 if footer else 0 -%}
+{%- set ZONE_GAP    = 16 -%}
+{%- set ZONE_H      = 130 -%}
+{%- set TW_COUNT    = tw_zones|length -%}
+{%- set DP_COUNT    = dp_zones|length -%}
+{%- set ZONE_ROWS   = (TW_COUNT if TW_COUNT > DP_COUNT else DP_COUNT) -%}
+{%- set ZONES_TOTAL = ZONE_ROWS * ZONE_H + (ZONE_ROWS - 1) * ZONE_GAP if ZONE_ROWS > 0 else 0 -%}
+{%- set H = MARGIN + TITLE_H + SUBTITLE_H + 8 + ACTOR_H + 14 + ZONES_TOTAL + 14 + FOOTER_H + MARGIN -%}
+{%- set CENTER_W    = 200 -%}
+{%- set COL_W       = (W - 2*MARGIN - CENTER_W - 2*ZONE_GAP) // 2 -%}
+{%- set TW_X        = MARGIN -%}
+{%- set CENTER_X    = MARGIN + COL_W + ZONE_GAP -%}
+{%- set DP_X        = CENTER_X + CENTER_W + ZONE_GAP -%}
+{%- set ZONES_TOP   = MARGIN + TITLE_H + SUBTITLE_H + 8 + ACTOR_H + 14 -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}"
+     font-family="Times New Roman, serif">
+  <defs>
+    <style>
+      .title       { font-size: 22px; font-weight: bold; fill: #1F3864; }
+      .subtitle    { font-size: 13px; fill: #404040; font-style: italic; }
+      .zone-name   { font-size: 13px; font-weight: bold; fill: #1F3864; }
+      .item        { font-size: 11px; fill: #1F3864; }
+      .actor-label { font-size: 11px; fill: #1F3864; }
+      .actor-strip { font-size: 13px; font-weight: bold; fill: #1F3864; }
+      .center-name { font-size: 14px; font-weight: bold; fill: #1F3864; }
+      .footer      { font-size: 13px; font-weight: bold; fill: #404040; }
+      .col-label   { font-size: 14px; font-weight: bold; fill: #C00000; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="{{ W }}" height="{{ H }}" fill="white"/>
+
+  <!-- Title -->
+  <text class="title" x="{{ W // 2 }}" y="{{ MARGIN + 28 }}" text-anchor="middle">{{ title }}</text>
+  {%- if subtitle %}
+  <text class="subtitle" x="{{ W // 2 }}" y="{{ MARGIN + 50 }}" text-anchor="middle">{{ subtitle }}</text>
+  {%- endif %}
+
+  <!-- Actors strip -->
+  {%- if actors %}
+    {%- set ay = MARGIN + TITLE_H + SUBTITLE_H + 8 %}
+    <rect x="{{ MARGIN }}" y="{{ ay }}" width="{{ W - 2*MARGIN }}" height="{{ ACTOR_H }}"
+          fill="#F2F2F2" stroke="#1F3864" stroke-width="1.2" rx="6" ry="6"/>
+    <text class="actor-strip" x="{{ MARGIN + 14 }}" y="{{ ay + 22 }}">Đối tượng sử dụng</text>
+    {%- set n = actors|length %}
+    {%- set strip_x = MARGIN + 200 %}
+    {%- set strip_w = (W - MARGIN - 14) - strip_x %}
+    {%- set actor_w = (strip_w - (n-1)*10) // n if n > 0 else 100 %}
+    {%- for a in actors %}
+      {%- set i = loop.index0 %}
+      {%- set ax = strip_x + i * (actor_w + 10) %}
+      {%- set ay2 = ay + 14 %}
+      <rect x="{{ ax }}" y="{{ ay2 }}" width="{{ actor_w }}" height="{{ ACTOR_H - 28 }}"
+            fill="{{ a.get('color', '#DEEBF7') }}" stroke="#2E75B6" stroke-width="1" rx="4" ry="4"/>
+      <text class="actor-label" x="{{ ax + actor_w // 2 }}" y="{{ ay2 + (ACTOR_H - 28) // 2 + 4 }}" text-anchor="middle">{{ a.label }}</text>
+    {%- endfor %}
+  {%- endif %}
+
+  <!-- Column labels (TW / ĐP) -->
+  <text class="col-label" x="{{ TW_X + COL_W // 2 }}" y="{{ ZONES_TOP - 4 }}" text-anchor="middle">TRUNG ƯƠNG</text>
+  <text class="col-label" x="{{ DP_X + COL_W // 2 }}" y="{{ ZONES_TOP - 4 }}" text-anchor="middle">ĐỊA PHƯƠNG</text>
+
+  <!-- TW zones -->
+  {%- for z in tw_zones %}
+    {%- set zy = ZONES_TOP + loop.index0 * (ZONE_H + ZONE_GAP) %}
+    <rect x="{{ TW_X }}" y="{{ zy }}" width="{{ COL_W }}" height="{{ ZONE_H }}"
+          fill="{{ z.color }}" stroke="{{ z.border }}" stroke-width="1.5" rx="6" ry="6"/>
+    <text class="zone-name" x="{{ TW_X + 14 }}" y="{{ zy + 20 }}">{{ z.name }}</text>
+    {%- set n = z['items']|length %}
+    {%- if n > 0 %}
+      {%- set inner_x = TW_X + 14 %}
+      {%- set inner_y = zy + 32 %}
+      {%- set inner_w = COL_W - 28 %}
+      {%- set inner_h = ZONE_H - 46 %}
+      {%- set cols = (n if n <= 4 else 4) %}
+      {%- set rows = ((n + cols - 1) // cols) %}
+      {%- set item_w = (inner_w - (cols-1)*8) // cols %}
+      {%- set item_h = (inner_h - (rows-1)*6) // rows if rows > 0 else inner_h %}
+      {%- for item in z['items'] %}
+        {%- set i = loop.index0 %}
+        {%- set col = i % cols %}
+        {%- set row = i // cols %}
+        {%- set ix = inner_x + col * (item_w + 8) %}
+        {%- set iy = inner_y + row * (item_h + 6) %}
+      <rect x="{{ ix }}" y="{{ iy }}" width="{{ item_w }}" height="{{ item_h }}"
+            fill="white" stroke="{{ z.border }}" stroke-width="1" rx="3" ry="3"/>
+      <text class="item" x="{{ ix + item_w // 2 }}" y="{{ iy + item_h // 2 + 3 }}" text-anchor="middle">{{ item }}</text>
+      {%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+
+  <!-- ĐP zones -->
+  {%- for z in dp_zones %}
+    {%- set zy = ZONES_TOP + loop.index0 * (ZONE_H + ZONE_GAP) %}
+    <rect x="{{ DP_X }}" y="{{ zy }}" width="{{ COL_W }}" height="{{ ZONE_H }}"
+          fill="{{ z.color }}" stroke="{{ z.border }}" stroke-width="1.5" rx="6" ry="6"/>
+    <text class="zone-name" x="{{ DP_X + 14 }}" y="{{ zy + 20 }}">{{ z.name }}</text>
+    {%- set n = z['items']|length %}
+    {%- if n > 0 %}
+      {%- set inner_x = DP_X + 14 %}
+      {%- set inner_y = zy + 32 %}
+      {%- set inner_w = COL_W - 28 %}
+      {%- set inner_h = ZONE_H - 46 %}
+      {%- set cols = (n if n <= 4 else 4) %}
+      {%- set rows = ((n + cols - 1) // cols) %}
+      {%- set item_w = (inner_w - (cols-1)*8) // cols %}
+      {%- set item_h = (inner_h - (rows-1)*6) // rows if rows > 0 else inner_h %}
+      {%- for item in z['items'] %}
+        {%- set i = loop.index0 %}
+        {%- set col = i % cols %}
+        {%- set row = i // cols %}
+        {%- set ix = inner_x + col * (item_w + 8) %}
+        {%- set iy = inner_y + row * (item_h + 6) %}
+      <rect x="{{ ix }}" y="{{ iy }}" width="{{ item_w }}" height="{{ item_h }}"
+            fill="white" stroke="{{ z.border }}" stroke-width="1" rx="3" ry="3"/>
+      <text class="item" x="{{ ix + item_w // 2 }}" y="{{ iy + item_h // 2 + 3 }}" text-anchor="middle">{{ item }}</text>
+      {%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+
+  <!-- Center bus (NDOP/LGSP) -->
+  {%- if central %}
+    {%- set cx = CENTER_X %}
+    {%- set cy = ZONES_TOP %}
+    {%- set cw = CENTER_W %}
+    {%- set ch = ZONES_TOTAL %}
+    {%- set ery = 18 %}
+    <ellipse cx="{{ cx + cw // 2 }}" cy="{{ cy + ery }}" rx="{{ cw // 2 }}" ry="{{ ery }}"
+             fill="{{ central.get('color', '#FFE699') }}" stroke="{{ central.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <rect x="{{ cx }}" y="{{ cy + ery }}" width="{{ cw }}" height="{{ ch - 2*ery }}"
+          fill="{{ central.get('color', '#FFE699') }}" stroke="{{ central.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <line x1="{{ cx }}" y1="{{ cy + ery }}" x2="{{ cx }}" y2="{{ cy + ch - ery }}"
+          stroke="{{ central.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <line x1="{{ cx + cw }}" y1="{{ cy + ery }}" x2="{{ cx + cw }}" y2="{{ cy + ch - ery }}"
+          stroke="{{ central.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <ellipse cx="{{ cx + cw // 2 }}" cy="{{ cy + ch - ery }}" rx="{{ cw // 2 }}" ry="{{ ery }}"
+             fill="{{ central.get('color', '#FFE699') }}" stroke="{{ central.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <text class="center-name" x="{{ cx + cw // 2 }}" y="{{ cy + ch // 2 - 6 }}" text-anchor="middle">{{ central.name }}</text>
+    {%- if central.get('subtitle') %}
+    <text class="item" x="{{ cx + cw // 2 }}" y="{{ cy + ch // 2 + 14 }}" text-anchor="middle">{{ central.subtitle }}</text>
+    {%- endif %}
+  {%- endif %}
+
+  <!-- Footer -->
+  {%- if footer %}
+    {%- set fy = ZONES_TOP + ZONES_TOTAL + 14 %}
+    <rect x="{{ MARGIN }}" y="{{ fy }}" width="{{ W - 2*MARGIN }}" height="{{ FOOTER_H - 8 }}"
+          fill="#F2F2F2" stroke="#404040" stroke-width="1.2" rx="4" ry="4"/>
+    <text class="footer" x="{{ W // 2 }}" y="{{ fy + (FOOTER_H - 8) // 2 + 5 }}" text-anchor="middle">{{ footer }}</text>
+  {%- endif %}
+</svg>

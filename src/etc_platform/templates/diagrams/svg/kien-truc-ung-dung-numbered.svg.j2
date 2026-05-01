@@ -1,0 +1,193 @@
+{#-
+  kien-truc-ung-dung-numbered.svg.j2 — Kiến trúc ứng dụng với module đánh số (kiểu ảnh #3)
+
+  Style: actor strip top + functional bands (vertical chia 4-5 cột) + database row + integration bar.
+  Dùng cho: TKKT §3 kiến trúc ứng dụng, NCKT §6.5 thiết kế PM nội bộ.
+
+  Schema:
+    title:     str
+    subtitle:  str (optional)
+    actors:    list of {label, color}    — strip top
+    bands:     list of {                 — band content (functional grouping)
+      name:    str
+      color:   str (default '#DEEBF7')
+      border:  str (default '#2E75B6')
+      modules: list of {no: int, name: str}
+      width_ratio: float (default 1.0)   — relative width
+    }
+    databases: list of {label, color}    — bottom row of CSDL (cylinder)
+    integration_bar: str (optional)      — horizontal bar text "17. Phần mềm Quản lý dịch vụ kết nối..."
+    bottom_links: list of {label, color} (optional)  — LGSP, NDXP, TTHC, etc.
+    footer:    str (optional)
+-#}
+{%- set subtitle        = subtitle        | default('', true) -%}
+{%- set actors          = actors          | default([], true) -%}
+{%- set bands           = bands           | default([], true) -%}
+{%- set databases       = databases       | default([], true) -%}
+{%- set integration_bar = integration_bar | default('', true) -%}
+{%- set bottom_links    = bottom_links    | default([], true) -%}
+{%- set footer          = footer          | default('', true) -%}
+
+{%- set W           = 1400 -%}
+{%- set MARGIN      = 30 -%}
+{%- set TITLE_H     = 60 -%}
+{%- set SUBTITLE_H  = 26 if subtitle else 0 -%}
+{%- set ACTOR_H     = 70 if actors else 0 -%}
+{%- set BANDS_H     = 280 -%}
+{%- set INTEG_H     = 50 if integration_bar else 0 -%}
+{%- set DB_H        = 90 if databases else 0 -%}
+{%- set BOTTOM_H    = 70 if bottom_links else 0 -%}
+{%- set FOOTER_H    = 40 if footer else 0 -%}
+{%- set GAP         = 14 -%}
+
+{%- set H = MARGIN + TITLE_H + SUBTITLE_H + 8
+            + (ACTOR_H + GAP if actors else 0)
+            + BANDS_H + GAP
+            + (INTEG_H + GAP if integration_bar else 0)
+            + (DB_H + GAP if databases else 0)
+            + (BOTTOM_H + GAP if bottom_links else 0)
+            + (FOOTER_H if footer else 0)
+            + MARGIN -%}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}"
+     font-family="Times New Roman, serif">
+  <defs>
+    <style>
+      .title       { font-size: 22px; font-weight: bold; fill: #1F3864; }
+      .subtitle    { font-size: 13px; fill: #404040; font-style: italic; }
+      .band-name   { font-size: 13px; font-weight: bold; fill: #1F3864; }
+      .module      { font-size: 11px; fill: #1F3864; }
+      .module-no   { font-size: 11px; font-weight: bold; fill: #C00000; }
+      .actor-label { font-size: 11px; fill: #1F3864; }
+      .strip-label { font-size: 13px; font-weight: bold; fill: #1F3864; }
+      .integ       { font-size: 13px; font-weight: bold; fill: #1F3864; }
+      .db-label    { font-size: 12px; fill: #1F3864; }
+      .footer      { font-size: 12px; fill: #404040; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="{{ W }}" height="{{ H }}" fill="white"/>
+
+  <!-- Title -->
+  <text class="title" x="{{ W // 2 }}" y="{{ MARGIN + 28 }}" text-anchor="middle">{{ title }}</text>
+  {%- if subtitle %}
+  <text class="subtitle" x="{{ W // 2 }}" y="{{ MARGIN + 50 }}" text-anchor="middle">{{ subtitle }}</text>
+  {%- endif %}
+
+  {%- set y_cursor = MARGIN + TITLE_H + SUBTITLE_H + 8 %}
+
+  <!-- Actor strip -->
+  {%- if actors %}
+    <rect x="{{ MARGIN }}" y="{{ y_cursor }}" width="{{ W - 2*MARGIN }}" height="{{ ACTOR_H }}"
+          fill="#F2F2F2" stroke="#1F3864" stroke-width="1.2" rx="6" ry="6" stroke-dasharray="4,3"/>
+    <text class="strip-label" x="{{ MARGIN + 14 }}" y="{{ y_cursor + 18 }}">Người dùng &amp; quản trị</text>
+    {%- set n = actors|length %}
+    {%- set strip_x = MARGIN + 220 %}
+    {%- set strip_w = (W - MARGIN - 14) - strip_x %}
+    {%- set actor_w = (strip_w - (n-1)*10) // n if n > 0 else 100 %}
+    {%- for a in actors %}
+      {%- set i = loop.index0 %}
+      {%- set ax = strip_x + i * (actor_w + 10) %}
+      {%- set ay = y_cursor + 22 %}
+    <rect x="{{ ax }}" y="{{ ay }}" width="{{ actor_w }}" height="{{ ACTOR_H - 32 }}"
+          fill="{{ a.get('color', '#DEEBF7') }}" stroke="#2E75B6" stroke-width="1" rx="4" ry="4"/>
+    <text class="actor-label" x="{{ ax + actor_w // 2 }}" y="{{ ay + (ACTOR_H - 32) // 2 + 4 }}" text-anchor="middle">{{ a.label }}</text>
+    {%- endfor %}
+    {%- set y_cursor = y_cursor + ACTOR_H + GAP %}
+  {%- endif %}
+
+  <!-- Functional bands (vertical columns) -->
+  {%- if bands %}
+    {%- set total_ratio = bands | sum(attribute='width_ratio', start=0) -%}
+    {%- if total_ratio == 0 %}{% set total_ratio = bands|length %}{% endif -%}
+    {%- set bands_total_w = W - 2*MARGIN -%}
+    {%- set band_gap = 10 -%}
+    {%- set usable_w = bands_total_w - (bands|length - 1) * band_gap -%}
+    {%- set _ns = namespace(x = MARGIN) -%}
+    {%- for b in bands -%}
+      {%- set ratio = b.get('width_ratio', 1.0) | float -%}
+      {%- set band_w = (usable_w * ratio / total_ratio) | int -%}
+      <g>
+        <rect x="{{ _ns.x }}" y="{{ y_cursor }}" width="{{ band_w }}" height="{{ BANDS_H }}"
+              fill="{{ b.get('color', '#DEEBF7') }}" stroke="{{ b.get('border', '#2E75B6') }}"
+              stroke-width="1.5" rx="6" ry="6"/>
+        <text class="band-name" x="{{ _ns.x + band_w // 2 }}" y="{{ y_cursor + 20 }}" text-anchor="middle">{{ b.name }}</text>
+
+        {%- set mods = b.get('modules', []) -%}
+        {%- set m_count = mods | length -%}
+        {%- if m_count > 0 -%}
+          {%- set inner_x = _ns.x + 10 -%}
+          {%- set inner_y = y_cursor + 34 -%}
+          {%- set inner_w = band_w - 20 -%}
+          {%- set inner_h = BANDS_H - 46 -%}
+          {%- set rows = m_count -%}
+          {%- set m_h = (inner_h - (rows-1)*6) // rows if rows > 0 else 30 -%}
+          {%- if m_h > 38 %}{% set m_h = 38 %}{% endif -%}
+          {%- for m in mods -%}
+            {%- set i = loop.index0 -%}
+            {%- set my = inner_y + i * (m_h + 6) -%}
+        <rect x="{{ inner_x }}" y="{{ my }}" width="{{ inner_w }}" height="{{ m_h }}"
+              fill="white" stroke="{{ b.get('border', '#2E75B6') }}" stroke-width="1" rx="3" ry="3"/>
+        <text class="module-no" x="{{ inner_x + 8 }}" y="{{ my + m_h // 2 + 4 }}">{{ m.no }}.</text>
+        <text class="module" x="{{ inner_x + 28 }}" y="{{ my + m_h // 2 + 4 }}">{{ m.name }}</text>
+          {%- endfor -%}
+        {%- endif -%}
+      </g>
+      {%- set _ns.x = _ns.x + band_w + band_gap -%}
+    {%- endfor -%}
+    {%- set y_cursor = y_cursor + BANDS_H + GAP %}
+  {%- endif %}
+
+  <!-- Integration bar -->
+  {%- if integration_bar %}
+    <rect x="{{ MARGIN }}" y="{{ y_cursor }}" width="{{ W - 2*MARGIN }}" height="{{ INTEG_H }}"
+          fill="#FFF2CC" stroke="#BF9000" stroke-width="1.5" rx="6" ry="6"/>
+    <text class="integ" x="{{ W // 2 }}" y="{{ y_cursor + INTEG_H // 2 + 4 }}" text-anchor="middle">{{ integration_bar }}</text>
+    {%- set y_cursor = y_cursor + INTEG_H + GAP %}
+  {%- endif %}
+
+  <!-- Database row (cylinders) -->
+  {%- if databases %}
+    {%- set n = databases | length %}
+    {%- set db_total_w = W - 2*MARGIN %}
+    {%- set db_gap = 14 %}
+    {%- set db_w = (db_total_w - (n-1)*db_gap) // n %}
+    {%- for db in databases %}
+      {%- set i = loop.index0 %}
+      {%- set dx = MARGIN + i * (db_w + db_gap) %}
+      {%- set dy = y_cursor %}
+      {%- set ery = 12 %}
+    <ellipse cx="{{ dx + db_w // 2 }}" cy="{{ dy + ery }}" rx="{{ db_w // 2 }}" ry="{{ ery }}"
+             fill="{{ db.get('color', '#FBE5D5') }}" stroke="#C55A11" stroke-width="1.2"/>
+    <rect x="{{ dx }}" y="{{ dy + ery }}" width="{{ db_w }}" height="{{ DB_H - 2*ery }}"
+          fill="{{ db.get('color', '#FBE5D5') }}" stroke="#C55A11" stroke-width="1.2"/>
+    <line x1="{{ dx }}" y1="{{ dy + ery }}" x2="{{ dx }}" y2="{{ dy + DB_H - ery }}" stroke="#C55A11" stroke-width="1.2"/>
+    <line x1="{{ dx + db_w }}" y1="{{ dy + ery }}" x2="{{ dx + db_w }}" y2="{{ dy + DB_H - ery }}" stroke="#C55A11" stroke-width="1.2"/>
+    <ellipse cx="{{ dx + db_w // 2 }}" cy="{{ dy + DB_H - ery }}" rx="{{ db_w // 2 }}" ry="{{ ery }}"
+             fill="{{ db.get('color', '#FBE5D5') }}" stroke="#C55A11" stroke-width="1.2"/>
+    <text class="db-label" x="{{ dx + db_w // 2 }}" y="{{ dy + DB_H // 2 + 4 }}" text-anchor="middle">{{ db.label }}</text>
+    {%- endfor %}
+    {%- set y_cursor = y_cursor + DB_H + GAP %}
+  {%- endif %}
+
+  <!-- Bottom links (LGSP, NDXP, TTHC) -->
+  {%- if bottom_links %}
+    {%- set n = bottom_links | length %}
+    {%- set bl_total_w = W - 2*MARGIN %}
+    {%- set bl_gap = 14 %}
+    {%- set bl_w = (bl_total_w - (n-1)*bl_gap) // n %}
+    {%- for bl in bottom_links %}
+      {%- set i = loop.index0 %}
+      {%- set blx = MARGIN + i * (bl_w + bl_gap) %}
+    <rect x="{{ blx }}" y="{{ y_cursor }}" width="{{ bl_w }}" height="{{ BOTTOM_H }}"
+          fill="{{ bl.get('color', '#E2EFDA') }}" stroke="#548235" stroke-width="1.5" rx="6" ry="6"/>
+    <text class="strip-label" x="{{ blx + bl_w // 2 }}" y="{{ y_cursor + BOTTOM_H // 2 + 4 }}" text-anchor="middle">{{ bl.label }}</text>
+    {%- endfor %}
+    {%- set y_cursor = y_cursor + BOTTOM_H + GAP %}
+  {%- endif %}
+
+  <!-- Footer -->
+  {%- if footer %}
+    <text class="footer" x="{{ W // 2 }}" y="{{ y_cursor + 18 }}" text-anchor="middle">{{ footer }}</text>
+  {%- endif %}
+</svg>

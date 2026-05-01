@@ -586,6 +586,21 @@ def check_diagram_quality(data: dict) -> list[str]:
                 f"Use proper shapes per diagram-quality-patterns.md §1 rule 5."
             )
 
+        # Advisory: diagram tổng thể "khung kiến trúc" / "tổng thể" / "ngữ cảnh" → recommend SVG hero
+        title_match = re.search(r"(?im)^\s*title\s+(.{0,200})", s)
+        title_text = (title_match.group(1) if title_match else "").lower()
+        overview_keywords = (
+            "khung kiến trúc", "khung kt", "kiến trúc tổng thể",
+            "tổng quát", "tổng thể", "ngữ cảnh", "context", "khung cpđt",
+        )
+        if any(kw in title_text for kw in overview_keywords):
+            warnings.append(
+                f"{prefix}: title nhận diện diagram tổng thể ('{title_text[:60]}'). "
+                f"PlantUML không vẽ được layered architecture đều full-width + cylinder bus. "
+                f"Khuyến nghị: dùng SVG hero template `kien-truc-cpdt` / `khung-kt-quoc-gia` "
+                f"thay PlantUML. Xem diagram-quality-patterns.md §13b Pattern N."
+            )
+
         # Markdown fence smell
         if "```plantuml" in low or "```uml" in low:
             warnings.append(

@@ -1,0 +1,142 @@
+{#-
+  kien-truc-cpdt.svg.j2 — Khung kiến trúc CPĐT 4.0 (layered, VN gov-grade)
+
+  Style: full-width horizontal layers + optional cylinder bus on right.
+  Phù hợp: TKKT §1, NCKT §7.1, Đề án CĐS §3 — diagram tổng thể quốc gia/ngành.
+
+  Schema (data dict):
+    title:    str — "Hình X.Y: Tên diagram"
+    subtitle: str (optional) — version / cấp ban hành
+    layers: list of {
+      name:        str    — tên tầng (ví dụ "Lớp người dùng", "Lớp ứng dụng nghiệp vụ")
+      color:       str    — hex layer fill (ví dụ "#DEEBF7")
+      border:      str    — hex border (ví dụ "#2E75B6")
+      items:       list of str — tên các block trong layer
+      item_color:  str (optional) — fill cho item box (default white)
+      item_border: str (optional) — border cho item (default = layer border)
+    }
+    bus (optional): {
+      name:   str    — "LGSP / NDXP" — text dọc cylinder
+      color:  str    — fill (default "#FFF2CC")
+      border: str    — border (default "#BF9000")
+    }
+    footer (optional): str — "Hạ tầng mạng truyền dẫn quốc gia"
+
+  Output: pure SVG, Times New Roman font, VN diacritics OK.
+-#}
+{%- set subtitle = subtitle | default('', true) -%}
+{%- set footer   = footer   | default('', true) -%}
+{%- set bus      = bus      | default(none, true) -%}
+{%- set W           = 1200 -%}
+{%- set TITLE_H     = 60 -%}
+{%- set SUBTITLE_H  = 28 if subtitle else 0 -%}
+{%- set LAYER_H     = 110 -%}
+{%- set LAYER_GAP   = 18 -%}
+{%- set FOOTER_H    = 50 if footer else 0 -%}
+{%- set BUS_W       = 110 if bus else 0 -%}
+{%- set BUS_GAP     = 20  if bus else 0 -%}
+{%- set MARGIN      = 30 -%}
+{%- set LAYERS_W    = W - 2*MARGIN - BUS_W - BUS_GAP -%}
+{%- set FOOTER_GAP = 14 if footer else 0 -%}
+{%- set H = TITLE_H + SUBTITLE_H + 2*MARGIN + (layers|length)*LAYER_H + ((layers|length)-1)*LAYER_GAP + FOOTER_H + FOOTER_GAP -%}
+{%- set LAYERS_TOP  = MARGIN + TITLE_H + SUBTITLE_H + 12 -%}
+{%- set BUS_TOP     = LAYERS_TOP -%}
+{%- set BUS_H       = (layers|length)*LAYER_H + ((layers|length)-1)*LAYER_GAP -%}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ W }}" height="{{ H }}" viewBox="0 0 {{ W }} {{ H }}"
+     font-family="Times New Roman, serif">
+  <defs>
+    <style>
+      .title    { font-size: 22px; font-weight: bold; fill: #1F3864; }
+      .subtitle { font-size: 13px; fill: #404040; font-style: italic; }
+      .layer-name { font-size: 14px; font-weight: bold; fill: #1F3864; }
+      .item     { font-size: 12px; fill: #1F3864; }
+      .bus-label{ font-size: 14px; font-weight: bold; fill: #1F3864; }
+      .footer   { font-size: 13px; font-weight: bold; fill: #404040; }
+    </style>
+    <linearGradient id="busGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="{{ bus.get('color',  '#FFF2CC') if bus else '#FFF2CC' }}"/>
+      <stop offset="100%" stop-color="{{ bus.get('color2', '#FFE699') if bus else '#FFE699' }}"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="{{ W }}" height="{{ H }}" fill="white"/>
+
+  <!-- Title -->
+  <text class="title" x="{{ W // 2 }}" y="{{ MARGIN + 28 }}" text-anchor="middle">{{ title }}</text>
+  {%- if subtitle %}
+  <text class="subtitle" x="{{ W // 2 }}" y="{{ MARGIN + 50 }}" text-anchor="middle">{{ subtitle }}</text>
+  {%- endif %}
+
+  <!-- Layers -->
+  {%- for layer in layers %}
+    {%- set y = LAYERS_TOP + loop.index0 * (LAYER_H + LAYER_GAP) %}
+    <g>
+      <!-- Layer band -->
+      <rect x="{{ MARGIN }}" y="{{ y }}" width="{{ LAYERS_W }}" height="{{ LAYER_H }}"
+            fill="{{ layer.color }}" stroke="{{ layer.border }}" stroke-width="1.5" rx="6" ry="6"/>
+      <!-- Layer name (left side, vertical optional but here horizontal at top-left) -->
+      <text class="layer-name" x="{{ MARGIN + 14 }}" y="{{ y + 22 }}">{{ layer.name }}</text>
+
+      <!-- Items -->
+      {%- set n = layer['items']|length %}
+      {%- if n > 0 %}
+        {%- set inner_x = MARGIN + 14 %}
+        {%- set inner_y = y + 36 %}
+        {%- set inner_w = LAYERS_W - 28 %}
+        {%- set inner_h = LAYER_H - 50 %}
+        {%- set cols = (n if n <= 6 else 6) %}
+        {%- set rows = ((n + cols - 1) // cols) %}
+        {%- set item_w = (inner_w - (cols-1)*10) // cols %}
+        {%- set item_h = (inner_h - (rows-1)*8) // rows if rows > 0 else inner_h %}
+        {%- for item in layer['items'] %}
+          {%- set i = loop.index0 %}
+          {%- set col = i % cols %}
+          {%- set row = i // cols %}
+          {%- set ix = inner_x + col * (item_w + 10) %}
+          {%- set iy = inner_y + row * (item_h + 8) %}
+        <rect x="{{ ix }}" y="{{ iy }}" width="{{ item_w }}" height="{{ item_h }}"
+              fill="{{ layer.get('item_color', 'white') }}"
+              stroke="{{ layer.get('item_border', layer.border) }}" stroke-width="1" rx="4" ry="4"/>
+        <text class="item" x="{{ ix + item_w // 2 }}" y="{{ iy + item_h // 2 + 4 }}" text-anchor="middle">{{ item }}</text>
+        {%- endfor %}
+      {%- endif %}
+    </g>
+  {%- endfor %}
+
+  <!-- Bus cylinder (right side, spans all layers) -->
+  {%- if bus %}
+    {%- set bx = W - MARGIN - BUS_W %}
+    {%- set by = BUS_TOP %}
+    {%- set bw = BUS_W %}
+    {%- set bh = BUS_H %}
+    {%- set ellipseRy = 16 %}
+    <!-- Top ellipse -->
+    <ellipse cx="{{ bx + bw // 2 }}" cy="{{ by + ellipseRy }}" rx="{{ bw // 2 }}" ry="{{ ellipseRy }}"
+             fill="url(#busGrad)" stroke="{{ bus.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <!-- Body -->
+    <rect x="{{ bx }}" y="{{ by + ellipseRy }}" width="{{ bw }}" height="{{ bh - 2*ellipseRy }}"
+          fill="url(#busGrad)" stroke="{{ bus.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <!-- Side lines top to bottom (overlay) -->
+    <line x1="{{ bx }}" y1="{{ by + ellipseRy }}" x2="{{ bx }}" y2="{{ by + bh - ellipseRy }}"
+          stroke="{{ bus.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <line x1="{{ bx + bw }}" y1="{{ by + ellipseRy }}" x2="{{ bx + bw }}" y2="{{ by + bh - ellipseRy }}"
+          stroke="{{ bus.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <!-- Bottom ellipse (full, visible front half darker via fill) -->
+    <ellipse cx="{{ bx + bw // 2 }}" cy="{{ by + bh - ellipseRy }}" rx="{{ bw // 2 }}" ry="{{ ellipseRy }}"
+             fill="url(#busGrad)" stroke="{{ bus.get('border', '#BF9000') }}" stroke-width="1.5"/>
+    <!-- Bus label vertical (rotated) -->
+    <text class="bus-label" x="{{ bx + bw // 2 }}" y="{{ by + bh // 2 }}" text-anchor="middle"
+          transform="rotate(-90 {{ bx + bw // 2 }} {{ by + bh // 2 }})">
+      {{ bus.name }}
+    </text>
+  {%- endif %}
+
+  <!-- Footer (network bus) -->
+  {%- if footer %}
+    {%- set fy = LAYERS_TOP + (layers|length)*LAYER_H + ((layers|length)-1)*LAYER_GAP + 14 %}
+    <rect x="{{ MARGIN }}" y="{{ fy }}" width="{{ W - 2*MARGIN }}" height="{{ FOOTER_H - 8 }}"
+          fill="#F2F2F2" stroke="#404040" stroke-width="1.2" rx="4" ry="4"/>
+    <text class="footer" x="{{ W // 2 }}" y="{{ fy + (FOOTER_H - 8) // 2 + 5 }}" text-anchor="middle">{{ footer }}</text>
+  {%- endif %}
+</svg>

@@ -33,6 +33,7 @@ dependencies = [
     "Pillow>=10.0.0",
     "rich>=13.0.0",                # Pretty CLI output
     "jinja2>=3.1.0",
+    "cairosvg>=2.7.0",             # SVG hero templates → PNG (govt-grade layered diagrams)
     "mcp>=1.0.0",                  # MCP server SDK
     "fastapi>=0.110.0",            # HTTP job API
     "python-multipart>=0.0.9",     # multipart/form-data for /uploads

@@ -121,6 +121,30 @@ def _render_svg_template(template_name: str, data: dict) -> str:
     )
 
 
+def _svg_to_png_cairosvg(svg_text: str, png_path: Path, output_width: int = 1600) -> None:
+    """Convert SVG → PNG via cairosvg (libcairo native, fast + stable for layered hero templates).
+
+    Preferred over Playwright for hero templates because:
+      - 5-10× faster (no browser startup)
+      - No headless Chromium dependency for purely declarative SVG
+      - Deterministic pixel output (good for diff testing)
+    """
+    import cairosvg
+    cairosvg.svg2png(
+        bytestring=svg_text.encode("utf-8"),
+        write_to=str(png_path),
+        output_width=output_width,
+    )
+
+
+def _check_cairosvg() -> bool:
+    try:
+        import cairosvg  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 def _svg_to_png_playwright(svg_text: str, png_path: Path, scale: float = 2.0) -> None:
     """Convert SVG source → PNG via headless Chromium (pixel-perfect)."""
     from playwright.sync_api import sync_playwright
@@ -171,20 +195,35 @@ def _render_svg_hero(
     svg_path = out_dir / f"{key}.svg"
     svg_path.write_text(svg_text, encoding="utf-8")
 
-    # Convert SVG → PNG
+    # Convert SVG → PNG. Prefer cairosvg (fast, native libcairo); fall back to playwright.
     png_path = out_dir / f"{key}.png"
-    if not report.playwright_available:
+    converters: list[tuple[str, callable]] = []
+    if _check_cairosvg():
+        converters.append(("cairosvg", lambda: _svg_to_png_cairosvg(svg_text, png_path)))
+    if report.playwright_available:
+        converters.append(("playwright", lambda: _svg_to_png_playwright(svg_text, png_path)))
+
+    if not converters:
         report.failed.append({
             "key": key, "type": "svg",
-            "error": "Playwright not installed — SVG saved but PNG not rendered. "
-                     "Install: pip install playwright && playwright install chromium",
+            "error": "No SVG→PNG converter available. Install: pip install cairosvg "
+                     "(preferred) or pip install playwright && playwright install chromium.",
         })
         return None
 
-    try:
-        _svg_to_png_playwright(svg_text, png_path)
-    except Exception as e:
-        report.failed.append({"key": key, "type": "svg", "error": f"SVG→PNG: {type(e).__name__}: {e}"})
+    last_err: Exception | None = None
+    for name, fn in converters:
+        try:
+            fn()
+            break
+        except Exception as e:  # noqa: BLE001 — converters raise heterogeneous errors
+            last_err = e
+            continue
+    else:
+        report.failed.append({
+            "key": key, "type": "svg",
+            "error": f"SVG→PNG all converters failed: {type(last_err).__name__}: {last_err}",
+        })
         return None
 
     report.rendered.append({
