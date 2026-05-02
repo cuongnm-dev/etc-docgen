@@ -90,7 +90,7 @@ def init(
             f"[green]✓[/green] Created [cyan]{config_file}[/cyan]\n\n"
             f"Next steps:\n"
             f"  1. Edit [cyan]etc-platform.yaml[/cyan] with your project info\n"
-            f"  2. Set credentials: [yellow]export DOCGEN_USERNAME=...[/yellow]\n"
+            f"  2. Set credentials: [yellow]export ETC_PLATFORM_USERNAME=...[/yellow]\n"
             f"  3. Run: [cyan]etc-platform generate[/cyan]",
             title="Config created",
         )

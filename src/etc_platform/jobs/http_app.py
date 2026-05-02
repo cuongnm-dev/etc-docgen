@@ -46,11 +46,13 @@ from fastapi import (
     Form,
     Header,
     HTTPException,
-    Path as PathParam,
     Request,
     Response,
     UploadFile,
     status,
+)
+from fastapi import (
+    Path as PathParam,
 )
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
@@ -59,19 +61,18 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from etc_platform.jobs.models import (
     DEFAULT_WORKSPACE_MAX_BYTES,
     DEFAULT_WORKSPACE_MAX_FILES,
+    VALID_TARGETS,
     Job,
     JobError,
-    JobStatus,
     JobValidationError,
     UploadTooLarge,
-    VALID_TARGETS,
     WorkspaceTooLarge,
 )
 from etc_platform.jobs.runner import JobRunner, RunnerConfig
 from etc_platform.jobs.storage import (
     DEFAULT_JOB_TTL,
-    DEFAULT_UPLOAD_TTL,
     DEFAULT_MAX_UPLOAD_BYTES,
+    DEFAULT_UPLOAD_TTL,
     JobStore,
 )
 
@@ -114,18 +115,16 @@ class HttpSettings(BaseModel):
 
         cors = _env("ETC_PLATFORM_CORS_ORIGINS", "ETC_DOCGEN_CORS_ORIGINS")
         return cls(
-            storage_root=_env("ETC_PLATFORM_JOBS_ROOT", "ETC_DOCGEN_JOBS_ROOT", default="/data/_jobs"),
+            storage_root=_env(
+                "ETC_PLATFORM_JOBS_ROOT", "ETC_DOCGEN_JOBS_ROOT", default="/data/_jobs"
+            ),
             api_key=_env("ETC_PLATFORM_API_KEY", "ETC_DOCGEN_API_KEY") or None,
             upload_ttl_seconds=_int(
                 "ETC_PLATFORM_UPLOAD_TTL_S", int(DEFAULT_UPLOAD_TTL.total_seconds())
             ),
-            job_ttl_seconds=_int(
-                "ETC_PLATFORM_JOB_TTL_S", int(DEFAULT_JOB_TTL.total_seconds())
-            ),
+            job_ttl_seconds=_int("ETC_PLATFORM_JOB_TTL_S", int(DEFAULT_JOB_TTL.total_seconds())),
             workspace_ttl_seconds=_int("ETC_PLATFORM_WORKSPACE_TTL_S", 24 * 3600),
-            max_upload_bytes=_int(
-                "ETC_PLATFORM_MAX_UPLOAD_BYTES", DEFAULT_MAX_UPLOAD_BYTES
-            ),
+            max_upload_bytes=_int("ETC_PLATFORM_MAX_UPLOAD_BYTES", DEFAULT_MAX_UPLOAD_BYTES),
             max_workspace_bytes=_int(
                 "ETC_PLATFORM_MAX_WORKSPACE_BYTES", DEFAULT_WORKSPACE_MAX_BYTES
             ),
@@ -244,6 +243,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings: HttpSettings = app.state.settings
 
     from pathlib import Path
+
     storage_root = Path(settings.storage_root)
     storage_root.mkdir(parents=True, exist_ok=True)
 
@@ -265,6 +265,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Publish singletons so MCP tools (running in the same process) can share state.
     from etc_platform.jobs.shared import reset_shared, set_shared
+
     set_shared(store=store, runner=runner)
 
     log.info(
@@ -313,6 +314,7 @@ def create_app(settings: HttpSettings | None = None) -> FastAPI:
 
     if settings.cors_origins:
         from fastapi.middleware.cors import CORSMiddleware
+
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.cors_origins,
@@ -391,9 +393,7 @@ def create_app(settings: HttpSettings | None = None) -> FastAPI:
                 break
             total += len(chunk)
             if total > max_bytes:
-                raise UploadTooLarge(
-                    f"Upload exceeds {max_bytes} bytes"
-                )
+                raise UploadTooLarge(f"Upload exceeds {max_bytes} bytes")
             chunks.append(chunk)
         data = b"".join(chunks)
         upload = await store.create_upload(
@@ -597,7 +597,7 @@ def create_app(settings: HttpSettings | None = None) -> FastAPI:
                         "message": f"Form key {key!r} must match files[<path>].",
                     },
                 )
-            ws_path = key[len("files["):-1]
+            ws_path = key[len("files[") : -1]
             if not hasattr(value, "read"):
                 raise HTTPException(
                     status_code=400,

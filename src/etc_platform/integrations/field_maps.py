@@ -17,16 +17,16 @@ from __future__ import annotations
 # Routing: which doc types use etc-platform vs Pandoc
 # ──────────────────────────────────────────────────────────────────
 
-DOCGEN_DOC_TYPES = {"tkcs", "tkct", "tkkt", "hdsd", "xlsx", "nckt"}
+ETC_PLATFORM_DOC_TYPES = {"tkcs", "tkct", "tkkt", "hdsd", "xlsx", "nckt"}
 """Doc types rendered by etc-platform (has templates)."""
 
 PANDOC_DOC_TYPES = {"de-an-cds", "hsmt", "hsdt", "du-toan", "bao-cao-ct", "thuyet-minh"}
 """Doc types rendered by Pandoc (no etc-platform templates)."""
 
 
-def uses_docgen(doc_type: str) -> bool:
+def uses_etc_platform(doc_type: str) -> bool:
     """Check if a doc type should use etc-platform for rendering."""
-    return doc_type.lower().replace("-", "_") in DOCGEN_DOC_TYPES
+    return doc_type.lower().replace("-", "_") in ETC_PLATFORM_DOC_TYPES
 
 
 # ──────────────────────────────────────────────────────────────────

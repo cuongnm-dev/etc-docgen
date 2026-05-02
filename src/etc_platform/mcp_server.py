@@ -994,10 +994,10 @@ def field_map(doc_type: str) -> str:
     from etc_platform.integrations.field_maps import (
         get_field_map,
         get_writer_prompt_context,
-        uses_docgen,
+        uses_etc_platform,
     )
 
-    if not uses_docgen(doc_type):
+    if not uses_etc_platform(doc_type):
         return json.dumps(
             {
                 "doc_type": doc_type,
@@ -1550,7 +1550,7 @@ def template_registry_load(namespace: str, template_id: str) -> dict:
     """Load a template from the registry by namespace + ID.
 
     Replaces local `ref-*.md` reads in new-workspace skill.
-    Renamed from `template_load` to avoid collision with docgen's template helpers.
+    Renamed from `template_load` to avoid collision with render-side template helpers.
     """
     return template_load_impl(namespace=namespace, template_id=template_id)
 

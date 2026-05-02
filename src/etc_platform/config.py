@@ -68,10 +68,10 @@ class AuthConfig(BaseModel):
     base_url: str = Field(description="Base URL for Playwright capture")
     login_url: str = "/login"
     username_env: str = Field(
-        default="DOCGEN_USERNAME",
+        default="ETC_PLATFORM_USERNAME",
         description="Env var containing username (never commit credentials)",
     )
-    password_env: str = "DOCGEN_PASSWORD"
+    password_env: str = "ETC_PLATFORM_PASSWORD"
     mode: Literal["auto", "recording", "unauthenticated"] = "auto"
     post_login_url: str | None = None
 
@@ -238,8 +238,8 @@ auth:
   base_url: "http://localhost:3000"
   login_url: "/login"
   # Credentials from env vars — never commit:
-  username_env: "DOCGEN_USERNAME"
-  password_env: "DOCGEN_PASSWORD"
+  username_env: "ETC_PLATFORM_USERNAME"
+  password_env: "ETC_PLATFORM_PASSWORD"
   mode: auto                           # auto | recording | unauthenticated
 
 capture:

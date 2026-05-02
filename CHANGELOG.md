@@ -14,7 +14,7 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Workspace pattern** — content-addressed multi-file bundles for render jobs.
   - `Workspace`, `WorkspacePart` dataclasses with manifest sha256 + path validation
   - `JobStore.create_workspace / get_workspace / open_workspace_file /
- materialize_workspace / list_workspaces / delete_workspace / lock_workspace`
+materialize_workspace / list_workspaces / delete_workspace / lock_workspace`
   - HTTP endpoints: `POST /workspaces`, `GET /workspaces/{id}`, `DELETE /workspaces/{id}`
   - Form-field convention: `files[<workspace-relative-path>]=@local-file`
   - Content-addressed dedup: same content → same `workspace_id` (TTL refreshed)
