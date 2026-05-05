@@ -106,10 +106,10 @@ def parse_feature_req_scope(feature_req: str) -> dict[str, list[str]]:
 
 
 def slugify(name: str) -> str:
-    """Convert module/feature name to ASCII kebab-case slug.
+    """Convert name to ASCII kebab-case slug.
 
-    Strips Vietnamese diacritics via NFKD decomposition.
-    Handles 'đ' / 'Đ' explicitly (no decomposition rule for it).
+    Strips Vietnamese diacritics via NFKD decomposition. Use only as
+    last-resort fallback when no explicit slug or English name available.
     Truncates to 30 chars + strips trailing hyphen.
     """
     import unicodedata
@@ -124,6 +124,32 @@ def slugify(name: str) -> str:
     s = re.sub(r"-+", "-", s)
     s = s[:30].rstrip("-")
     return s or "default"
+
+
+def derive_slug(entity: dict, fallback_name: str = "") -> tuple[str, str]:
+    """Derive ASCII slug from entity dict using strict precedence.
+
+    Precedence (per CD-22 — slug must be English/canonical):
+        1. entity.slug             (explicit, used as-is — schema-validated)
+        2. entity.name_en          (English name → slugify)
+        3. entity.canonical_name   (canonical English alias → slugify)
+        4. fallback_name           (e.g. ID → slugify, last resort)
+        5. slugify(entity.name)    (Vietnamese transliteration — WARN)
+
+    Returns: (slug, source) where source ∈ {explicit, name_en, canonical_name,
+    fallback_id, transliteration}.
+
+    Pattern check: ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ — caller verifies via verify tool.
+    """
+    if entity.get("slug"):
+        return slugify(entity["slug"]), "explicit"
+    if entity.get("name_en"):
+        return slugify(entity["name_en"]), "name_en"
+    if entity.get("canonical_name"):
+        return slugify(entity["canonical_name"]), "canonical_name"
+    if fallback_name:
+        return slugify(fallback_name), "fallback_id"
+    return slugify(entity.get("name", "default")), "transliteration"
 
 
 # ---------------------------------------------------------------------------
@@ -157,6 +183,7 @@ def build_migration_plan(workspace: Path) -> dict[str, Any]:
     legacy_with_num.sort(key=lambda x: x[0])
 
     counter = 1
+    slug_warnings: list[dict[str, str]] = []
     for _num, folder, old_slug in legacy_with_num:
         legacy_id = folder.name.split("-", 2)[0] + "-" + folder.name.split("-", 2)[1]
         state_md = folder / "_state.md"
@@ -171,7 +198,19 @@ def build_migration_plan(workspace: Path) -> dict[str, Any]:
             continue
 
         feature_name = fm.get("feature-name", legacy_id)
-        slug = old_slug or slugify(feature_name)
+        # Derive slug per CD-22 strict precedence
+        if old_slug:
+            slug, slug_source = old_slug, "preserved"
+        else:
+            # Try _state.md frontmatter for slug/name_en/canonical_name
+            slug_data = {
+                "slug": fm.get("slug"),
+                "name_en": fm.get("name-en") or fm.get("feature-name-en"),
+                "name": feature_name,
+            }
+            slug, slug_source = derive_slug(slug_data, fallback_name=feature_name)
+        if slug_source == "transliteration":
+            slug_warnings.append({"id": legacy_id, "name": feature_name[:60], "slug": slug})
 
         new_module_id = f"M-{counter:03d}"
         counter += 1
@@ -196,6 +235,7 @@ def build_migration_plan(workspace: Path) -> dict[str, Any]:
         "renames": plan_renames,
         "feature_ids_per_module": feature_ids_per_module,
         "unmigratable": unmigratable,
+        "slug_warnings": slug_warnings,
     }
 
 
@@ -633,7 +673,8 @@ def create_feature_subfolders(workspace: Path, plan: dict[str, Any]) -> tuple[in
         for fid in feature_ids:
             feat_data = feat_by_id.get(fid, {})
             feat_name = feat_data.get("name", fid)
-            feat_slug = slugify(feat_name)
+            # CD-22 precedence: explicit slug > name_en > name (transliterate)
+            feat_slug, slug_source = derive_slug(feat_data, fallback_name=fid)
             feat_dir = features_root / f"{fid}-{feat_slug}"
             if feat_dir.exists():
                 continue
@@ -759,12 +800,165 @@ def cleanup_legacy_artifacts(workspace: Path) -> list[str]:
                 cleaned.append("docs/features/ (empty)")
         except OSError:
             pass
+    # Old docs/source/ (renamed to docs/inputs/ per CD-22 D5)
+    old_source = workspace / "docs" / "source"
+    if old_source.exists():
+        try:
+            entries = list(old_source.iterdir())
+            inputs_dir = workspace / "docs" / "inputs"
+            inputs_dir.mkdir(parents=True, exist_ok=True)
+            # Move contents to inputs/
+            for entry in entries:
+                target = inputs_dir / entry.name
+                if not target.exists():
+                    entry.rename(target)
+            # Remove if now empty
+            if not list(old_source.iterdir()):
+                old_source.rmdir()
+                cleaned.append("docs/source/ -> docs/inputs/ (CD-22 D5 rename)")
+        except OSError as exc:
+            cleaned.append(f"docs/source/ rename FAILED: {exc}")
     # Old root-level feature-map.yaml (now at docs/intel/feature-map.yaml)
     old_map = workspace / "docs" / "feature-map.yaml"
     if old_map.exists():
         old_map.unlink()
         cleaned.append("docs/feature-map.yaml (moved to docs/intel/)")
     return cleaned
+
+
+# ---------------------------------------------------------------------------
+# Phase 4: workspace-level CD-22 polish + garbage collection
+# ---------------------------------------------------------------------------
+
+
+def scaffold_workspace_files(workspace: Path, repo_type: str = "mono") -> list[str]:
+    """Create CD-22 required workspace-level files if missing.
+
+    Pre-existing AGENTS.md / .gitignore preserved. Only creates missing.
+    """
+    created: list[str] = []
+
+    # CLAUDE.md
+    claude_md = workspace / "CLAUDE.md"
+    if not claude_md.exists():
+        claude_md.write_text(
+            f"# {workspace.name}\n\n"
+            "## Project context\n\n"
+            "(Populated during ba/sa stages; see docs/intel/business-context.json for canonical brief.)\n\n"
+            "## SDLC structure\n\n"
+            "Per ADR-003 + CLAUDE.md CD-22: SDLC artifacts under `docs/modules/M-NNN-{slug}/`.\n"
+            "Refer to `docs/intel/module-catalog.json` and `docs/intel/feature-catalog.json` as canonical sources.\n",
+            encoding="utf-8",
+        )
+        created.append("CLAUDE.md")
+
+    # .editorconfig
+    ec = workspace / ".editorconfig"
+    if not ec.exists():
+        ec.write_text(
+            "root = true\n\n"
+            "[*]\n"
+            "charset = utf-8\n"
+            "end_of_line = lf\n"
+            "indent_style = space\n"
+            "indent_size = 2\n"
+            "insert_final_newline = true\n"
+            "trim_trailing_whitespace = true\n\n"
+            "[*.md]\n"
+            "trim_trailing_whitespace = false\n\n"
+            "[Makefile]\n"
+            "indent_style = tab\n\n"
+            "[*.go]\n"
+            "indent_style = tab\n",
+            encoding="utf-8",
+        )
+        created.append(".editorconfig")
+
+    # docker-compose.yml + .env.example (mono repos only)
+    if repo_type == "mono":
+        compose = workspace / "docker-compose.yml"
+        if not compose.exists():
+            compose.write_text(
+                "# Workspace docker-compose stub — services populated as scaffold_app_or_service runs.\n"
+                "version: \"3.8\"\n\n"
+                "services: {}\n",
+                encoding="utf-8",
+            )
+            created.append("docker-compose.yml")
+        env_ex = workspace / ".env.example"
+        if not env_ex.exists():
+            env_ex.write_text(
+                "# Environment variable template — copy to .env and fill in.\n"
+                "# Per-service env vars added when scaffold_app_or_service is invoked.\n",
+                encoding="utf-8",
+            )
+            created.append(".env.example")
+
+    # libs/ + tools/ (CD-22 standard mono dirs; .gitkeep stub)
+    if repo_type == "mono":
+        for d in ("libs", "tools"):
+            target = workspace / d
+            if not target.exists():
+                target.mkdir(parents=True, exist_ok=True)
+                (target / ".gitkeep").write_text("", encoding="utf-8")
+                created.append(f"{d}/")
+
+    return created
+
+
+def update_gitignore(workspace: Path) -> bool:
+    """Append migration-artifact ignore patterns to .gitignore (idempotent)."""
+    gi = workspace / ".gitignore"
+    patterns = (
+        "\n# Migration backups + rollback scripts (auto-emitted by tools/migrate_features_to_modules.py)\n"
+        "docs.pre-migrate-*/\n"
+        "rollback-migrate-*.sh\n"
+    )
+    if not gi.exists():
+        gi.write_text(patterns.lstrip("\n"), encoding="utf-8")
+        return True
+    text = gi.read_text(encoding="utf-8")
+    if "docs.pre-migrate-" in text:
+        return False  # already added
+    if not text.endswith("\n"):
+        text += "\n"
+    gi.write_text(text + patterns, encoding="utf-8")
+    return True
+
+
+def cleanup_migration_artifacts(workspace: Path, keep_latest: int = 1) -> list[str]:
+    """Remove old migration backup dirs + rollback scripts.
+
+    Keeps the `keep_latest` most recent backups (sorted by name = timestamp).
+    Default keeps 1 (current safety net). Set keep_latest=0 to remove all.
+    """
+    removed: list[str] = []
+    # Find backup dirs
+    backups = sorted(
+        [p for p in workspace.iterdir() if p.is_dir() and p.name.startswith("docs.pre-migrate-")],
+        key=lambda p: p.name,
+    )
+    rollbacks = sorted(
+        [p for p in workspace.iterdir() if p.is_file() and p.name.startswith("rollback-migrate-")],
+        key=lambda p: p.name,
+    )
+
+    to_remove_dirs = backups[: max(0, len(backups) - keep_latest)]
+    to_remove_files = rollbacks[: max(0, len(rollbacks) - keep_latest)]
+
+    for d in to_remove_dirs:
+        try:
+            shutil.rmtree(d)
+            removed.append(d.name)
+        except OSError as exc:
+            removed.append(f"{d.name} FAILED: {exc}")
+    for f in to_remove_files:
+        try:
+            f.unlink()
+            removed.append(f.name)
+        except OSError as exc:
+            removed.append(f"{f.name} FAILED: {exc}")
+    return removed
 
 
 # ---------------------------------------------------------------------------
@@ -783,6 +977,17 @@ def main():
         "--backup-confirmed",
         action="store_true",
         help="Acknowledge backup will be created at docs.pre-migrate-{ts}/",
+    )
+    parser.add_argument(
+        "--cleanup-backups",
+        action="store_true",
+        help="Phase 4: garbage-collect old migration backup dirs + rollback scripts (keeps latest 1 by default)",
+    )
+    parser.add_argument(
+        "--keep-backups",
+        type=int,
+        default=1,
+        help="Number of most-recent backup dirs to retain when --cleanup-backups (default 1, set 0 to delete all)",
     )
     args = parser.parse_args()
 
@@ -893,8 +1098,39 @@ def main():
     if cleaned:
         print(f"  [OK] Legacy cleanup: {cleaned}")
 
+    # Phase 4: workspace-level CD-22 polish + garbage collection
     print()
-    print("[OK] Migration complete (Phase 1 + 2 + 3 — CD-22 compliant)!")
+    print("[*] Phase 4 (workspace-level + cleanup)...")
+    repo_type = "mono"  # detected via _is_mono heuristic; default mono for taxpayer
+    if not any((workspace / d).is_dir() for d in ("apps", "services", "libs", "packages")):
+        repo_type = "mini"
+    print(f"  Repo type detected: {repo_type}")
+
+    ws_files = scaffold_workspace_files(workspace, repo_type=repo_type)
+    if ws_files:
+        print(f"  [OK] Created CD-22 workspace files: {ws_files}")
+    else:
+        print(f"  [OK] All CD-22 workspace files already present")
+
+    if update_gitignore(workspace):
+        print(f"  [OK] .gitignore patched with migration-artifact ignore patterns")
+
+    if args.cleanup_backups:
+        keep = args.keep_backups
+        removed = cleanup_migration_artifacts(workspace, keep_latest=keep)
+        if removed:
+            print(f"  [OK] Garbage collected (kept latest {keep}): {removed}")
+        else:
+            print(f"  [OK] No old migration artifacts to clean")
+    else:
+        all_backups = sorted(
+            [p.name for p in workspace.iterdir() if p.is_dir() and p.name.startswith("docs.pre-migrate-")],
+        )
+        if len(all_backups) > 1:
+            print(f"  [info] {len(all_backups)} backup dirs accumulated. Pass --cleanup-backups to garbage-collect (keep latest 1).")
+
+    print()
+    print("[OK] Migration complete (Phase 1 + 2 + 3 + 4 — Full CD-22 compliant)!")
     print()
     print("Next steps:")
     print("  1. Review changes with `git status` (assuming workspace is git-tracked)")
