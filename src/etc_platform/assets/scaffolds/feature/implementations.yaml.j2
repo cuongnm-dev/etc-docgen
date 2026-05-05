@@ -1,0 +1,13 @@
+feature_id: {{ feature_id }}
+module_id: {{ module_id }}
+slug: {{ slug }}
+
+# Map logical feature → physical code locations.
+# Primary owner = service that implements feature's main flow.
+# Consumers = services/apps that read or invoke this feature.
+implementations:
+  primary: ""
+  consumers: []
+
+# Cross-cutting: features consumed by multiple modules
+consumed_by_modules: {{ consumed_by_modules | default([]) | tojson }}

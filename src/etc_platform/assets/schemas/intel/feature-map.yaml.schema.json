@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://etc-vn.github.io/schemas/intel/feature-map.yaml.schema.json",
+  "title": "Feature path resolver",
+  "description": "F-NNN → module-id + filesystem path. Per ADR-003 D9-4.",
+  "type": "object",
+  "required": ["schema_version", "features"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "features": {
+      "type": "object",
+      "patternProperties": {
+        "^F-[0-9]{3,}[a-z]?$": {
+          "type": "object",
+          "required": ["module", "path"],
+          "properties": {
+            "module": { "type": "string", "pattern": "^M-[0-9]{3,}$" },
+            "name": { "type": "string" },
+            "slug": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+            "path": {
+              "type": "string",
+              "description": "Relative to workspace root, e.g. docs/modules/M-001-iam/features/F-001-vneid-link"
+            },
+            "status": { "enum": ["proposed", "in-progress", "blocked", "done"] }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

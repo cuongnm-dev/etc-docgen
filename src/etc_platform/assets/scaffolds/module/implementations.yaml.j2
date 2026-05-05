@@ -1,0 +1,21 @@
+module_id: {{ module_id }}
+module_name: {{ module_name | tojson }}
+type: bounded-context
+slug: {{ slug }}
+
+# Map logical module → physical implementations across apps/services/libs.
+# Updated by `from-code` Phase 5 (auto-detect) or `dev` agent (manual).
+implementations:
+  apps: {{ apps | default([]) | tojson }}
+  services: {{ services | default([]) | tojson }}
+  libs: {{ libs | default([]) | tojson }}
+  packages: {{ packages | default([]) | tojson }}
+
+# Stakeholder roster (BA fills business-owner; tech-lead fills tech-lead)
+stakeholders:
+  business-owner: ""
+  tech-lead: ""
+  qa-lead: ""
+
+# Cross-references
+depends_on: {{ depends_on | tojson }}

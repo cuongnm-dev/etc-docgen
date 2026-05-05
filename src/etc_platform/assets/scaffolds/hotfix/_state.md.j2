@@ -1,0 +1,62 @@
+---
+feature-id: {{ hotfix_id }}
+feature-name: {{ hotfix_name | tojson }}
+pipeline-type: hotfix
+is-hotfix: true
+status: in-progress
+severity: {{ severity | default('high') }}
+created: "{{ created_at }}"
+last-updated: "{{ created_at }}"
+current-stage: tech-lead
+skipped-stages: [ba, sa, designer]
+output-mode: lean
+repo-type: {{ repo_type }}
+repo-path: "."
+docs-path: docs/hotfixes/{{ hotfix_id }}-{{ slug }}
+intel-path: docs/intel
+stages-queue: [tech-lead, dev-wave-1, qa-wave-1, reviewer]
+affected-modules: {{ affected_modules | default([]) | tojson }}
+locked-fields: []
+kpi:
+  tokens-total: 0
+  cycle-time-start: "{{ created_at }}"
+  tokens-by-stage: {}
+clarification-notes: ""
+---
+
+# Hotfix State: {{ hotfix_name }}
+
+## Patch Summary
+
+{{ patch_summary }}
+
+## Severity
+
+**{{ severity | default('high') }}** — {{ severity_rationale | default('[CẦN BỔ SUNG: lý do severity]') }}
+
+## Stage Progress
+
+| # | Stage | Agent | Verdict | Artifact | Date |
+|---|---|---|---|---|---|
+| 1 | Intake | — | Skipped (hotfix) | — | {{ created_at }} |
+| 2 | Tech-lead Plan | tech-lead | — | tech-lead/04-plan.md | — |
+| 3 | Development | dev | — | dev/05-dev-w1-*.md | — |
+| 4 | QA | qa | — | qa/07-qa-report.md | — |
+| 5 | Review | reviewer | — | reviewer/08-review-report.md | — |
+
+## Current Stage
+
+**tech-lead** — Ready to start.
+
+## Next Action
+
+Cursor: `/resume-feature {{ hotfix_id }}` để dispatch tech-lead.
+
+## Active Blockers
+
+none
+
+## Escalation Log
+
+| Date | Item | Decision |
+|---|---|---|

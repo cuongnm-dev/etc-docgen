@@ -1,0 +1,40 @@
+---
+hotfix-id: {{ hotfix_id }}
+hotfix-name: {{ hotfix_name | tojson }}
+slug: {{ slug }}
+severity: {{ severity }}
+affected-modules: {{ affected_modules | tojson }}
+created: "{{ created_at }}"
+---
+
+# Hotfix Brief: {{ hotfix_name }}
+
+## Patch Summary
+
+{{ patch_summary }}
+
+## Affected Modules
+
+{% if affected_modules -%}
+{% for mid in affected_modules -%}
+- {{ mid }}
+{% endfor %}
+{%- else -%}
+[CẦN BỔ SUNG: danh sách module bị ảnh hưởng]
+{%- endif %}
+
+## Severity Rationale
+
+{{ severity_rationale | default('[CẦN BỔ SUNG: lý do severity = ' + severity + ']') }}
+
+## Root Cause
+
+[CẦN BỔ SUNG: phân tích nguyên nhân gốc rễ]
+
+## Fix Approach
+
+[CẦN BỔ SUNG: hướng tiếp cận sửa lỗi]
+
+## Rollback Plan
+
+[CẦN BỔ SUNG: kế hoạch rollback nếu fix gây regression]

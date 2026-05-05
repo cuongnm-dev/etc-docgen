@@ -1,0 +1,64 @@
+---
+feature-id: {{ feature_id }}
+feature-name: {{ feature_name | tojson }}
+slug: {{ slug }}
+module-id: {{ module_id }}
+status: proposed
+priority: {{ priority | default('medium') }}
+created: "{{ created_at }}"
+last-updated: "{{ created_at }}"
+locked-fields: []
+consumed_by_modules: {{ consumed_by_modules | default([]) | tojson }}
+---
+
+# Feature: {{ feature_name }}
+
+## Description
+
+{{ description | default('[CẦN BỔ SUNG: mô tả chi tiết tính năng, ≥ 200 ký tự]') }}
+
+## Business Intent
+
+{{ business_intent | default('[CẦN BỔ SUNG: mục đích kinh doanh, ≥ 100 ký tự]') }}
+
+## Flow Summary
+
+{{ flow_summary | default('[CẦN BỔ SUNG: tóm tắt luồng nghiệp vụ, ≥ 150 ký tự]') }}
+
+## Acceptance Criteria
+
+{% if acceptance_criteria -%}
+{% for ac in acceptance_criteria -%}
+- {{ ac }}
+{% endfor %}
+{%- else -%}
+- [CẦN BỔ SUNG: tiêu chí chấp nhận 1]
+- [CẦN BỔ SUNG: tiêu chí chấp nhận 2]
+- [CẦN BỔ SUNG: tiêu chí chấp nhận 3]
+{%- endif %}
+
+## In Scope
+
+(populated by ba stage)
+
+## Out of Scope
+
+(populated by ba stage)
+
+## Roles + Permissions
+
+| Role | Level | Notes |
+|---|---|---|
+
+## Entities
+
+(populated by ba/sa stage)
+
+## Business Rules
+
+| ID | Rule | Applies-to | Source |
+|---|---|---|---|
+
+## Testing Strategy
+
+(populated by qa stage)
