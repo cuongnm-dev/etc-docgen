@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "etc-platform"
-version = "3.1.0"
-description = "Template-first documentation generator for ETC projects — turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents."
+version = "3.2.0"
+description = "Template-first documentation generator + SDLC scaffolding MCP for ETC projects — turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary" }
