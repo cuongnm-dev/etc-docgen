@@ -106,12 +106,13 @@ def parse_feature_req_scope(feature_req: str) -> dict[str, list[str]]:
 
 
 def slugify(name: str) -> str:
-    """Convert module name to kebab-case slug."""
+    """Convert module name to kebab-case slug; ensures no trailing hyphen post-truncation."""
     s = name.lower()
     s = re.sub(r"[^\w\s-]", "", s)
     s = re.sub(r"\s+", "-", s).strip("-")
     s = re.sub(r"-+", "-", s)
-    return s[:30] or "default"
+    s = s[:30].rstrip("-")  # strip trailing hyphen after length truncation
+    return s or "default"
 
 
 # ---------------------------------------------------------------------------
@@ -262,11 +263,256 @@ def apply_renames(workspace: Path, plan: dict[str, Any]) -> list[str]:
         new = workspace / r["new_path"]
         new.parent.mkdir(parents=True, exist_ok=True)
         if not old.exists():
-            print(f"  ⚠ Skip: {old} no longer exists")
+            print(f"  [!] Skip: {old} no longer exists")
             continue
         old.rename(new)
-        moves.append(f"{r['old_path']} → {r['new_path']}")
+        moves.append(f"{r['old_path']} -> {r['new_path']}")
     return moves
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: Frontmatter rewrite + catalog population (post-rename)
+# ---------------------------------------------------------------------------
+
+
+def update_state_md_frontmatters(workspace: Path, plan: dict[str, Any]) -> int:
+    """Rewrite _state.md frontmatter after rename: feature-id F-NNN -> M-NNN,
+    docs-path update, depends-on F-NNN -> M-NNN translation."""
+    rename_map = {r["from"]: r["to"] for r in plan["renames"]}
+    count = 0
+    for r in plan["renames"]:
+        state_md = workspace / r["new_path"] / "_state.md"
+        if not state_md.exists():
+            continue
+        text = state_md.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            continue
+        # Replace feature-id line with new M-NNN
+        new_text = re.sub(
+            r"^feature-id:\s*F-\d+\s*$",
+            f"feature-id: {r['to']}",
+            text,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        # Update docs-path
+        new_text = re.sub(
+            r"^docs-path:\s*.+$",
+            f"docs-path: {r['new_path']}",
+            new_text,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        # Translate depends-on F-NNN values to M-NNN (if YAML list inline format)
+        # e.g. "depends-on: [F-061, F-062]" -> "depends-on: [M-001, M-002]"
+        def _translate_deps(match):
+            deps_raw = match.group(1)
+            translated = re.sub(
+                r"F-\d+",
+                lambda m: rename_map.get(m.group(0), m.group(0)),
+                deps_raw,
+            )
+            return f"depends-on: [{translated}]"
+
+        new_text = re.sub(
+            r"^depends-on:\s*\[([^\]]*)\]\s*$",
+            _translate_deps,
+            new_text,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        # Update pipeline-type if missing
+        if "pipeline-type:" not in new_text:
+            new_text = new_text.replace("---\n", "---\npipeline-type: sdlc\n", 1)
+        state_md.write_text(new_text, encoding="utf-8")
+        count += 1
+    return count
+
+
+def populate_module_catalog(workspace: Path, plan: dict[str, Any]) -> Path:
+    """Build module-catalog.json from renamed _state.md files."""
+    catalog_path = workspace / INTEL_DIR / "module-catalog.json"
+    if catalog_path.exists():
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    else:
+        catalog = {"schema_version": "1.0", "modules": []}
+
+    catalog.setdefault("modules", [])
+    existing_ids = {m["id"] for m in catalog["modules"]}
+
+    # Build rename map for depends_on translation
+    rename_map = {r["from"]: r["to"] for r in plan["renames"]}
+
+    for r in plan["renames"]:
+        if r["to"] in existing_ids:
+            continue
+        state_md = workspace / r["new_path"] / "_state.md"
+        fm = parse_state_md(state_md) if state_md.exists() else {}
+        # Translate F-NNN dependencies to M-NNN per rename map
+        raw_deps = fm.get("depends-on", []) or []
+        depends_on = [rename_map.get(d, d) for d in raw_deps]
+        agent_flags = fm.get("agent-flags", {}) or {}
+
+        module_entry = {
+            "id": r["to"],
+            "name": r["module_name"],
+            "slug": r["slug"],
+            "status": "in-progress",
+            "depends_on": depends_on,
+            "feature_ids": plan["feature_ids_per_module"].get(r["to"], []),
+            "primary_service": fm.get("project", ""),
+            "modules_in_scope": [],
+            "agent_flags": agent_flags,
+            "created_at": datetime.now(UTC).isoformat(),
+        }
+        # Try to extract tier/mvp_wave/risk_score from agent-flags.ba
+        ba_flags = agent_flags.get("ba", {})
+        if "tier" in ba_flags:
+            module_entry["tier"] = ba_flags["tier"]
+        if "mvp-wave" in ba_flags:
+            module_entry["mvp_wave"] = ba_flags["mvp-wave"]
+        if "pipeline-risk-score" in ba_flags:
+            module_entry["risk_score"] = ba_flags["pipeline-risk-score"]
+
+        catalog["modules"].append(module_entry)
+
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    catalog_path.write_text(
+        json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return catalog_path
+
+
+def populate_module_map(workspace: Path, plan: dict[str, Any]) -> Path:
+    """Build module-map.yaml from rename plan."""
+    map_path = workspace / INTEL_DIR / "module-map.yaml"
+    if map_path.exists():
+        map_data = yaml.safe_load(map_path.read_text(encoding="utf-8")) or {}
+    else:
+        map_data = {"schema_version": "1.0", "modules": {}}
+
+    map_data.setdefault("modules", {})
+
+    for r in plan["renames"]:
+        map_data["modules"][r["to"]] = {
+            "name": r["module_name"],
+            "slug": r["slug"],
+            "path": r["new_path"],
+        }
+
+    map_path.parent.mkdir(parents=True, exist_ok=True)
+    map_path.write_text(
+        yaml.safe_dump(map_data, sort_keys=True, default_flow_style=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return map_path
+
+
+def populate_feature_map(workspace: Path, plan: dict[str, Any]) -> Path:
+    """Build feature-map.yaml mapping features to their parent modules."""
+    map_path = workspace / INTEL_DIR / "feature-map.yaml"
+    if map_path.exists():
+        map_data = yaml.safe_load(map_path.read_text(encoding="utf-8")) or {}
+    else:
+        map_data = {"schema_version": "1.0", "features": {}}
+
+    map_data.setdefault("features", {})
+
+    feat_catalog_path = workspace / INTEL_DIR / "feature-catalog.json"
+    feat_catalog = (
+        json.loads(feat_catalog_path.read_text(encoding="utf-8"))
+        if feat_catalog_path.exists()
+        else {"features": []}
+    )
+    feat_by_id = {f["id"]: f for f in feat_catalog.get("features", [])}
+
+    for r in plan["renames"]:
+        module_id = r["to"]
+        module_path = r["new_path"]
+        for fid in plan["feature_ids_per_module"].get(module_id, []):
+            feat_data = feat_by_id.get(fid, {})
+            # Slug field omitted intentionally — feature folders don't exist yet,
+            # will be populated by scaffold_feature when feature folders created.
+            # Schema marks slug as optional; only validates pattern when present.
+            map_data["features"][fid] = {
+                "module": module_id,
+                "name": feat_data.get("name", ""),
+                "path": f"{module_path}/features/{fid}",  # Future location
+                "status": feat_data.get("status", "proposed"),
+            }
+
+    map_path.parent.mkdir(parents=True, exist_ok=True)
+    map_path.write_text(
+        yaml.safe_dump(map_data, sort_keys=True, default_flow_style=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return map_path
+
+
+def add_reservation_entry(workspace: Path, plan: dict[str, Any]) -> None:
+    """Add reservations entry to id-aliases.json to suppress unjustified-gap warning."""
+    aliases_path = workspace / INTEL_DIR / "id-aliases.json"
+    aliases = json.loads(aliases_path.read_text(encoding="utf-8"))
+    aliases.setdefault("reservations", [])
+
+    # Compute F range used by old pipelines
+    nums = sorted(int(re.match(r"F-(\d+)", r["from"]).group(1)) for r in plan["renames"])
+    if nums:
+        rng = f"F-{nums[0]:03d}..F-{nums[-1]:03d}"
+        aliases["reservations"].append(
+            {
+                "range": rng,
+                "reason": (
+                    f"Migrated to {plan['renames'][0]['to']}..{plan['renames'][-1]['to']} "
+                    "per ADR-003 P4 (see id_renames). Range reserved permanently to prevent re-use."
+                ),
+                "reserved_by": "tools/migrate_features_to_modules.py",
+                "expires": None,
+            }
+        )
+
+    aliases_path.write_text(
+        json.dumps(aliases, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def patch_feature_catalog_module_id(workspace: Path, plan: dict[str, Any]) -> Path:
+    """Add module_id field to each feature in feature-catalog.json based on plan."""
+    catalog_path = workspace / INTEL_DIR / "feature-catalog.json"
+    if not catalog_path.exists():
+        return catalog_path
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+
+    # Build feature -> module lookup
+    f_to_m = {}
+    for r in plan["renames"]:
+        for fid in plan["feature_ids_per_module"].get(r["to"], []):
+            f_to_m[fid] = r["to"]
+
+    for feat in catalog.get("features", []):
+        fid = feat.get("id")
+        if fid in f_to_m and not feat.get("module_id"):
+            feat["module_id"] = f_to_m[fid]
+
+    catalog_path.write_text(
+        json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return catalog_path
+
+
+def ensure_required_dirs(workspace: Path) -> list[str]:
+    """Create docs/inputs/ + docs/generated/ if missing."""
+    created = []
+    for d in ("docs/inputs", "docs/generated"):
+        target = workspace / d
+        if not target.exists():
+            target.mkdir(parents=True, exist_ok=True)
+            (target / ".gitkeep").write_text("", encoding="utf-8")
+            created.append(d)
+    return created
 
 
 # ---------------------------------------------------------------------------
@@ -349,8 +595,34 @@ def main():
     aliases = write_id_aliases(workspace, plan, datetime.now(UTC).isoformat())
     print(f"  [OK] id-aliases.json updated: {aliases}")
 
+    # Phase 2: catalog population + frontmatter rewrite + reservation
     print()
-    print("[OK] Migration complete!")
+    print("[*] Phase 2 (post-rename polish)...")
+
+    n_fm = update_state_md_frontmatters(workspace, plan)
+    print(f"  [OK] Updated _state.md frontmatter feature-id in {n_fm} file(s)")
+
+    cat = populate_module_catalog(workspace, plan)
+    print(f"  [OK] module-catalog.json populated: {cat}")
+
+    mod_map = populate_module_map(workspace, plan)
+    print(f"  [OK] module-map.yaml populated: {mod_map}")
+
+    feat_map = populate_feature_map(workspace, plan)
+    print(f"  [OK] feature-map.yaml populated: {feat_map}")
+
+    fc = patch_feature_catalog_module_id(workspace, plan)
+    print(f"  [OK] feature-catalog.json patched (module_id field added): {fc}")
+
+    add_reservation_entry(workspace, plan)
+    print(f"  [OK] id-aliases.json reservations entry added")
+
+    dirs = ensure_required_dirs(workspace)
+    if dirs:
+        print(f"  [OK] Created missing dirs: {dirs}")
+
+    print()
+    print("[OK] Migration complete (Phase 1 + Phase 2)!")
     print()
     print("Next steps:")
     print("  1. Review changes with `git status` (assuming workspace is git-tracked)")
