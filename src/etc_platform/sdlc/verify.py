@@ -176,16 +176,132 @@ def _check_structure(ws: Path) -> list[dict[str, Any]]:
     if modules_dir.is_dir():
         pat = re.compile(r"^M-[0-9]{3,}-[a-z][a-z0-9]*(-[a-z0-9]+)*$")
         for child in modules_dir.iterdir():
-            if child.is_dir() and not pat.match(child.name):
+            if not child.is_dir():
+                continue
+            if not pat.match(child.name):
                 findings.append(
                     _finding(
                         "structure",
                         _SEVERITY_MEDIUM,
                         "module-folder-name-malformed",
                         f"docs/modules/{child.name}",
-                        f"Module folder name doesn't match M-NNN-{{slug}} pattern",
+                        "Module folder name doesn't match M-NNN-{slug} pattern",
                     )
                 )
+                continue
+            # CD-22 deep structure checks per module
+            findings.extend(_check_module_substructure(ws, child))
+
+    # Hotfix folder pattern check: docs/hotfixes/H-NNN-{slug}/
+    hotfixes_dir = ws / "docs" / "hotfixes"
+    if hotfixes_dir.is_dir():
+        h_pat = re.compile(r"^H-[0-9]{3,}-[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+        for child in hotfixes_dir.iterdir():
+            if child.is_dir() and not h_pat.match(child.name):
+                findings.append(
+                    _finding(
+                        "structure",
+                        _SEVERITY_MEDIUM,
+                        "hotfix-folder-name-malformed",
+                        f"docs/hotfixes/{child.name}",
+                        "Hotfix folder name doesn't match H-NNN-{slug} pattern",
+                    )
+                )
+
+    return findings
+
+
+_MODULE_REQUIRED_FILES = ("_state.md", "module-brief.md", "implementations.yaml")
+_MODULE_REQUIRED_SUBDIRS = ("ba", "sa", "designer", "security", "tech-lead", "qa", "reviewer")
+_FEATURE_REQUIRED_FILES = ("_feature.md", "implementations.yaml", "test-evidence.json")
+_FEATURE_REQUIRED_SUBDIRS = ("dev", "qa")
+
+
+def _check_module_substructure(ws: Path, module_dir: Path) -> list[dict[str, Any]]:
+    """Check per-module CD-22 deep structure: required files + 7 stage subdirs + nested features."""
+    findings: list[dict[str, Any]] = []
+    rel = str(module_dir.relative_to(ws)).replace("\\", "/")
+
+    # Required files
+    for f in _MODULE_REQUIRED_FILES:
+        if not (module_dir / f).exists():
+            findings.append(
+                _finding(
+                    "structure",
+                    _SEVERITY_HIGH,
+                    "module-missing-file",
+                    f"{rel}/{f}",
+                    f"Module {module_dir.name} missing required file: {f}",
+                    fix_hint="Run scaffold_module via MCP, or migrate via migrate_features_to_modules.py.",
+                )
+            )
+
+    # Required stage subdirs
+    for sub in _MODULE_REQUIRED_SUBDIRS:
+        if not (module_dir / sub).is_dir():
+            findings.append(
+                _finding(
+                    "structure",
+                    _SEVERITY_HIGH,
+                    "module-missing-stage-subdir",
+                    f"{rel}/{sub}/",
+                    f"Module {module_dir.name} missing stage subdir: {sub}/",
+                )
+            )
+
+    # features/ subdir + per-feature substructure
+    features_dir = module_dir / "features"
+    if features_dir.is_dir():
+        feat_pat = re.compile(r"^F-[0-9]{3,}[a-z]?-[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+        for feat_child in features_dir.iterdir():
+            if not feat_child.is_dir():
+                continue
+            if not feat_pat.match(feat_child.name):
+                findings.append(
+                    _finding(
+                        "structure",
+                        _SEVERITY_MEDIUM,
+                        "feature-folder-name-malformed",
+                        str(feat_child.relative_to(ws)).replace("\\", "/"),
+                        f"Feature folder name doesn't match F-NNN-{{slug}} pattern",
+                    )
+                )
+                continue
+            findings.extend(_check_feature_substructure(ws, feat_child))
+    # Note: features/ subdir is OPTIONAL (module may have 0 features yet);
+    # missing features/ is not a finding.
+
+    return findings
+
+
+def _check_feature_substructure(ws: Path, feature_dir: Path) -> list[dict[str, Any]]:
+    """Check per-feature CD-22 substructure."""
+    findings: list[dict[str, Any]] = []
+    rel = str(feature_dir.relative_to(ws)).replace("\\", "/")
+
+    for f in _FEATURE_REQUIRED_FILES:
+        if not (feature_dir / f).exists():
+            findings.append(
+                _finding(
+                    "structure",
+                    _SEVERITY_HIGH,
+                    "feature-missing-file",
+                    f"{rel}/{f}",
+                    f"Feature {feature_dir.name} missing required file: {f}",
+                )
+            )
+
+    for sub in _FEATURE_REQUIRED_SUBDIRS:
+        if not (feature_dir / sub).is_dir():
+            findings.append(
+                _finding(
+                    "structure",
+                    _SEVERITY_MEDIUM,
+                    "feature-missing-subdir",
+                    f"{rel}/{sub}/",
+                    f"Feature {feature_dir.name} missing subdir: {sub}/",
+                )
+            )
 
     return findings
 

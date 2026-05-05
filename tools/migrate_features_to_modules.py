@@ -106,12 +106,23 @@ def parse_feature_req_scope(feature_req: str) -> dict[str, list[str]]:
 
 
 def slugify(name: str) -> str:
-    """Convert module name to kebab-case slug; ensures no trailing hyphen post-truncation."""
-    s = name.lower()
+    """Convert module/feature name to ASCII kebab-case slug.
+
+    Strips Vietnamese diacritics via NFKD decomposition.
+    Handles 'đ' / 'Đ' explicitly (no decomposition rule for it).
+    Truncates to 30 chars + strips trailing hyphen.
+    """
+    import unicodedata
+
+    # Vietnamese 'đ' / 'Đ' don't decompose via NFKD — replace explicitly
+    s = name.replace("đ", "d").replace("Đ", "D")
+    # NFKD decomposition + ASCII filter strips remaining diacritics
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    s = s.lower()
     s = re.sub(r"[^\w\s-]", "", s)
     s = re.sub(r"\s+", "-", s).strip("-")
     s = re.sub(r"-+", "-", s)
-    s = s[:30].rstrip("-")  # strip trailing hyphen after length truncation
+    s = s[:30].rstrip("-")
     return s or "default"
 
 
@@ -516,6 +527,247 @@ def ensure_required_dirs(workspace: Path) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Phase 3: per-module deep substructure (CD-22 compliance)
+# ---------------------------------------------------------------------------
+
+
+_MODULE_STAGE_SUBDIRS = ("ba", "sa", "designer", "security", "tech-lead", "qa", "reviewer")
+_FEATURE_STAGE_SUBDIRS = ("dev", "qa")
+
+
+def rename_feature_brief_to_module_brief(workspace: Path, plan: dict[str, Any]) -> int:
+    """Rename feature-brief.md -> module-brief.md per module folder (CD-22 vocab fix)."""
+    count = 0
+    for r in plan["renames"]:
+        old = workspace / r["new_path"] / "feature-brief.md"
+        new = workspace / r["new_path"] / "module-brief.md"
+        if old.exists() and not new.exists():
+            old.rename(new)
+            count += 1
+    return count
+
+
+def create_module_implementations_yaml(workspace: Path, plan: dict[str, Any]) -> int:
+    """Create implementations.yaml per module per CD-22."""
+    count = 0
+    for r in plan["renames"]:
+        impl_path = workspace / r["new_path"] / "implementations.yaml"
+        if impl_path.exists():
+            continue
+        state_md = workspace / r["new_path"] / "_state.md"
+        fm = parse_state_md(state_md) if state_md.exists() else {}
+        primary = fm.get("project", "") or fm.get("project-path", "")
+        services = []
+        if primary:
+            services = [{"path": primary, "role": "primary"}]
+        content = {
+            "module_id": r["to"],
+            "module_name": r["module_name"],
+            "type": "bounded-context",
+            "slug": r["slug"],
+            "implementations": {
+                "apps": [],
+                "services": services,
+                "libs": [],
+                "packages": [],
+            },
+            "stakeholders": {
+                "business-owner": "",
+                "tech-lead": "",
+                "qa-lead": "",
+            },
+            "depends_on": [],
+        }
+        # Translate depends from M-NNN list (already translated in module-catalog)
+        catalog = json.loads(
+            (workspace / INTEL_DIR / "module-catalog.json").read_text(encoding="utf-8")
+        )
+        for m in catalog.get("modules", []):
+            if m.get("id") == r["to"]:
+                content["depends_on"] = m.get("depends_on", [])
+                break
+        impl_path.write_text(
+            yaml.safe_dump(content, sort_keys=False, default_flow_style=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+        count += 1
+    return count
+
+
+def create_module_stage_subdirs(workspace: Path, plan: dict[str, Any]) -> int:
+    """Create 7 stage subdirs (.gitkeep) per module per CD-22."""
+    count = 0
+    for r in plan["renames"]:
+        for sub in _MODULE_STAGE_SUBDIRS:
+            d = workspace / r["new_path"] / sub
+            if not d.exists():
+                d.mkdir(parents=True, exist_ok=True)
+                (d / ".gitkeep").write_text("", encoding="utf-8")
+                count += 1
+    return count
+
+
+def create_feature_subfolders(workspace: Path, plan: dict[str, Any]) -> tuple[int, int]:
+    """Create nested features/F-NNN-{slug}/ per CD-22 with required artifacts.
+
+    Returns: (folders_created, files_created)
+    """
+    feat_catalog_path = workspace / INTEL_DIR / "feature-catalog.json"
+    feat_catalog = json.loads(feat_catalog_path.read_text(encoding="utf-8"))
+    feat_by_id = {f["id"]: f for f in feat_catalog.get("features", [])}
+
+    folders = 0
+    files = 0
+    feat_map_path = workspace / INTEL_DIR / "feature-map.yaml"
+    feat_map = yaml.safe_load(feat_map_path.read_text(encoding="utf-8")) or {}
+    feat_map.setdefault("features", {})
+
+    for r in plan["renames"]:
+        module_id = r["to"]
+        feature_ids = plan["feature_ids_per_module"].get(module_id, [])
+        if not feature_ids:
+            continue
+        features_root = workspace / r["new_path"] / "features"
+        features_root.mkdir(parents=True, exist_ok=True)
+
+        for fid in feature_ids:
+            feat_data = feat_by_id.get(fid, {})
+            feat_name = feat_data.get("name", fid)
+            feat_slug = slugify(feat_name)
+            feat_dir = features_root / f"{fid}-{feat_slug}"
+            if feat_dir.exists():
+                continue
+            feat_dir.mkdir(parents=True, exist_ok=True)
+            folders += 1
+
+            # _feature.md
+            ac_list = feat_data.get("acceptance_criteria", []) or []
+            description = feat_data.get("description", "[CẦN BỔ SUNG]")
+            business_intent = feat_data.get("business_intent", "[CẦN BỔ SUNG]")
+            flow_summary = feat_data.get("flow_summary", "[CẦN BỔ SUNG]")
+            consumed_by = feat_data.get("consumed_by_modules", []) or []
+            priority = feat_data.get("priority", "medium")
+
+            fm_lines = [
+                "---",
+                f"feature-id: {fid}",
+                f"feature-name: {json.dumps(feat_name, ensure_ascii=False)}",
+                f"slug: {feat_slug}",
+                f"module-id: {module_id}",
+                f"status: {feat_data.get('status', 'proposed')}",
+                f"priority: {priority}",
+                f"created: \"{datetime.now(UTC).strftime('%Y-%m-%d')}\"",
+                f"last-updated: \"{datetime.now(UTC).strftime('%Y-%m-%d')}\"",
+                "locked-fields: []",
+                f"consumed_by_modules: {json.dumps(consumed_by, ensure_ascii=False)}",
+                "---",
+                "",
+                f"# Feature: {feat_name}",
+                "",
+                "## Description",
+                "",
+                description,
+                "",
+                "## Business Intent",
+                "",
+                business_intent,
+                "",
+                "## Flow Summary",
+                "",
+                flow_summary,
+                "",
+                "## Acceptance Criteria",
+                "",
+            ]
+            if ac_list:
+                for ac in ac_list:
+                    fm_lines.append(f"- {ac}")
+            else:
+                fm_lines.append("- [CẦN BỔ SUNG: tiêu chí 1]")
+                fm_lines.append("- [CẦN BỔ SUNG: tiêu chí 2]")
+                fm_lines.append("- [CẦN BỔ SUNG: tiêu chí 3]")
+            fm_lines.append("")
+            (feat_dir / "_feature.md").write_text("\n".join(fm_lines), encoding="utf-8")
+            files += 1
+
+            # implementations.yaml
+            impl_content = {
+                "feature_id": fid,
+                "module_id": module_id,
+                "slug": feat_slug,
+                "implementations": {
+                    "primary": "",
+                    "consumers": [],
+                },
+                "consumed_by_modules": consumed_by,
+            }
+            (feat_dir / "implementations.yaml").write_text(
+                yaml.safe_dump(impl_content, sort_keys=False, default_flow_style=False, allow_unicode=True),
+                encoding="utf-8",
+            )
+            files += 1
+
+            # test-evidence.json
+            te_content = {
+                "schema_version": "1.0",
+                "feature_id": fid,
+                "module_id": module_id,
+                "test_cases": [],
+                "screenshots": [],
+                "playwright_specs": [],
+                "execution_history": [],
+            }
+            (feat_dir / "test-evidence.json").write_text(
+                json.dumps(te_content, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            files += 1
+
+            # dev/, qa/ subdirs
+            for sub in _FEATURE_STAGE_SUBDIRS:
+                sub_dir = feat_dir / sub
+                sub_dir.mkdir(parents=True, exist_ok=True)
+                (sub_dir / ".gitkeep").write_text("", encoding="utf-8")
+                files += 1
+
+            # Update feature-map slug + path now that folder exists
+            rel_path = str(feat_dir.relative_to(workspace)).replace("\\", "/")
+            entry = feat_map["features"].setdefault(fid, {})
+            entry["module"] = module_id
+            entry["name"] = feat_name
+            entry["slug"] = feat_slug
+            entry["path"] = rel_path
+            entry["status"] = feat_data.get("status", "proposed")
+
+    feat_map_path.write_text(
+        yaml.safe_dump(feat_map, sort_keys=True, default_flow_style=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+    return folders, files
+
+
+def cleanup_legacy_artifacts(workspace: Path) -> list[str]:
+    """Remove legacy artifacts no longer needed post-migration."""
+    cleaned = []
+    # Empty docs/features/ (folders renamed to modules/)
+    legacy_features = workspace / "docs" / "features"
+    if legacy_features.exists():
+        try:
+            entries = [p for p in legacy_features.iterdir()]
+            if not entries:
+                legacy_features.rmdir()
+                cleaned.append("docs/features/ (empty)")
+        except OSError:
+            pass
+    # Old root-level feature-map.yaml (now at docs/intel/feature-map.yaml)
+    old_map = workspace / "docs" / "feature-map.yaml"
+    if old_map.exists():
+        old_map.unlink()
+        cleaned.append("docs/feature-map.yaml (moved to docs/intel/)")
+    return cleaned
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -621,8 +873,28 @@ def main():
     if dirs:
         print(f"  [OK] Created missing dirs: {dirs}")
 
+    # Phase 3: CD-22 deep substructure
     print()
-    print("[OK] Migration complete (Phase 1 + Phase 2)!")
+    print("[*] Phase 3 (CD-22 deep substructure)...")
+
+    n_brief = rename_feature_brief_to_module_brief(workspace, plan)
+    print(f"  [OK] Renamed feature-brief.md -> module-brief.md in {n_brief} module(s)")
+
+    n_impl = create_module_implementations_yaml(workspace, plan)
+    print(f"  [OK] Created implementations.yaml in {n_impl} module(s)")
+
+    n_stages = create_module_stage_subdirs(workspace, plan)
+    print(f"  [OK] Created {n_stages} stage subdir(s) (7 per module x N modules)")
+
+    folders, files = create_feature_subfolders(workspace, plan)
+    print(f"  [OK] Created {folders} feature folder(s) with {files} artifact(s)")
+
+    cleaned = cleanup_legacy_artifacts(workspace)
+    if cleaned:
+        print(f"  [OK] Legacy cleanup: {cleaned}")
+
+    print()
+    print("[OK] Migration complete (Phase 1 + 2 + 3 — CD-22 compliant)!")
     print()
     print("Next steps:")
     print("  1. Review changes with `git status` (assuming workspace is git-tracked)")
