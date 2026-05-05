@@ -53,6 +53,22 @@ from etc_platform.registry.kb import kb_query_impl, kb_save_impl
 from etc_platform.registry.outlines import outline_load_impl, outlines_list_impl
 from etc_platform.registry.templates_registry import template_load_impl, templates_list_impl
 
+# SDLC scaffolding tools (ADR-003 D6/D7/D8/D11). 11 NEW tools.
+from etc_platform.sdlc.errors import MCPSdlcError
+from etc_platform.sdlc.refactor import rename_module_slug_impl
+from etc_platform.sdlc.repair import autofix_impl
+from etc_platform.sdlc.resolve import resolve_path_impl
+from etc_platform.sdlc.scaffold import (
+    scaffold_app_or_service_impl,
+    scaffold_feature_impl,
+    scaffold_hotfix_impl,
+    scaffold_module_impl,
+    scaffold_workspace_impl,
+)
+from etc_platform.sdlc.state import update_state_impl
+from etc_platform.sdlc.template_registry import template_registry_impl
+from etc_platform.sdlc.verify import verify_impl
+
 log = logging.getLogger("etc-platform.mcp")
 
 # ---------------------------------------------------------------------------
@@ -1559,6 +1575,424 @@ def template_registry_load(namespace: str, template_id: str) -> dict:
 def templates_registry_list(namespace: str | None = None) -> dict:
     """List templates in the registry, optionally filtered by namespace."""
     return templates_list_impl(namespace=namespace)
+
+
+# ─────────────────────────── SDLC scaffolding tools (ADR-003 D6/D7/D8/D11) ───────────────────────────
+#
+# 11 NEW tools implementing enterprise-grade SDLC structure enforcement.
+# Skills (from-doc/from-code/from-idea/new-feature/etc.) MUST call these
+# tools instead of using Write/mkdir directly per CD-8 v3 governance.
+#
+# All tools return uniform { ok, data | error } shape per p0-spec §2.6.
+# Errors auto-converted via _sdlc_call wrapper.
+
+
+def _sdlc_call(impl_fn, *args, **kwargs):
+    """Wrap SDLC tool impl to convert MCPSdlcError → uniform error response."""
+    try:
+        return impl_fn(*args, **kwargs)
+    except MCPSdlcError as exc:
+        return exc.to_response()
+
+
+# Tier-1: scaffolding (5 tools)
+
+
+@mcp.tool()
+def scaffold_workspace(
+    workspace_path: str,
+    workspace_type: str,
+    stack: str = "none",
+    config: dict | None = None,
+    force: bool = False,
+) -> dict:
+    """Bootstrap workspace base structure (mini or mono) per ADR-003 D8.
+
+    Creates docs/{intel,inputs,generated,architecture/adr}/, intel layer
+    (feature-catalog.json, module-catalog.json, module-map.yaml,
+    feature-map.yaml, _meta.json), AGENTS.md, CLAUDE.md, .gitignore,
+    .editorconfig — all atomic via FileTransaction.
+
+    Refuses if workspace already scaffolded unless force=True.
+
+    Args:
+        workspace_path: Absolute path to workspace root.
+        workspace_type: "mini" (single app) or "mono" (apps/services/libs/...).
+        stack: Tech stack hint (nodejs|python|go|rust|none) for .gitignore template.
+        config: Optional dict {auth, cache, ci, docker}.
+        force: Re-scaffold even if existing scaffolding detected.
+    """
+    return _sdlc_call(scaffold_workspace_impl, workspace_path, workspace_type, stack, config, force)
+
+
+@mcp.tool()
+def scaffold_app_or_service(
+    workspace_path: str,
+    name: str,
+    kind: str,
+    stack: str = "none",
+    expected_workspace_version: int | None = None,
+) -> dict:
+    """Add 1 deployable project (app/service/lib/package) to monorepo.
+
+    Mono-only operation (refuses on mini). Creates {kind+s}/{name}/ with
+    minimal src/ + README.md. Stack-specific scaffolding deferred to
+    future image versions; current emits warning STACK_TEMPLATE_DEFERRED.
+
+    Args:
+        workspace_path: Absolute path to monorepo root.
+        name: Project name (lowercase kebab-case, alphanumeric + hyphens, must start with letter).
+        kind: "app" | "service" | "lib" | "package".
+        stack: Tech stack hint.
+    """
+    return _sdlc_call(
+        scaffold_app_or_service_impl,
+        workspace_path,
+        name,
+        kind,
+        stack,
+        expected_workspace_version=expected_workspace_version,
+    )
+
+
+@mcp.tool()
+def scaffold_module(
+    workspace_path: str,
+    module_id: str,
+    module_name: str,
+    slug: str,
+    modules_in_scope: list[str] | None = None,
+    depends_on: list[str] | None = None,
+    primary_service: str = "",
+    agent_flags: dict | None = None,
+    business_goal: str = "",
+    output_mode: str = "lean",
+    risk_path: str = "M",
+    expected_catalog_version: int | None = None,
+) -> dict:
+    """Atomic create SDLC module + update catalog + update map.
+
+    Creates docs/modules/M-NNN-{slug}/ with _state.md, module-brief.md,
+    implementations.yaml + 7 stage subfolders (ba, sa, designer, security,
+    tech-lead, qa, reviewer). Atomically updates module-catalog.json +
+    module-map.yaml + bumps versions in _meta.json.
+
+    Args:
+        module_id: M-NNN format (e.g. M-001).
+        slug: kebab-case ASCII (e.g. iam, identity-access).
+        modules_in_scope: Original module IDs from doc-brief (M01-M20).
+        depends_on: Module IDs this depends on (FK enforced).
+        risk_path: "S" | "M" | "L" controls stages_queue selection.
+        agent_flags: Conditional inserts (designer if screens > 0,
+                     security-design if pii_found, etc.)
+    """
+    return _sdlc_call(
+        scaffold_module_impl,
+        workspace_path,
+        module_id,
+        module_name,
+        slug,
+        modules_in_scope=modules_in_scope,
+        depends_on=depends_on,
+        primary_service=primary_service,
+        agent_flags=agent_flags,
+        business_goal=business_goal,
+        output_mode=output_mode,
+        risk_path=risk_path,
+        expected_catalog_version=expected_catalog_version,
+    )
+
+
+@mcp.tool()
+def scaffold_feature(
+    workspace_path: str,
+    module_id: str,
+    feature_id: str,
+    feature_name: str,
+    slug: str,
+    description: str = "",
+    business_intent: str = "",
+    flow_summary: str = "",
+    acceptance_criteria: list[str] | None = None,
+    consumed_by_modules: list[str] | None = None,
+    priority: str = "medium",
+    expected_module_version: int | None = None,
+) -> dict:
+    """Atomic create feature nested under existing module.
+
+    Creates docs/modules/M-NNN/features/F-NNN-{slug}/ with _feature.md,
+    implementations.yaml, test-evidence.json + dev/qa subfolders.
+    Atomically updates feature-catalog.json + feature-map.yaml +
+    parent module's feature_ids list.
+
+    Args:
+        module_id: Parent module (must exist; FK enforced).
+        feature_id: F-NNN format (e.g. F-001, F-009a sub-suffix allowed).
+        consumed_by_modules: Cross-cutting tracking (D10-2) — modules
+                              consuming this feature beyond primary owner.
+        priority: "critical" | "high" | "medium" | "low".
+    """
+    return _sdlc_call(
+        scaffold_feature_impl,
+        workspace_path,
+        module_id,
+        feature_id,
+        feature_name,
+        slug,
+        description=description,
+        business_intent=business_intent,
+        flow_summary=flow_summary,
+        acceptance_criteria=acceptance_criteria,
+        consumed_by_modules=consumed_by_modules,
+        priority=priority,
+        expected_module_version=expected_module_version,
+    )
+
+
+@mcp.tool()
+def scaffold_hotfix(
+    workspace_path: str,
+    hotfix_id: str,
+    hotfix_name: str,
+    slug: str,
+    patch_summary: str,
+    affected_modules: list[str] | None = None,
+    severity: str = "high",
+    severity_rationale: str = "",
+) -> dict:
+    """Create hotfix entry with skip-ba-sa flow.
+
+    Creates docs/hotfixes/H-NNN-{slug}/ with _state.md (skipped-stages:
+    [ba, sa, designer], current-stage: tech-lead), patch-brief.md,
+    implementations.yaml + tech-lead/dev/qa/reviewer subfolders.
+
+    Args:
+        hotfix_id: H-NNN format (e.g. H-001).
+        patch_summary: Min 50 chars. Required.
+        affected_modules: Module IDs impacted by patch.
+        severity: "critical" | "high" | "medium".
+    """
+    return _sdlc_call(
+        scaffold_hotfix_impl,
+        workspace_path,
+        hotfix_id,
+        hotfix_name,
+        slug,
+        patch_summary,
+        affected_modules=affected_modules,
+        severity=severity,
+        severity_rationale=severity_rationale,
+    )
+
+
+# Tier-1: refactor (1 tool)
+
+
+@mcp.tool()
+def rename_module_slug(
+    workspace_path: str,
+    module_id: str,
+    new_slug: str,
+    reason: str,
+    expected_version: int | None = None,
+) -> dict:
+    """Atomic slug rename across folder + all references + alias entry.
+
+    Per ADR-003 D10-1 (slug evolvability without breaking IDs).
+    Renames folder, updates module-catalog.modules[].slug, updates
+    module-map[M-NNN].slug + path, migrates feature-map paths
+    containing old slug, appends id-aliases.json.slug_renames audit entry.
+
+    Args:
+        module_id: M-NNN whose slug to change.
+        new_slug: kebab-case ASCII; must not collide with other modules.
+        reason: Min 10 chars; recorded in audit log.
+    """
+    return _sdlc_call(
+        rename_module_slug_impl,
+        workspace_path,
+        module_id,
+        new_slug,
+        reason,
+        expected_version=expected_version,
+    )
+
+
+# Tier-1: read (1 tool)
+
+
+@mcp.tool()
+def resolve_path(
+    workspace_path: str,
+    kind: str,
+    id: str,
+    include_metadata: bool = False,
+) -> dict:
+    """Map-based path resolution (replaces ALL skill glob fallbacks).
+
+    Per ADR-003 D8/CD-8 v3 (skills MUST NOT glob docs/{modules,features,
+    hotfixes}/**). Reads appropriate map file (module-map.yaml /
+    feature-map.yaml / filesystem for hotfixes). Falls back to
+    id-aliases.json for legacy renames.
+
+    Args:
+        kind: "module" | "feature" | "hotfix".
+        id: M-NNN | F-NNN | H-NNN.
+        include_metadata: True returns enriched response with catalog excerpt
+                          (name, status, depends_on, etc.).
+    """
+    return _sdlc_call(resolve_path_impl, workspace_path, kind, id, include_metadata)
+
+
+# Tier-1: repair (1 tool)
+
+
+@mcp.tool()
+def autofix(
+    workspace_path: str,
+    fix_classes: list[str],
+    dry_run: bool = True,
+    confirm_destructive: bool = False,
+) -> dict:
+    """Repair structure violations with safeguards.
+
+    Per ADR-003 D7. Read-only by default (dry_run=True returns plan).
+    Destructive classes (orphan-removal, id-collision-resolve) require
+    confirm_destructive=True.
+
+    Args:
+        fix_classes: Subset of:
+          - orphan-removal       (delete leftover .tmp from failed txn)
+          - missing-scaffold     (regenerate missing required artifacts)
+          - schema-migrate       (migrate old-format frontmatter)
+          - id-collision-resolve (generate id-aliases for conflicts)
+          - cross-ref-repair     (add missing FK with [CẦN BỔ SUNG] markers)
+          - all                  (expand to all above)
+        dry_run: If True, return plan only (no mutation).
+        confirm_destructive: Required True for destructive ops.
+    """
+    return _sdlc_call(autofix_impl, workspace_path, fix_classes, dry_run=dry_run, confirm_destructive=confirm_destructive)
+
+
+# Tier-2: consolidated mutations (1 tool — replaces 5 update_* per D11)
+
+
+@mcp.tool()
+def update_state(
+    workspace_path: str,
+    file_path: str,
+    op: str,
+    field_path: str | None = None,
+    field_value: object = None,
+    stage: str | None = None,
+    verdict: str | None = None,
+    artifact: str = "",
+    date: str | None = None,
+    metric: str | None = None,
+    delta_value: object = None,
+    kpi_op: str = "set",
+    log_kind: str | None = None,
+    entry: dict | None = None,
+    entity_id: str | None = None,
+    status: str | None = None,
+    evidence: dict | None = None,
+    expected_version: int | None = None,
+) -> dict:
+    """All state mutations on _state.md / _feature.md / catalog files.
+
+    Per ADR-003 D10-3 + D11 (consolidated). Op discriminator selects
+    operation; only fields relevant to op need be passed.
+
+    Operations + required params:
+      op="field"    — field_path (dot-path), field_value
+                       (rejects locked-fields[] entries)
+      op="progress" — stage, verdict, [artifact], [date]
+                       (appends row to ## Stage Progress table)
+      op="kpi"      — metric, delta_value, [kpi_op: set|increment|append]
+      op="log"      — log_kind: escalation|wave|audit, entry: dict
+      op="status"   — entity_id, status, [evidence]
+                       (atomic 2-file: _state.md + matching catalog)
+
+    Args:
+        file_path: Relative to workspace_path or absolute (within workspace).
+        expected_version: Optional optimistic concurrency check on _meta.
+    """
+    kwargs = {
+        "field_path": field_path,
+        "field_value": field_value,
+        "stage": stage,
+        "verdict": verdict,
+        "artifact": artifact,
+        "date": date,
+        "metric": metric,
+        "delta_value": delta_value,
+        "kpi_op": kpi_op,
+        "log_kind": log_kind,
+        "entry": entry,
+        "entity_id": entity_id,
+        "status": status,
+        "evidence": evidence,
+        "expected_version": expected_version,
+    }
+    # Filter None to keep impl signatures clean (some required-by-op)
+    return _sdlc_call(update_state_impl, workspace_path, file_path, op, **kwargs)
+
+
+# Tier-2: consolidated verify (1 tool — replaces 8 verify_* per D11)
+
+
+@mcp.tool()
+def verify(
+    workspace_path: str,
+    scopes: list[str],
+    strict_mode: str = "warn",
+    context: dict | None = None,
+) -> dict:
+    """Read-only structural integrity check (8 scopes via discriminator).
+
+    Per ADR-003 D7/D10-6/D11. Each scope independent; "all" expands to all.
+
+    Scopes:
+      structure        — required dirs + intel files + folder name pattern
+      schemas          — JSON Schema validation (jsonschema lib)
+      ownership        — single-writer rule (needs context.agent_log)
+      cross_references — FK integrity (feature.module_id, depends_on, etc.)
+      freshness        — TTL exceeded + content-hash mismatch vs _meta
+      completeness     — required artifacts for context.current_stage
+      id_uniqueness    — collisions + unjustified gaps + filesystem orphans
+                         (CATCHES F-061 BUG CLASS — D10-6 severity tiers)
+      all              — aggregator
+
+    Strict modes:
+      block — raise VerificationFailedError if any HIGH severity finding
+      warn  — return success with warnings
+      info  — return success with all findings, no blocking
+
+    Args:
+        context: Optional { current_stage, feature_id, agent_log }.
+    """
+    return _sdlc_call(verify_impl, workspace_path, scopes, strict_mode=strict_mode, context=context)
+
+
+# Tier-3: consolidated template_registry (1 tool — replaces list+load per D11)
+
+
+@mcp.tool()
+def template_registry(
+    namespace: str,
+    action: str,
+    template_id: str | None = None,
+) -> dict:
+    """Templates baked in MCP image (assets/scaffolds/{namespace}/).
+
+    Per ADR-003 D11 (consolidated list+load). Path traversal guarded.
+
+    Args:
+        namespace: "workspace" | "module" | "feature" | "hotfix" | "intel" | etc.
+        action: "list" returns metadata; "load" returns content + sha256.
+        template_id: Required for action="load".
+    """
+    return _sdlc_call(template_registry_impl, namespace, action, template_id)
 
 
 # ─────────────────────────── Entry point ───────────────────────────
