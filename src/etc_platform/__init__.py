@@ -4,7 +4,7 @@ Turn codebase + Docker into TKKT, TKCS, Test Case, HDSD documents.
 Docs-as-Code pattern: AI produces structured JSON, Python engines render.
 """
 
-__version__ = "5.0.0"
+__version__ = "6.0.0"
 __author__ = "Công ty CP Hệ thống Công nghệ ETC"
 
 from etc_platform.config import Config, load_config
